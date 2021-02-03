@@ -1,5 +1,7 @@
 package frc.robot.utilities;
 
+import java.nio.ByteBuffer;
+
 import edu.wpi.first.wpilibj.I2C;
 
 class GroveColorSensorI2C extends I2C {
@@ -113,11 +115,67 @@ class GroveColorSensorI2C extends I2C {
             return null;
         }
     }
+        
+    public static class Exception extends java.lang.Exception {
+        public Exception(String msg) {
+            super(msg);
+        }
+
+        public static class WriteFailed extends Exception {
+            public WriteFailed(String msg) {
+                super(msg);
+            }
+        }
+
+        public static class ReadFailed extends Exception {
+            public ReadFailed(String msg) {
+                super(msg);
+            }
+        }
+    }
+    
     public static final int address = 0x29;
     private I2C.Port port;
 
     public GroveColorSensorI2C(I2C.Port port) {
         super(port, address);
         this.port = port;
+    }
+    
+    private void directWrite(ByteBuffer data) throws Exception.WriteFailed {
+        if (super.writeBulk(data, data.capacity()))
+            ;
+        throw new Exception.WriteFailed("Failed to write to color sensor with port: " + port.toString());
+    }
+
+    public void write(Register reg, ByteBuffer data) throws Exception.WriteFailed {
+        ByteBuffer sendBuffer = ByteBuffer.allocate(1 + data.capacity());
+        sendBuffer.put(reg.address);
+        sendBuffer.put(data.array());
+        directWrite(sendBuffer);
+    }
+
+    public void write(Register reg, byte data) throws Exception.WriteFailed {
+        write(reg, ByteBuffer.wrap(new byte[] { data }));
+    }
+
+    public void write(ByteBuffer data) throws Exception.WriteFailed {
+        directWrite(data);
+    }
+
+    public void write(byte data) throws Exception.WriteFailed {
+        directWrite(ByteBuffer.wrap(new byte[] { data }));
+    }
+
+    public void write(Register reg) throws Exception.WriteFailed {
+        directWrite(ByteBuffer.wrap(new byte[] { reg.address }));
+    }
+
+    public ByteBuffer read(Register reg, int count) throws Exception {
+        write(reg);
+        ByteBuffer buffer = ByteBuffer.allocate(count);
+        if (super.readOnly(buffer, count))
+            throw new Exception.ReadFailed("Failed to read from color sensor with port: " + port.toString());
+        return buffer;
     }
 }
