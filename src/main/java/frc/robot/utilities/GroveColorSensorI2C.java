@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import edu.wpi.first.wpilibj.I2C;
 
 class GroveColorSensorI2C extends I2C {
+    public static final byte COMMAND_BIT = (byte) 0x80;
+
     public static enum Register {
         ENABLE ((byte) 0x00),
         ENABLE_AIEN((byte) 0x10),    /* RGBC Interrupt Enable */
@@ -20,6 +22,7 @@ class GroveColorSensorI2C extends I2C {
         AILTH((byte) 0x05),
         AIHTL((byte) 0x06),    /* Clear channel upper interrupt threshold */
         AIHTH((byte) 0x07),
+        CLEAR_INTERRUPT((byte) 0x66),
         PERS((byte) 0x0C),    /* Persistence register - basic SW filtering mechanism for interrupts */
         PERS_NONE((byte) 0b0000),  /* Every RGBC cycle generates an interrupt                                */
         PERS_1_CYCLE((byte) 0b0001),  /* 1 clean channel value outside threshold range generates an interrupt   */
@@ -143,16 +146,15 @@ class GroveColorSensorI2C extends I2C {
     }
     
     private void directWrite(ByteBuffer data) throws Exception.WriteFailed {
-        if (super.writeBulk(data, data.capacity()))
-            ;
-        throw new Exception.WriteFailed("Failed to write to color sensor with port: " + port.toString());
+        if (super.writeBulk(data, data.capacity())) 
+            throw new Exception.WriteFailed("Failed to write to color sensor with port: " + port.toString());
     }
 
     public void write(Register reg, ByteBuffer data) throws Exception.WriteFailed {
         ByteBuffer sendBuffer = ByteBuffer.allocate(1 + data.capacity());
         sendBuffer.put(reg.address);
         sendBuffer.put(data.array());
-        directWrite(sendBuffer);
+        write(sendBuffer);
     }
 
     public void write(Register reg, byte data) throws Exception.WriteFailed {
@@ -160,15 +162,17 @@ class GroveColorSensorI2C extends I2C {
     }
 
     public void write(ByteBuffer data) throws Exception.WriteFailed {
+        data.position(0);
+        data.put((byte) (COMMAND_BIT | data.get(0)));
         directWrite(data);
     }
 
     public void write(byte data) throws Exception.WriteFailed {
-        directWrite(ByteBuffer.wrap(new byte[] { data }));
+        write(ByteBuffer.wrap(new byte[] { data }));
     }
 
     public void write(Register reg) throws Exception.WriteFailed {
-        directWrite(ByteBuffer.wrap(new byte[] { reg.address }));
+        write(ByteBuffer.wrap(new byte[] { reg.address }));
     }
 
     public ByteBuffer read(Register reg, int count) throws Exception {
