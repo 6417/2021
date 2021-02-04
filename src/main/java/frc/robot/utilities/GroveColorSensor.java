@@ -3,7 +3,7 @@ package frc.robot.utilities;
 import java.nio.ByteBuffer;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.I2C;
 
 public class GroveColorSensor {
     public static class RawColor {
@@ -24,6 +24,32 @@ public class GroveColorSensor {
             green = 0;
             blue = 0;
             clear = 0;
+        }
+
+        public String toString() {
+            return String.format("Red: %d, Green: %d, Blue: %d, Clear: %d", red, green, blue, clear);
+        }
+    }
+
+    public static class Color {
+        public int red;
+        public int green;
+        public int blue;
+
+        public Color(int red, int green, int blue) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+        }
+
+        public Color() {
+            red = 0;
+            green = 0;
+            blue = 0;
+        }
+
+        public String toString() {
+            return String.format("Red: %d, Green: %d, Blue: %d", red, green, blue);
         }
     }
 
@@ -83,7 +109,9 @@ public class GroveColorSensor {
     private GroveColorSensorI2C.IntegrationTime integrationTime;
     private GroveColorSensorI2C.Gain gain;
 
-    public GroveColorSensor(GroveColorSensorI2C.IntegrationTime integrationTime, GroveColorSensorI2C.Gain gain) {
+    public GroveColorSensor(I2C.Port port, GroveColorSensorI2C.IntegrationTime integrationTime,
+            GroveColorSensorI2C.Gain gain) {
+        i2c = new GroveColorSensorI2C(port);
         this.integrationTime = integrationTime;
         this.gain = gain;
         setInegrationTime();
@@ -93,10 +121,13 @@ public class GroveColorSensor {
 
     public Color readRGB() {
         RawColor rawColor = getRawColor();
-        double r = rawColor.red / rawColor.clear;
-        double g = rawColor.green / rawColor.clear;
-        double b = rawColor.blue / rawColor.clear;
-        return new Color(r, g, b);
+        Color ret = new Color();
+        if (rawColor.clear > 0) {
+            ret.red = 255 * rawColor.red / rawColor.clear;
+            ret.green = 255 * rawColor.green / rawColor.clear;
+            ret.blue = 255 * rawColor.blue / rawColor.clear;
+        }
+        return ret;
     }
 
     public void setInterrupt(boolean i) {
@@ -115,10 +146,14 @@ public class GroveColorSensor {
 
     public RawColor getRawColor() {
         RawColor recieved = new RawColor();
-        recieved.clear = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.CDATAL, 2)).getShort(0);
-        recieved.red = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.RDATAL, 2)).getShort(0);
-        recieved.green = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.GDATAL, 2)).getShort(0);
-        recieved.blue = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.BDATAL, 2)).getShort(0);
+        recieved.clear = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.CDATAL, 2))
+                .getShort(0);
+        recieved.red = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.RDATAL, 2))
+                .getShort(0);
+        recieved.green = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.GDATAL, 2))
+                .getShort(0);
+        recieved.blue = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.BDATAL, 2))
+                .getShort(0);
         return recieved;
     }
 }

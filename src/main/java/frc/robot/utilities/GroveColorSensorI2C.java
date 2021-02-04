@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import edu.wpi.first.wpilibj.I2C;
 
-class GroveColorSensorI2C extends I2C {
+public class GroveColorSensorI2C extends I2C {
     public static final byte COMMAND_BIT = (byte) 0x80;
 
     public static enum Register {
