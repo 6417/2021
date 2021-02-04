@@ -6,6 +6,7 @@ import frc.robot.Constants;
 public class Controller {
 
     private static Controller mInstance;
+
     public DriveJoystick driveJoystick;
     public ControlJoystick controlJoystick;
 
@@ -41,12 +42,8 @@ public class Controller {
             return controller.getTwist();
         }
 
-        public double getPOV() {
+        public double getDpad() {
             return controller.getPOV();
-        }
-
-        public boolean getButton() {
-            return controller.getRawButton(Constants.Joystick.X_BUTTON_ID);
         }
     }
 
