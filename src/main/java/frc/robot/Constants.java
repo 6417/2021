@@ -32,4 +32,8 @@ public final class Constants {
         public static final int LEFT_JOYSTICK_BUTTON_ID = 11;
         public static final int RIGHT_JOYSTICK_BUTTON_ID = 12;
     }
+
+    public static class Vision{
+        public static final boolean IS_ENABLED = true;
+    }
 }
