@@ -25,6 +25,7 @@ import frc.robot.utilities.baseClasses.VisionServiceBase;
  */
 public class Robot extends TimedRobot {
     private RobotContainer m_robotContainer;
+    VisionServiceBase vision;
 
     /**
      * This function is run when the robot is first started up and should be used
@@ -36,6 +37,7 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
+        vision = VisionService.getInstance();
     }
 
     /**
@@ -86,11 +88,9 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
     }
 
-    VisionServiceBase vision;
-
     @Override
     public void teleopInit() {
-        vision = VisionService.getInstance();
+        vision.setConnectionStatus();
     }
 
     /**
@@ -99,8 +99,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         Optional<Values> visionValues = vision.getValues();
-        visionValues.ifPresentOrElse((Values values) -> System.out.println(values.distance), () -> System.out.println("No values reciesved"));
-        visionValues.ifPresent((Values values) -> System.out.println(values.targetLockon));
+        visionValues.ifPresentOrElse((Values) -> System.out.println(visionValues.get().distance), () -> System.out.println("Not updated"));
     }
 
     @Override

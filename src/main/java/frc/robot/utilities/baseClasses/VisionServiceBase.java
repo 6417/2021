@@ -11,4 +11,7 @@ public class VisionServiceBase {
     public Optional<Values> getValues() {
         return Optional.empty();
     }
+
+    public void setConnectionStatus() {
+    }
 }

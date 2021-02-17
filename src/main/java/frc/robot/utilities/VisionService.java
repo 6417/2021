@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.utilities.baseClasses.VisionServiceBase;
 
@@ -16,6 +17,7 @@ public class VisionService extends VisionServiceBase {
         super();
         networkTableInstance = NetworkTableInstance.getDefault();
         smartDashboard = networkTableInstance.getTable("SmartDashboard");
+        smartDashboard.getEntry("connected").setBoolean(true);
     }
 
     public static VisionServiceBase getInstance() {
@@ -54,5 +56,10 @@ public class VisionService extends VisionServiceBase {
             return Optional.of(new Values(robotAngle, distance, targetLockon));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void setConnectionStatus() {
+        smartDashboard.getEntry("connected").setBoolean(true);
     }
 }

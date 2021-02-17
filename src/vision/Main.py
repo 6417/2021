@@ -211,6 +211,67 @@ def startCamera(config):
 
     return camera, inst
 
+def startNetworkTables():
+    networkTablesInstance = NetworkTablesInstance.getDefault()
+
+    print("Setting up NetworkTables client for team {}".format(team))
+
+    condition = threading.Condition()
+    notified = [False]
+
+    def connectionListener(connected, info):
+        print(info, '; Connected=%s' % connected)
+        with condition:
+            notified[0] = True
+            condition.notify()
+    
+    NetworkTables.initialize(server="10.64.17.2")
+    NetworkTables.addConnectionListener(connectionListener, immediateNotify=True)
+
+    with condition:
+        print("waiting")
+        if not notified[0]:
+            condition.wait()
+
+    networkTablesInstance.startClientTeam(team)
+    networkTablesInstance.startDSClient()
+    dashboard =  networkTablesInstance.getTable('SmartDashboard')
+
+    print("Connected")
+
+    return networkTablesInstance, dashboard
+
+    # if server:
+    #     print("Setting up NetworkTables server")
+    #     networkTablesInstance.startServer()
+    # else:
+    #     print("Setting up NetworkTables client for team {}".format(team))
+
+    #     condition = threading.Condition()
+    #     notified = [False]
+
+    #     def connectionListener(connected, info):
+    #         print(info, '; Connected=%s' % connected)
+    #         with condition:
+    #             notified[0] = True
+    #             condition.notify()
+        
+    #     NetworkTables.initialize(server="10.64.17.2")
+    #     NetworkTables.addConnectionListener(connectionListener, immediateNotify=True)
+
+    #     with condition:
+    #         print("waiting")
+    #         if not notified[0]:
+    #             condition.wait()
+
+    #     networkTablesInstance.startClientTeam(team)
+    #     networkTablesInstance.startDSClient()
+    #     dashboard =  networkTablesInstance.getTable('SmartDashboard')
+
+    #     print("Connected")
+
+        # return networkTablesInstance, dashboard
+
 # def initializeNetworkTables():
 #     print("Initializing the networkTables")
 
@@ -242,18 +303,43 @@ if __name__ == "__main__":
     if not readConfig():
         sys.exit(1)
 
-    # start NetworkTables
-    ntinst = NetworkTablesInstance.getDefault()
-    if server:
-        print("Setting up NetworkTables server")
-        ntinst.startServer()
-    else:
-        print("Setting up NetworkTables client for team {}".format(team))
-        ntinst.startClientTeam(team)
-        ntinst.startDSClient()
-        dashboard =  ntinst.getTable('SmartDashboard')
+    # # start NetworkTables
+    # networkTablesInstance = NetworkTablesInstance.getDefault()
+    # if server:
+    #     print("Setting up NetworkTables server")
+    #     networkTablesInstance.startServer()
+    # else:
+    #     print("Setting up NetworkTables client for team {}".format(team))
 
+    #     condition = threading.Condition()
+    #     notified = [False]
+
+    #     def connectionListener(connected, info):
+    #         print(info, '; Connected=%s' % connected)
+    #         with condition:
+    #             notified[0] = True
+    #             condition.notify()
+        
+    #     NetworkTables.initialize(server="10.64.17.2")
+    #     NetworkTables.addConnectionListener(connectionListener, immediateNotify=True)
+
+    #     with condition:
+    #         print("waiting")
+    #         if not notified[0]:
+    #             condition.wait()
+
+    #     networkTablesInstance.startClientTeam(team)
+    #     networkTablesInstance.startDSClient()
+    #     dashboard =  networkTablesInstance.getTable('SmartDashboard')
+
+    #     print("Connected")
+        
     # start cameras
+
+    networkTablesInstance, dashboard = startNetworkTables()
+
+    dashboard.putBoolean('connected', False)
+
     for config in cameraConfigs:
         cam, server = startCamera(config)
         cameras.append(cam)
@@ -273,9 +359,16 @@ if __name__ == "__main__":
     kernel = np.ones((5, 5), dtype=np.uint8)
     erode_kernel = np.ones((3, 3), dtype=np.uint8)
 
+    startTime = time.time()
+
     # loop forever
     while True:
-        target_locked = False
+        if dashboard.getBoolean('connected', False) == False:
+            if time.time() - startTime >= 10:
+                print("Connection Timeout")
+                sys.exit()
+
+        targetInView = False
         s_time = time.time()
         frame_time, img = cvSink.grabFrame(img)
         if frame_time == 0:
