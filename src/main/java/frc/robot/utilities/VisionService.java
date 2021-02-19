@@ -49,6 +49,8 @@ public class VisionService extends VisionServiceBase {
     @Override
     public Optional<Values> getValues() {
         if (smartDashboard.getEntry("currentValues").getBoolean(false)) {
+            if (smartDashboard.getEntry("connected").getBoolean(false) == false)
+            setConnectionStatus();
             double distance = smartDashboard.getEntry("distance").getDouble(0);
             double robotAngle = smartDashboard.getEntry("robotAngle").getDouble(0);
             boolean targetLockon = smartDashboard.getEntry("targetInView").getBoolean(false);
@@ -60,6 +62,7 @@ public class VisionService extends VisionServiceBase {
 
     @Override
     public void setConnectionStatus() {
+        System.out.println("Connected to the pi");
         smartDashboard.getEntry("connected").setBoolean(true);
     }
 }
