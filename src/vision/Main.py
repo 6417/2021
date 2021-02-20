@@ -120,7 +120,8 @@ class thread(threading.Thread):
 
     def raise_exception(self):
         thread_id = self.get_id()
-        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, ctypes.py_object(SystemExit))
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            thread_id, ctypes.py_object(SystemExit))
         if res > 1:
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,	0)
             print('Exception	raise	failure')
@@ -161,15 +162,19 @@ def getMidPoint(pointList):
 def getDistance(point1,	point2):
     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)**0.5
 
+
 def getMiddleLineLengthStraight(distance):
     return 689.356*(distance ** -0.99836)
 
+
 def getTargetAngle(MiddleLineLengthDifference):
-    targetAngle = -0.002182 * (MiddleLineLengthDifference ** 2) + 0.631977 * MiddleLineLengthDifference + 9.22611
-    if targetAngle >= 13: 
+    targetAngle = -0.002182 * (MiddleLineLengthDifference ** 2) + \
+        0.631977 * MiddleLineLengthDifference + 9.22611
+    if targetAngle >= 13:
         return targetAngle
     else:
         return 0
+
 
 def parseError(str):
     """Report	parse	error."""
@@ -299,6 +304,30 @@ def startNetworkTables():
 
     return networkTablesInstance,	dashboard
 
+def generateDebugImage(img):
+    cv2.putText(img,	"Distance_total:    " + str(round(distance, 3)),
+                (0,	250),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
+    cv2.putText(img,	"Robot	Viewing	dir(rel	to	target):    " + str(round(toAimingSystem(getMidPoint(
+        locations))[0] * (horizontal_fov/2), 3)), (0, 280), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+    cv2.putText(img, "Line Length:  " + str(round(lineLength, 2)),
+                (0, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+    cv2.putText(img, "Straight Line Length: " + str(round(straightLineLength, 1)),
+                (0, 340), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+    cv2.putText(img, "TargetAngle: " + str(round(targetAngle, 1)),
+                (0, 370), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+    cv2.putText(img, "Viewing Side: " + str(round(side, 1)),
+                (0, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+    cv2.line(img, (int(locations[0][0]), int(locations[0][1])), (int(
+        locations[1][0]), int(locations[1][1])), (0, 255, 0), thickness=2)
+    return img
+
+def filterImage(rawImage):
+    hsv_img = cv2.cvtColor(rawImage, cv2.COLOR_BGR2HSV)
+    binary_img = cv2.inRange(
+        hsv_img,	(min_hue,	min_sat,	min_val),	(max_hue,	max_sat,	max_val))
+
+    binary_img = cv2.erode(binary_img, erode_kernel, iterations=3)
+    return binary_img
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
@@ -319,8 +348,8 @@ if __name__ == "__main__":
 
     cs = servers[0]
 
+    #Starting two threads in case the cvSinkGetter fails it can be restarted
     print("getting	Sink")
-    #	cvSink	=	cs.getVideo()
     cvSinkGetter = thread("cvSinkGetter")
     watchdog = thread("watchdog", cvSinkGetter)
     cvSinkGetter.start()
@@ -328,11 +357,11 @@ if __name__ == "__main__":
     cvSink = cvSinkGetter.join()
     watchdog.join()
 
-    #	print("starting	Streams")
-    outputStream	=	cs.putVideo("Processed_Image",	res[0],	res[1])
-    #	binaryStream	=	cs.putVideo("Binary	Image",	res[0],	res[1])
+    # Starting the streams
+    # outputStream = cs.putVideo("Processed_Image", res[0], res[1])
+    # binaryStream	=	cs.putVideo("Binary	Image",	res[0],	res[1])
 
-    print("Grabbed	stream")
+    print("Started vision program")
 
     img = np.zeros((res[1], res[0], 3), dtype=np.uint8)
 
@@ -343,6 +372,7 @@ if __name__ == "__main__":
 
     #	loop	forever
     while True:
+        # check for connection timeout and restart if there's one
         if dashboard.getBoolean('connected',	False) == False:
             if time.time() - startTime >= 10:
                 print("Connection	Timeout")
@@ -352,15 +382,8 @@ if __name__ == "__main__":
         s_time = time.time()
 
         frame_time,	img = cvSink.grabFrame(img)
-        #	if	frame_time	==	0:
-        #					outputStream.notifyError(cvSink.getError())
-        #					continue
 
-        hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        binary_img = cv2.inRange(
-            hsv_img,	(min_hue,	min_sat,	min_val),	(max_hue,	max_sat,	max_val))
-
-        binary_img = cv2.erode(binary_img, erode_kernel, iterations=3)
+        binary_img = filterImage(img)
 
         _,	contours,	_ = cv2.findContours(
             binary_img,	cv2.RETR_EXTERNAL,	cv2.CHAIN_APPROX_SIMPLE)
@@ -398,20 +421,20 @@ if __name__ == "__main__":
 
             for box in boxes:
                 try:
-                    cv2.drawContours(img,	[box],	-1,	(0,	0,	255),	thickness=1)
-
+                    # cv2.drawContours(img,	[box],	-1,	(0,	0,	255),	thickness=1)
+                    
+                    #Get the locations of the side stripes
                     midpoint = getMidPoint(box)
                     locations.append(midpoint)
 
-                    cv2.circle(img,	(int(midpoint[0]),	int(
-                        midpoint[1])),	4,	(255,	255,	255))
+                    # cv2.circle(img,	(int(midpoint[0]),	int(
+                    #     midpoint[1])),	4,	(255,	255,	255))
                 except:
                     print("no	boxes")
-            
-            side = (locations[0][0] > locations[1][0]) * 2 - 1
 
-            #	cv2.putText(img,	"Length	of	line	1:		"	+	str(int(y_differences[0])),	(0,	70),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
-            #	cv2.putText(img,	"Length	of	line	2:		"	+	str(int(y_differences[1])),	(0,	100),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
+            #Determine the side from wich the robot is looking at the target
+            viewingSide = (locations[0][0] > locations[1][0]) * 2 - 1
+
             np.sort(heights)
 
             for i in range(2):
@@ -421,18 +444,12 @@ if __name__ == "__main__":
             distance = (distances[0] + distances[1])/2
             robotAngle = toAimingSystem(getMidPoint(locations))[
                 0] * (horizontal_fov/2)
-            lineLength = (abs(locations[0][0] - locations[1][0])**2 + abs(locations[0][1] - locations[1][1])**2)**0.5
+            lineLength = (abs(locations[0][0] - locations[1][0])
+                          ** 2 + abs(locations[0][1] - locations[1][1])**2)**0.5
             straightLineLength = getMiddleLineLengthStraight(distance)
             targetAngle = getTargetAngle(abs(straightLineLength - lineLength))
-            cv2.putText(img,	"Distance_total:    " + str(round(distance, 3)),
-                        (0,	250),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
-            cv2.putText(img,	"Robot	Viewing	dir(rel	to	target):    " + str(round(toAimingSystem(getMidPoint(
-                locations))[0] * (horizontal_fov/2), 3)), (0, 280), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-            cv2.putText(img, "Line Length:  " + str(round(lineLength, 2)), (0, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-            cv2.putText(img, "Straight Line Length: " + str(round(straightLineLength, 1)), (0, 340), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-            cv2.putText(img, "TargetAngle: " + str(round(targetAngle, 1)), (0, 370), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-            cv2.putText(img, "Viewing Side: " + str(round(side, 1)), (0, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-            cv2.line(img, (int(locations[0][0]), int(locations[0][1])), (int(locations[1][0]), int(locations[1][1])), (0, 255, 0), thickness=2)
+            
+            # img = generateDebugImage(img)
 
             if distance <= 4.5:
                 targetInView = True
@@ -441,16 +458,22 @@ if __name__ == "__main__":
             distance = 0
             robotAngle = 0
 
+        # writing fps on debug image
+
         processing_time = time.time() - s_time
         fps = round(1 / processing_time, 3)
-        cv2.putText(img,	"FPS:     " + str(fps), (0, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX,	1,	(0,	0,	255))
+        # cv2.putText(img,	"FPS:     " + str(fps), (0, 40),
+        #             cv2.FONT_HERSHEY_SIMPLEX,	1,	(0,	0,	255))
 
-        outputStream.putFrame(img)
-        #	binaryStream.putFrame(binary_img)
+        #manually toggle streams on and off
+        # outputStream.putFrame(img)
+        # binaryStream.putFrame(binary_img)
+
+        #send values through networktables
         dashboard.putNumber('distance',	distance)
         dashboard.putBoolean('targetInView',	targetInView)
         dashboard.putNumber('robotAngle',	robotAngle)
         dashboard.putBoolean('currentValues',	True)
         dashboard.putNumber('targetAngle', targetAngle)
-        dashboard.putNumber('viewingSide', side)
+        dashboard.putNumber('viewingSide', viewingSide)
+        dashboard.putNumber('fps', fps)
