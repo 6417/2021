@@ -73,7 +73,7 @@ servers = []
 #	HSV	Filter	values
 min_hue = 0
 min_sat = 0
-min_val = 210
+min_val = 220
 max_hue = 180
 max_sat = 255
 max_val = 255
@@ -163,6 +163,13 @@ def getDistance(point1,	point2):
 
 def getMiddleLineLengthStraight(distance):
     return 689.356*(distance ** -0.99836)
+
+def getTargetAngle(MiddleLineLengthDifference):
+    targetAngle = -0.002182 * (MiddleLineLengthDifference ** 2) + 0.631977 * MiddleLineLengthDifference + 9.22611
+    if targetAngle >= 13: 
+        return targetAngle
+    else:
+        return 0
 
 def parseError(str):
     """Report	parse	error."""
@@ -387,6 +394,7 @@ if __name__ == "__main__":
 
             boxes = np.array([largest, second])
             y_differences = np.array([largest_difference, second_difference])
+            side = 0
 
             for box in boxes:
                 try:
@@ -399,6 +407,8 @@ if __name__ == "__main__":
                         midpoint[1])),	4,	(255,	255,	255))
                 except:
                     print("no	boxes")
+            
+            side = (locations[0][0] > locations[1][0]) * 2 - 1
 
             #	cv2.putText(img,	"Length	of	line	1:		"	+	str(int(y_differences[0])),	(0,	70),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
             #	cv2.putText(img,	"Length	of	line	2:		"	+	str(int(y_differences[1])),	(0,	100),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
@@ -413,14 +423,16 @@ if __name__ == "__main__":
                 0] * (horizontal_fov/2)
             lineLength = (abs(locations[0][0] - locations[1][0])**2 + abs(locations[0][1] - locations[1][1])**2)**0.5
             straightLineLength = getMiddleLineLengthStraight(distance)
+            targetAngle = getTargetAngle(abs(straightLineLength - lineLength))
             cv2.putText(img,	"Distance_total:    " + str(round(distance, 3)),
                         (0,	250),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
             cv2.putText(img,	"Robot	Viewing	dir(rel	to	target):    " + str(round(toAimingSystem(getMidPoint(
                 locations))[0] * (horizontal_fov/2), 3)), (0, 280), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
             cv2.putText(img, "Line Length:  " + str(round(lineLength, 2)), (0, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
             cv2.putText(img, "Straight Line Length: " + str(round(straightLineLength, 1)), (0, 340), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+            cv2.putText(img, "TargetAngle: " + str(round(targetAngle, 1)), (0, 370), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+            cv2.putText(img, "Viewing Side: " + str(round(side, 1)), (0, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
             cv2.line(img, (int(locations[0][0]), int(locations[0][1])), (int(locations[1][0]), int(locations[1][1])), (0, 255, 0), thickness=2)
-
 
             if distance <= 4.5:
                 targetInView = True
@@ -440,3 +452,5 @@ if __name__ == "__main__":
         dashboard.putBoolean('targetInView',	targetInView)
         dashboard.putNumber('robotAngle',	robotAngle)
         dashboard.putBoolean('currentValues',	True)
+        dashboard.putNumber('targetAngle', targetAngle)
+        dashboard.putNumber('viewingSide', side)

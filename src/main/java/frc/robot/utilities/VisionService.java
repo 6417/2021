@@ -34,15 +34,19 @@ public class VisionService extends VisionServiceBase {
         public double robotAngle = -1;
         public double distance = -1;
         public boolean targetLockon = false;
+        public double targetAngle = -1;
+        public double viewingSide = 0;
 
         public Values() {
 
         }
 
-        public Values(double robotAngle, double distance, boolean targetLockon) {
+        public Values(double robotAngle, double distance, boolean targetLockon, double targetAngle, double viewingSide) {
             this.robotAngle = robotAngle;
             this.distance = distance;
             this.targetLockon = targetLockon;
+            this.targetAngle = targetAngle;
+            this.viewingSide = viewingSide;
         }
     }
 
@@ -54,8 +58,10 @@ public class VisionService extends VisionServiceBase {
             double distance = smartDashboard.getEntry("distance").getDouble(0);
             double robotAngle = smartDashboard.getEntry("robotAngle").getDouble(0);
             boolean targetLockon = smartDashboard.getEntry("targetInView").getBoolean(false);
+            double targetAngle = smartDashboard.getEntry("targetAngle").getDouble(0);
+            double viewingSide = smartDashboard.getEntry("viewingSide").getDouble(0);
             smartDashboard.getEntry("currentValues").setBoolean(false);
-            return Optional.of(new Values(robotAngle, distance, targetLockon));
+            return Optional.of(new Values(robotAngle, distance, targetLockon, targetAngle, viewingSide));
         }
         return Optional.empty();
     }
