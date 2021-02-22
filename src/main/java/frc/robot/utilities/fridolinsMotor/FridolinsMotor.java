@@ -1,21 +1,37 @@
 package frc.robot.utilities.fridolinsMotor;
 
 public interface FridolinsMotor {
+    public enum LimitSwitchPolarity {
+        kNormallyOpen, kNormallyClosed, kDisabled
+    }
+
+    public enum IdleModeType {
+        kBrake, kCoast
+    }
+
+    public enum FeedbackDevice {
+        QuadEncoder, CANEncoder, HallSensor
+    }
+
+    public enum DirectionType {
+        followMaster, invertMaster
+    }
+
     public void set(double percent);
 
     public void setPosition(int position);
 
-    public void enableForwardLimitSwitch(FridolinsLimitSwitchPolarity polarity, boolean enable);
+    public void enableForwardLimitSwitch(LimitSwitchPolarity polarity, boolean enable);
 
-    public void enableReverseLimitSwitch(FridolinsLimitSwitchPolarity polarity, boolean enable);
+    public void enableReverseLimitSwitch(LimitSwitchPolarity polarity, boolean enable);
 
     public boolean isForwardLimitSwitchActive();
 
     public boolean isReverseLimitSwitchActive();
 
-    public void setIdleMode(FridolinsIdleModeType type);
+    public void setIdleMode(IdleModeType type);
 
-    public void follow(FridolinsMotor master, FridolinsDirectionType direction);
+    public void follow(FridolinsMotor master, DirectionType direction);
 
     public void setDirection(boolean forward);
 
@@ -27,7 +43,7 @@ public interface FridolinsMotor {
 
     public void factoryDefault();
 
-    public void configSelectedFeedbackSensor(FridolinsFeedbackDevice device, int countsPerRev);
+    public void configSelectedFeedbackSensor(FeedbackDevice device, int countsPerRev);
 
     public void configOpenLoopRamp(double rate);
 }

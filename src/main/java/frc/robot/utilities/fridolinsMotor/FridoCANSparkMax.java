@@ -25,14 +25,14 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         // TODO Auto-generated method stub
     }
 
-    private LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(FridolinsLimitSwitchPolarity polarity) {
+    private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(FridolinsMotor.LimitSwitchPolarity polarity) {
         switch (polarity) {
             case kNormallyOpen:
-                return LimitSwitchPolarity.kNormallyOpen;
+                return CANDigitalInput.LimitSwitchPolarity.kNormallyOpen;
             case kNormallyClosed:
-                return LimitSwitchPolarity.kNormallyClosed;
+                return CANDigitalInput.LimitSwitchPolarity.kNormallyClosed;
             default:
-                return LimitSwitchPolarity.kNormallyOpen;
+                return CANDigitalInput.LimitSwitchPolarity.kNormallyOpen;
         }
     }
 
@@ -40,7 +40,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         return forwardLimitSwitch;
     }
 
-    private CANDigitalInput getForwardLimitSwitchInstance(FridolinsLimitSwitchPolarity polarity) {
+    private CANDigitalInput getForwardLimitSwitchInstance(FridolinsMotor.LimitSwitchPolarity polarity) {
         if (forwardLimitSwitch == null) {
             forwardLimitSwitch = super.getForwardLimitSwitch(convertFromFridoLimitSwitchPolarity(polarity));
         }
@@ -51,7 +51,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         return reverseLimitSwitch;
     }
 
-    private CANDigitalInput getReverselimitSwitchInstance(FridolinsLimitSwitchPolarity polarity) {
+    private CANDigitalInput getReverselimitSwitchInstance(FridolinsMotor.LimitSwitchPolarity polarity) {
         if (reverseLimitSwitch == null) {
             reverseLimitSwitch = super.getReverseLimitSwitch(convertFromFridoLimitSwitchPolarity(polarity));
         }
@@ -59,12 +59,12 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void enableForwardLimitSwitch(FridolinsLimitSwitchPolarity polarity, boolean enable) {
+    public void enableForwardLimitSwitch(FridolinsMotor.LimitSwitchPolarity polarity, boolean enable) {
         getForwardLimitSwitchInstance(polarity).enableLimitSwitch(enable);
     }
 
     @Override
-    public void enableReverseLimitSwitch(FridolinsLimitSwitchPolarity polarity, boolean enable) {
+    public void enableReverseLimitSwitch(FridolinsMotor.LimitSwitchPolarity polarity, boolean enable) {
         getReverselimitSwitchInstance(polarity).enableLimitSwitch(enable);
     }
 
@@ -78,7 +78,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         return getReverseLimitSwitchInstance().get();
     }
 
-    private IdleMode convertFromFridoIdleModeType(FridolinsIdleModeType idleModeType) {
+    private IdleMode convertFromFridoIdleModeType(FridolinsMotor.IdleModeType idleModeType) {
         switch (idleModeType) {
             case kBrake:
                 return IdleMode.kBrake;
@@ -90,11 +90,11 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void setIdleMode(FridolinsIdleModeType type) {
+    public void setIdleMode(FridolinsMotor.IdleModeType type) {
         this.setIdleMode(convertFromFridoIdleModeType(type));
     }
 
-    private boolean convertFromFridoDirectionsType(FridolinsDirectionType direction) {
+    private boolean convertFromFridoDirectionsType(FridolinsMotor.DirectionType direction) {
         switch (direction) {
             case followMaster:
                 return false;
@@ -106,7 +106,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void follow(FridolinsMotor master, FridolinsDirectionType direction) {
+    public void follow(FridolinsMotor master, FridolinsMotor.DirectionType direction) {
         if (master instanceof FridoCANSparkMax) {
             super.follow((FridoCANSparkMax) master, convertFromFridoDirectionsType(direction));
         }
@@ -137,7 +137,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         super.restoreFactoryDefaults();
     }
 
-    private EncoderType convertFromFridoFeedbackDevice(FridolinsFeedbackDevice device) {
+    private EncoderType convertFromFridoFeedbackDevice(FridolinsMotor.FeedbackDevice device) {
         switch (device) {
             case QuadEncoder:
                 return EncoderType.kQuadrature;
@@ -149,7 +149,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void configSelectedFeedbackSensor(FridolinsFeedbackDevice device, int countsPerRev) {
+    public void configSelectedFeedbackSensor(FridolinsMotor.FeedbackDevice device, int countsPerRev) {
         this.encoder = super.getEncoder(convertFromFridoFeedbackDevice(device), countsPerRev);
     }
 
