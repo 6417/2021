@@ -7,8 +7,14 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.utilities.VisionService;
+import frc.robot.utilities.VisionService.Values;
+import frc.robot.utilities.baseClasses.VisionServiceBase;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -19,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
     private RobotContainer m_robotContainer;
+    VisionServiceBase vision;
 
     /**
      * This function is run when the robot is first started up and should be used
@@ -30,6 +37,7 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
+        vision = VisionService.getInstance();
     }
 
     /**
@@ -82,7 +90,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        vision.setConnectionStatus();
     }
 
     /**
@@ -90,6 +98,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
+        Optional<Values> visionValues = vision.getValues();
+        visionValues.ifPresentOrElse((Values) -> System.out.println(visionValues.get().distance), () -> System.out.println("Not updated"));
     }
 
     @Override
