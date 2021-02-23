@@ -10,10 +10,10 @@ import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 public class SwerveModule {
     public static enum MountingLocation {
-        FrontRight, FrontLeft, BackRight, BackLeft  
+        FrontRight, FrontLeft, BackRight, BackLeft
     }
 
-    public static class Config {
+    public static class Config implements Cloneable {
         public MotorInitializer driveMotorInitializer;
         public MotorInitializer rotationMotorInitializer;
         public PIDValues drivePID;
@@ -22,8 +22,26 @@ public class SwerveModule {
         public double driveMotorTicksPerRotation;
         public double wheelCircumference; // in meter
         public Translation2d mountingPoint; // in meter
+
+        @Override
+        public Config clone() {
+            try {
+                return (Config) super.clone();
+            } catch (CloneNotSupportedException e) {
+                Config copy = new Config();
+                copy.driveMotorInitializer = driveMotorInitializer;
+                copy.rotationMotorInitializer = rotationMotorInitializer;
+                copy.drivePID = drivePID.clone();
+                copy.rotationPID = rotationPID.clone();
+                copy.rotationMotorTicksPerRotation = rotationMotorTicksPerRotation;
+                copy.driveMotorTicksPerRotation = driveMotorTicksPerRotation;
+                copy.wheelCircumference = wheelCircumference;
+                copy.mountingPoint = new Translation2d(mountingPoint.getX(), mountingPoint.getY());
+                return copy;
+            }
+        }
     }
-    
+
     private static class Motors {
         public FridolinsMotor drive;
         public FridolinsMotor rotation;
@@ -49,7 +67,7 @@ public class SwerveModule {
     }
 
     public Vector2d getModuleRotation() {
-       return Vector2d.fromRad(getModuleRotationAngle());
+        return Vector2d.fromRad(getModuleRotationAngle());
     }
 
     public double getModuleRotationAngle() {
@@ -61,12 +79,12 @@ public class SwerveModule {
     }
 
     private double meterPerSecondToDriveMotorEncoderTicksPer100ms(double speedMs) {
-        return (speedMs / motors.wheelCircumference) * motors.driveMotorTicksPerRotation * 10; 
+        return (speedMs / motors.wheelCircumference) * motors.driveMotorTicksPerRotation * 10;
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
         SwerveModuleState.optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
-        motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians())); 
+        motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
         motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderTicksPer100ms(desiredState.speedMetersPerSecond));
     }
 }
