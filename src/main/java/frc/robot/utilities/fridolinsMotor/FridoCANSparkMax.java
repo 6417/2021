@@ -1,7 +1,6 @@
 package frc.robot.utilities.fridolinsMotor;
 
 import com.revrobotics.CANDigitalInput;
-import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.EncoderType;
@@ -10,6 +9,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     CANDigitalInput forwardLimitSwitch;
     CANDigitalInput reverseLimitSwitch;
     CANEncoder encoder;
+    int ticksPerRotation;
 
     public FridoCANSparkMax(int deviceID, com.revrobotics.CANSparkMaxLowLevel.MotorType motorType) {
         super(deviceID, motorType);
@@ -132,24 +132,24 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         super.restoreFactoryDefaults();
     }
 
-    private EncoderType convertFromFridoFeedbackDevice(FridolinsMotor.FeedbackDevice device) {
+    private EncoderType convertFromFridoFeedbackDevice(FridolinsMotor.FridoFeedbackDevice device) {
         switch (device) {
             case QuadEncoder:
                 return EncoderType.kQuadrature;
-            case HallSensor:
-                return EncoderType.kHallSensor;
             default:
                 return EncoderType.kQuadrature;
         }
     }
 
     @Override
-    public void configSelectedFeedbackSensor(FridolinsMotor.FeedbackDevice device, int countsPerRev) {
+    public void configSelectedFeedbackSensor(FridolinsMotor.FridoFeedbackDevice device, int countsPerRev) {
         this.encoder = super.getEncoder(convertFromFridoFeedbackDevice(device), countsPerRev);
+        this.encoder.setPositionConversionFactor(countsPerRev);
     }
 
     public void selectBuiltinFeedbackSensor() {
         this.encoder = super.getEncoder();
+        this.encoder.setPositionConversionFactor(42);
     }
 
     @Override
