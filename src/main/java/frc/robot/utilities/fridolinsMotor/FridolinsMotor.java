@@ -1,5 +1,7 @@
 package frc.robot.utilities.fridolinsMotor;
 
+import frc.robot.utilities.PIDValues;
+
 public interface FridolinsMotor {
     public enum LimitSwitchPolarity {
         kNormallyOpen, kNormallyClosed, kDisabled
@@ -16,10 +18,10 @@ public interface FridolinsMotor {
     public enum DirectionType {
         followMaster, invertMaster
     }
-
+    
     public void set(double percent);
 
-    public void setPosition(int position);
+    public void setPosition(double position);
 
     public void enableForwardLimitSwitch(LimitSwitchPolarity polarity, boolean enable);
 
@@ -46,4 +48,8 @@ public interface FridolinsMotor {
     public void configSelectedFeedbackSensor(FeedbackDevice device, int countsPerRev);
 
     public void configOpenLoopRamp(double rate);
+
+    public void setPID(PIDValues pidValues);
+
+    public void setVelocity(double velocity);
 }
