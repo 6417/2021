@@ -139,4 +139,6 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     public void configSelectedFeedbackSensor(FridoFeedbackDevice device, int countsPerRev) {
         super.configSelectedFeedbackSensor(convertFromFridoFeedbackDevice(device));
     }
+
+    
 }
