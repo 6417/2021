@@ -11,7 +11,7 @@ public interface FridolinsMotor {
         kBrake, kCoast
     }
 
-    public enum FridoFeedbackDevice {
+    public enum FeedbackDevice {
         QuadEncoder, CANEncoder
     }
 
@@ -37,15 +37,15 @@ public interface FridolinsMotor {
 
     public void setDirection(boolean forward);
 
-    public void setSensorDirection(boolean inverted);
+    public void setEncoderDirection(boolean inverted);
 
-    public void setSensorPosition(double position);
+    public void setEncoderPosition(double position);
 
     public double getEncoderTicks();
 
     public void factoryDefault();
 
-    public void configSelectedFeedbackSensor(FridoFeedbackDevice device, int countsPerRev);
+    public void configEncoder(FeedbackDevice device, int countsPerRev);
 
     public void configOpenLoopRamp(double rate);
 

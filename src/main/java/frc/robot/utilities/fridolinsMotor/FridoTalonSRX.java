@@ -8,6 +8,8 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import frc.robot.utilities.PIDValues;
+
 public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     public FridoTalonSRX(int deviceID) {
         super(deviceID);
@@ -20,12 +22,12 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
 
     private LimitSwitchNormal convertFromFridoLimitSwitchPolarity(LimitSwitchPolarity polarity) {
         switch (polarity) {
-        case kNormallyOpen:
-            return LimitSwitchNormal.NormallyOpen;
-        case kNormallyClosed:
-            return LimitSwitchNormal.NormallyClosed;
-        default:
-            return LimitSwitchNormal.Disabled;
+            case kNormallyOpen:
+                return LimitSwitchNormal.NormallyOpen;
+            case kNormallyClosed:
+                return LimitSwitchNormal.NormallyClosed;
+            default:
+                return LimitSwitchNormal.Disabled;
         }
     }
 
@@ -57,22 +59,20 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
         return getSensorCollection().isRevLimitSwitchClosed();
     }
 
-
-
     private NeutralMode convertFromFridoIdleMode(IdleModeType type) {
         switch (type) {
-        case kBrake:
-            return NeutralMode.Brake;
-        case kCoast:
-            return NeutralMode.Coast;
-        default:
-            return NeutralMode.Brake;
+            case kBrake:
+                return NeutralMode.Brake;
+            case kCoast:
+                return NeutralMode.Coast;
+            default:
+                return NeutralMode.Brake;
         }
     }
 
-    private InvertType convertFromFridoDirectionsType(FridolinsMotor.DirectionType direction){
-        switch (direction){
-            case followMaster: 
+    private InvertType convertFromFridoDirectionsType(FridolinsMotor.DirectionType direction) {
+        switch (direction) {
+            case followMaster:
                 return InvertType.FollowMaster;
             case invertMaster:
                 return InvertType.OpposeMaster;
@@ -94,20 +94,19 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
         }
     }
 
-    
     @Override
     public void setDirection(boolean forward) {
         super.setInverted(forward);
     }
 
     @Override
-    public void setSensorDirection(boolean inverted) {
+    public void setEncoderDirection(boolean inverted) {
         super.setSensorPhase(inverted);
     }
 
     @Override
-    public void setSensorPosition(double position) {
-        super.setSelectedSensorPosition((int)position);
+    public void setEncoderPosition(double position) {
+        super.setSelectedSensorPosition((int) position);
     }
 
     @Override
@@ -126,18 +125,26 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
 
     }
 
-    private FeedbackDevice convertFromFridoFeedbackDevice(FridolinsMotor.FridoFeedbackDevice device){
-        switch(device){
+    private com.ctre.phoenix.motorcontrol.FeedbackDevice convertFromFridoFeedbackDevice(
+            FridolinsMotor.FeedbackDevice device) {
+        switch (device) {
             case QuadEncoder:
-                return FeedbackDevice.QuadEncoder;
+                return com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder;
 
             default:
-                return FeedbackDevice.QuadEncoder;
+                return com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder;
         }
     }
+
     @Override
-    public void configSelectedFeedbackSensor(FridoFeedbackDevice device, int countsPerRev) {
+    public void configEncoder(FeedbackDevice device, int countsPerRev) {
         super.configSelectedFeedbackSensor(convertFromFridoFeedbackDevice(device));
+    }
+
+    @Override
+    public void setPID(PIDValues pidValues) {
+        // TODO Auto-generated method stub
+
     }
 
     

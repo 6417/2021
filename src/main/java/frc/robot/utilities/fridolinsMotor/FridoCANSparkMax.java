@@ -2,8 +2,11 @@ package frc.robot.utilities.fridolinsMotor;
 
 import com.revrobotics.CANDigitalInput;
 import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.EncoderType;
+
+import frc.robot.utilities.PIDValues;
 
 public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     CANDigitalInput forwardLimitSwitch;
@@ -113,12 +116,12 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void setSensorDirection(boolean inverted) {
+    public void setEncoderDirection(boolean inverted) {
         this.encoder.setInverted(inverted);
     }
 
     @Override
-    public void setSensorPosition(double position) {
+    public void setEncoderPosition(double position) {
         this.encoder.setPosition(position);
     }
 
@@ -132,7 +135,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         super.restoreFactoryDefaults();
     }
 
-    private EncoderType convertFromFridoFeedbackDevice(FridolinsMotor.FridoFeedbackDevice device) {
+    private EncoderType convertFromFridoFeedbackDevice(FridolinsMotor.FeedbackDevice device) {
         switch (device) {
             case QuadEncoder:
                 return EncoderType.kQuadrature;
@@ -142,7 +145,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void configSelectedFeedbackSensor(FridolinsMotor.FridoFeedbackDevice device, int countsPerRev) {
+    public void configEncoder(FridolinsMotor.FeedbackDevice device, int countsPerRev) {
         this.encoder = super.getEncoder(convertFromFridoFeedbackDevice(device), countsPerRev);
         this.encoder.setPositionConversionFactor(countsPerRev);
     }
@@ -155,5 +158,13 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     @Override
     public void configOpenLoopRamp(double rate) {
         super.setOpenLoopRampRate(rate);
+    }
+
+    @Override
+    public void setPID(PIDValues pidValues) {
+        CANPIDController pid = super.getPIDController();
+        pid.setP(pidValues.kP);
+        pid.setI(pidValues.kI);
+        pid.setD(pidValues.kD);
     }
 }
