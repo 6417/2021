@@ -16,11 +16,6 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void set(double percent) {
-        super.set(percent);
-    }
-
-    @Override
     public void setPosition(int position) {
         // TODO Auto-generated method stub
     }
