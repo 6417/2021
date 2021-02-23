@@ -1,20 +1,27 @@
 package frc.robot.subsystems.Swerve;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import frc.robot.utilities.MotorInitializer;
-import frc.robot.utilities.PIDFValues;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 public class SwerveModule {
-    public class Config {
-        public PIDFValues drivePID;
+    public static enum MountingLocation {
+        FrontRight, FrontLeft, BackRight, BackLeft  
+    }
+
+    public static class Config {
+        public MotorInitializer driveMotorInitializer;
+        public MotorInitializer rotationMotorInitializer;
+        public PIDValues drivePID;
         public PIDValues rotationPID;
         public double rotationMotorTicksPerRotation;
         public double driveMotorTicksPerRotation;
         public double wheelCircumference; // in meter
+        public Translation2d mountingPoint; // in meter
     }
     
     private static class Motors {
@@ -32,8 +39,8 @@ public class SwerveModule {
 
     private Motors motors;
 
-    public SwerveModule(MotorInitializer driveMotorInitializer, MotorInitializer rotationMotorInitializer, Config config) {
-        motors = new Motors(driveMotorInitializer.initialize(), rotationMotorInitializer.initialize());
+    public SwerveModule(Config config) {
+        motors = new Motors(config.driveMotorInitializer.initialize(), config.rotationMotorInitializer.initialize());
         motors.drive.setPID(config.drivePID);
         motors.rotation.setPID(config.rotationPID);
         motors.driveMotorTicksPerRotation = config.driveMotorTicksPerRotation;

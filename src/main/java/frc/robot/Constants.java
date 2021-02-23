@@ -7,6 +7,14 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import frc.robot.subsystems.Swerve.SwerveModule;
+import frc.robot.subsystems.Swerve.SwerveModule.MountingLocation;
+import frc.robot.utilities.MotorInitializer;
+import frc.robot.utilities.PIDValues;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants.  This class should not be used for any other purpose.  All constants should be
@@ -16,7 +24,7 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static class Joystick{
+    public static final class Joystick{
         public static final int DRIVER_ID = 1;
         public static final int CONTROL_ID = 2;
         public static final int X_BUTTON_ID = 1;
@@ -33,7 +41,28 @@ public final class Constants {
         public static final int RIGHT_JOYSTICK_BUTTON_ID = 12;
     }
 
-    public static class Vision{
+    public static final class Vision{
         public static final boolean IS_ENABLED = true;
+    }
+
+    public static final class SwerveDrive {
+        public static final boolean enabled = true;
+        public static final double driveMotorTicksPerRotation = 0;
+        public static final double rotationMotorTicksPerRotation = 0;
+        public static final HashMap<SwerveModule.MountingLocation, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
+
+        public static final PIDValues drivePID = new PIDValues();
+        public static final PIDValues rotationPID = new PIDValues();
+
+        static {
+            SwerveModule.Config frontLeftConfig = new SwerveModule.Config();
+            frontLeftConfig.driveMotorTicksPerRotation = driveMotorTicksPerRotation;
+            frontLeftConfig.rotationMotorTicksPerRotation = rotationMotorTicksPerRotation;
+            frontLeftConfig.drivePID = drivePID;
+            frontLeftConfig.rotationPID = rotationPID;
+            frontLeftConfig.mountingPoint = new Translation2d();
+            swerveModuleConfigs.put(MountingLocation.FrontLeft, frontLeftConfig);
+            // TODO: add configurations for other modules
+        }
     }
 }
