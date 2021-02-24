@@ -19,6 +19,11 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
         super.set(ControlMode.Position, position);
     }
 
+    @Override
+    public void setVelocity(double velocity) {
+        super.set(ControlMode.Velocity, velocity);
+    }
+
     private LimitSwitchNormal convertFromFridoLimitSwitchPolarity(LimitSwitchPolarity polarity) {
         switch (polarity) {
             case kNormallyOpen:
@@ -142,8 +147,17 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
 
     @Override
     public void setPID(PIDValues pidValues) {
-
+        if (pidValues.slotIdX.isPresent()) {
+            super.config_kP(pidValues.slotIdX.get(), pidValues.kP);
+            super.config_kI(pidValues.slotIdX.get(), pidValues.kI);
+            super.config_kD(pidValues.slotIdX.get(), pidValues.kD);
+            pidValues.kF.ifPresent((kF) -> super.config_kF(pidValues.slotIdX.get(), kF));
+        } else {
+            try {
+                throw new Exception("You have to give a slotID for TalonSRX pidControllers");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
-
-    
 }

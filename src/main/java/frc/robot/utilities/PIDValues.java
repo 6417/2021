@@ -9,6 +9,7 @@ public class PIDValues {
         this.kD = kD;
     }
     public Optional<Double> kF = Optional.empty();
+    public Optional<Integer> slotIdX = Optional.empty();
     public double kP;
     public double kI;
     public double kD;

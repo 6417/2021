@@ -19,9 +19,9 @@ public interface FridolinsMotor {
         followMaster, invertMaster
     }
     
-    public void set(double percent);
-
     public void setPosition(double position);
+
+    public void setVelocity(double velocity);
 
     public void enableForwardLimitSwitch(LimitSwitchPolarity polarity, boolean enable);
 
