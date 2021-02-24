@@ -33,6 +33,19 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         }
     }
 
+    @Override
+    public void setVelocity(double velocity) {
+        if (this.pidController != null) {
+            this.pidController.setReference(velocity, ControlType.kVelocity);
+        } else {
+            try {
+                throw new Exception("PID Controller not initialized");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(FridolinsMotor.LimitSwitchPolarity polarity) {
         switch (polarity) {
             case kNormallyOpen:
