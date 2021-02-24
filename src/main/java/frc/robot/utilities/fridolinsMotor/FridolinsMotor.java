@@ -21,7 +21,7 @@ public interface FridolinsMotor {
     
     public void set(double percent);
 
-    public void setPosition(int position);
+    public void setPosition(double position);
 
     public void enableForwardLimitSwitch(LimitSwitchPolarity polarity, boolean enable);
 

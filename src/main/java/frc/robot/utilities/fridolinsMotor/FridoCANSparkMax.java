@@ -4,6 +4,7 @@ import com.revrobotics.CANDigitalInput;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
 import com.revrobotics.EncoderType;
 
 import frc.robot.utilities.PIDValues;
@@ -11,6 +12,7 @@ import frc.robot.utilities.PIDValues;
 public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     CANDigitalInput forwardLimitSwitch;
     CANDigitalInput reverseLimitSwitch;
+    CANPIDController pidController;
     CANEncoder encoder;
     int ticksPerRotation;
 
@@ -19,8 +21,16 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void setPosition(int position) {
-        // TODO Auto-generated method stub
+    public void setPosition(double position) {
+        if (this.pidController != null) {
+            this.pidController.setReference(position, ControlType.kPosition);
+        } else {
+            try {
+                throw new Exception("PID Controller not initialized");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(FridolinsMotor.LimitSwitchPolarity polarity) {
@@ -152,7 +162,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
 
     public void selectBuiltinFeedbackSensor() {
         this.encoder = super.getEncoder();
-        this.encoder.setPositionConversionFactor(42);
+        super.getEncoder().setPositionConversionFactor(0);
     }
 
     @Override
@@ -162,9 +172,10 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
 
     @Override
     public void setPID(PIDValues pidValues) {
-        CANPIDController pid = super.getPIDController();
-        pid.setP(pidValues.kP);
-        pid.setI(pidValues.kI);
-        pid.setD(pidValues.kD);
+        this.pidController = super.getPIDController();
+        this.pidController.setP(pidValues.kP);
+        this.pidController.setI(pidValues.kI);
+        this.pidController.setD(pidValues.kD);
+        pidValues.kF.ifPresent((kF) -> this.pidController.setFF(kF));
     }
 }

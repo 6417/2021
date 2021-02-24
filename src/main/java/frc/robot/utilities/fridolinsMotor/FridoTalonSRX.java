@@ -1,7 +1,6 @@
 package frc.robot.utilities.fridolinsMotor;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
@@ -16,7 +15,7 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     }
 
     @Override
-    public void setPosition(int position) {
+    public void setPosition(double position) {
         super.set(ControlMode.Position, position);
     }
 
@@ -143,7 +142,6 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
 
     @Override
     public void setPID(PIDValues pidValues) {
-        // TODO Auto-generated method stub
 
     }
 
