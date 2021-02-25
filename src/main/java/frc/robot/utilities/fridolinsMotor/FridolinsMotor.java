@@ -12,7 +12,7 @@ public interface FridolinsMotor {
     }
 
     public enum FeedbackDevice {
-        QuadEncoder, CANEncoder, HallSensor
+        QuadEncoder, CANEncoder
     }
 
     public enum DirectionType {
@@ -37,19 +37,19 @@ public interface FridolinsMotor {
 
     public void setDirection(boolean forward);
 
-    public void setSensorDirection(boolean inverted);
+    public void setEncoderDirection(boolean inverted);
 
-    public void setSensorPosition(double position);
+    public void setEncoderPosition(double position);
 
     public double getEncoderTicks();
 
     public void factoryDefault();
 
-    public void configSelectedFeedbackSensor(FeedbackDevice device, int countsPerRev);
+    public void configEncoder(FeedbackDevice device, int countsPerRev);
 
     public void configOpenLoopRamp(double rate);
 
     public void setPID(PIDValues pidValues);
 
-    public void setVelocity(double velocity);
+    public void setVelocity(double targetSpeed); // target speed in encoder ticks per 100ms
 }

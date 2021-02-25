@@ -10,7 +10,7 @@ public class Controller {
     public DriveJoystick driveJoystick;
     public ControlJoystick controlJoystick;
 
-    public Controller() {
+    private Controller() {
         driveJoystick = new DriveJoystick();
         controlJoystick = new ControlJoystick();
     }

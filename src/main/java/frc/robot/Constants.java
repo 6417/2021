@@ -11,7 +11,6 @@ import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.Swerve.SwerveModule;
-import frc.robot.subsystems.Swerve.SwerveModule.MountingLocation;
 import frc.robot.utilities.MotorInitializer;
 import frc.robot.utilities.PIDValues;
 
@@ -46,8 +45,18 @@ public final class Constants {
     }
 
     public static final class SwerveDrive {
+        public static enum MountingLocations {
+            FrontRight,
+            FrontLeft,
+            BackRight,
+            BackLeft
+        }
+
         public static final boolean enabled = true;
-        public static final HashMap<SwerveModule.MountingLocation, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
+        public static final double zeroingSpeed = 0.0;
+        public static final double maxSpeedOfDrive = 0.0; // max velocity for swerve drive in encoder ticks per 100ms
+        public static final double maxRotationSpeed = Math.PI; // at full rotation speed the robot will turn by 180 degrees, in rad per second
+        public static final HashMap<MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
 
         public static SwerveModule.Config commonConfigurations;
         // setting up commmon configurations for all swerve modules
@@ -65,19 +74,19 @@ public final class Constants {
         static {
             SwerveModule.Config frontLeftConfig = commonConfigurations.clone();
             frontLeftConfig.mountingPoint = new Translation2d();
-            swerveModuleConfigs.put(MountingLocation.FrontLeft, frontLeftConfig);
+            swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
 
             SwerveModule.Config frontRightConfig = commonConfigurations.clone();
             frontRightConfig.mountingPoint = new Translation2d();
-            swerveModuleConfigs.put(MountingLocation.FrontRight, frontRightConfig);
+            swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
 
             SwerveModule.Config backLeftConfig = commonConfigurations.clone();
             backLeftConfig.mountingPoint = new Translation2d();
-            swerveModuleConfigs.put(MountingLocation.BackLeft, backLeftConfig);
+            swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
 
             SwerveModule.Config backRightConfig = commonConfigurations.clone();
             backRightConfig.mountingPoint = new Translation2d();
-            swerveModuleConfigs.put(MountingLocation.BackRight, backRightConfig);
+            swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
         }
     }
 }

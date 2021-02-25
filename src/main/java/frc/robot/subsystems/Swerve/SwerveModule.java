@@ -1,21 +1,19 @@
 package frc.robot.subsystems.Swerve;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
-import frc.robot.utilities.MotorInitializer;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 public class SwerveModule {
-    public static enum MountingLocation {
-        FrontRight, FrontLeft, BackRight, BackLeft
-    }
-
+    private boolean isEncoderZeroed = false;
     public static class Config implements Cloneable {
-        public MotorInitializer driveMotorInitializer;
-        public MotorInitializer rotationMotorInitializer;
+        public Supplier<FridolinsMotor> driveMotorInitializer;
+        public Supplier<FridolinsMotor> rotationMotorInitializer;
         public PIDValues drivePID;
         public PIDValues rotationPID;
         public double rotationMotorTicksPerRotation;
@@ -58,7 +56,7 @@ public class SwerveModule {
     private Motors motors;
 
     public SwerveModule(Config config) {
-        motors = new Motors(config.driveMotorInitializer.initialize(), config.rotationMotorInitializer.initialize());
+        motors = new Motors(config.driveMotorInitializer.get(), config.rotationMotorInitializer.get());
         motors.drive.setPID(config.drivePID);
         motors.rotation.setPID(config.rotationPID);
         motors.driveMotorTicksPerRotation = config.driveMotorTicksPerRotation;
@@ -86,5 +84,35 @@ public class SwerveModule {
         SwerveModuleState.optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
         motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
         motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderTicksPer100ms(desiredState.speedMetersPerSecond));
+    }
+
+    public boolean isHalSensorTriggered() {
+        return motors.rotation.isForwardLimitSwitchActive(); // TODO: check to which limit switch the hal sensor is connected to
+    }
+
+	public void rotateModule(double speed) {
+        motors.rotation.set(speed);
+    }
+    
+    public void stopDriveMotor() {
+        motors.drive.set(0.0);
+    }
+
+    public void stopRotationMotor() {
+        motors.rotation.set(0.0);
+    }
+
+    public void stopAllMotors() {
+        stopDriveMotor();
+        stopRotationMotor();
+    }
+
+    public boolean hasEncoderBeenZeroed() {
+        return isEncoderZeroed;
+    }
+
+    public void setCurrentRotationToEncoderHome() {
+        isEncoderZeroed = true;
+        motors.rotation.setEncoderPosition(0);
     }
 }
