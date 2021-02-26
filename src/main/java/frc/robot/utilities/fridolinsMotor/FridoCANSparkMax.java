@@ -7,9 +7,22 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.EncoderType;
 
+import ch.fridolinsrobotik.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
+
+    // variables for CSVLogger:
+    private CSVLogger logger; 
+    private double speed;
+    private double position;
+    private double velocity;
+    private double kP;
+    private double kI;
+    private double kD;
+    private double kF;
+    private boolean isKFEnabled = false;
+    
     CANDigitalInput forwardLimitSwitch;
     CANDigitalInput reverseLimitSwitch;
     CANPIDController pidController;
@@ -31,6 +44,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
                 e.printStackTrace();
             }
         }
+        this.position = position;
     }
 
     @Override
@@ -44,6 +58,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
                 e.printStackTrace();
             }
         }
+        this.velocity = velocity;
     }
 
     private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(FridolinsMotor.LimitSwitchPolarity polarity) {
@@ -190,5 +205,27 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         this.pidController.setI(pidValues.kI);
         this.pidController.setD(pidValues.kD);
         pidValues.kF.ifPresent((kF) -> this.pidController.setFF(kF));
+
+        this.kP = pidValues.kP;
+        this.kI = pidValues.kI;
+        this.kD = pidValues.kD;
+        if(pidValues.kF.isPresent()){
+            this.kF = pidValues.kF.get();
+            isKFEnabled = true;
+        }
+    }
+
+    public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
+        logger = new CSVLogger(filePath);
+        logger.put("EncoderTicks", this.getEncoderTicks());
+        logger.put("Speed", speed);
+        logger.put("setValue velocity", velocity);
+        logger.put("setValue position", position);
+        logger.put("PID P", kP);
+        logger.put("PID I", kI);
+        logger.put("PID D", kD);  
+        if(isKFEnabled){
+            logger.put("PID F", kF);
+        }      
     }
 }
