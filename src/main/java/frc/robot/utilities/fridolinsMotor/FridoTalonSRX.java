@@ -7,21 +7,41 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import ch.fridolinsrobotik.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
+
+    // variables for CSVLogger:
+    private CSVLogger logger; 
+    private double speed;
+    private double position;
+    private double velocity;
+    private double kP;
+    private double kI;
+    private double kD;
+    private double kF;
+    private boolean isKFEnabled = false;
+    
     public FridoTalonSRX(int deviceID) {
         super(deviceID);
+    }
+
+    public void set(double speed){
+        super.set(speed);
+        this.speed = speed;
     }
 
     @Override
     public void setPosition(double position) {
         super.set(ControlMode.Position, position);
+        this.position = position;
     }
 
     @Override
     public void setVelocity(double velocity) {
         super.set(ControlMode.Velocity, velocity);
+        this.velocity = velocity;
     }
 
     private LimitSwitchNormal convertFromFridoLimitSwitchPolarity(LimitSwitchPolarity polarity) {
@@ -159,5 +179,26 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
                 e.printStackTrace();
             }
         }
+        this.kP = pidValues.kP;
+        this.kI = pidValues.kI;
+        this.kD = pidValues.kD;
+        if(pidValues.kF.isPresent()) {
+            this.kF = pidValues.kF.get();
+            isKFEnabled = true;
+        }
+    }
+    
+    public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
+        logger = new CSVLogger(filePath);
+        logger.put("EncoderTicks", this.getEncoderTicks());
+        logger.put("Speed", speed);
+        logger.put("setValue velocity", velocity);
+        logger.put("setValue position", position);
+        logger.put("PID P", kP);
+        logger.put("PID I", kI);
+        logger.put("PID D", kD);  
+        if(isKFEnabled){
+            logger.put("PID F", kF);
+        }      
     }
 }

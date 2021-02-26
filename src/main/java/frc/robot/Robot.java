@@ -84,6 +84,7 @@ public class Robot extends TimedRobot {
     }
 
     FridoCANSparkMax testMotor = new FridoCANSparkMax(23, MotorType.kBrushless);
+    
 
     @Override
     public void teleopInit() {
