@@ -1,11 +1,16 @@
 package frc.robot.utilities;
 
+import java.util.function.Supplier;
+
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpiutil.math.MathUtil;
 
 public class SwerveLimiter {
     public static class Config {
-
+        public double gauseStrechingFactor;
+        public Supplier<Long> clock;
+        public long defaultLoopTime;
     }
 
     private double gauseStrechingFactor;
@@ -13,17 +18,16 @@ public class SwerveLimiter {
     private long defaultLoopTime;
 
     public SwerveLimiter(Config config) {
-
+        gauseStrechingFactor = config.gauseStrechingFactor;
+        loopTimeTimer = new Timer(config.clock);
+        defaultLoopTime = config.defaultLoopTime;
     }
 
     /**
-     * A gause function that is filiped along the x-axis and is 0 at speed = 0
-     * 
-     * @param speed The current cruising velocity of the module in percent
-     * @return The calculated value of the gauseFunction
+     * A gause function that is filiped along the x-axis and is 0 at {@link #x} = 0 and 1 at infinity.
      */
-    private double modifiedGauseCurve(double speed) {
-        return -Math.exp(-(speed * speed) * gauseStrechingFactor) + 1;
+    private double modifiedGauseCurve(double x) {
+        return -Math.exp(-(x * x) * gauseStrechingFactor) + 1;
     }
 
     /**
@@ -57,13 +61,74 @@ public class SwerveLimiter {
     }
 
     /**
-     * @param desiredState   The target state
-     * @param moduleRotation The current rotation of the module as normalized vector
-     * @param moduleSpeed    The current cruising velocity of the module in percent
+     * @param solutions The two vectors to be checked
+     * @return The vector of {@link #solutions} that is nearest to the
+     *         {@link #moduleRotation}
+     */
+    private Vector2d getLimitedVectorCloserToModuleRotation(Pair<Vector2d, Vector2d> solutions, Vector2d moduleRotation,
+            Vector2d actualTargetVector) {
+        if (solutions.first.dot(actualTargetVector) > solutions.second.dot(actualTargetVector)
+                ^ moduleRotation.dot(actualTargetVector) < 0.0)
+            return solutions.first;
+        return solutions.second;
+    }
+
+    /**
+     * @param solutions The two vectors to be checked
+     * @return The vector of {@link #solutions} that is nearest to the
+     *         {@link #moduleRotation}. In case the {@link #actualTargetVector} is
+     *         eaven closer to the module rotation it will return the
+     *         {@link #actualTargetVector}.
+     */
+    private Vector2d getBestSolutionOfInverseDotProduct(Pair<Vector2d, Vector2d> solutions, Vector2d moduleRotation,
+            Vector2d actualTargetVector) {
+        Vector2d bestSoution = getLimitedVectorCloserToModuleRotation(solutions, moduleRotation, actualTargetVector);
+        if (Math.abs(moduleRotation.dot(actualTargetVector)) > moduleRotation.dot(bestSoution))
+            return actualTargetVector;
+        return bestSoution;
+    }
+
+    /**
+     * Rotates {@link #moduleRotation} by 180° if {@link #targetRotation} has an
+     * angle grater than 90° to {@link #moduleRotation}, because the other way than
+     * is shorter.
+     */
+    private void rotateModuleRotationIfNecessary(Vector2d moduleRotation, Vector2d targetRotation) {
+        if (Math.signum(moduleRotation.dot(targetRotation)) < 0.0)
+            moduleRotation.rotate(180);
+    }
+
+    /**
+     * @param vec                  The rotation vector of the state the length is
+     *                             not used, if the length is 0 the angle will be 0
+     * @param speedMetersPerSecond The speed which the state will have
+     * @return A new {@link #SwerveModuleState} with an angle of {@link #vec} and a
+     *         speed of {@link #speedMetersPerSecond}
+     */
+    private SwerveModuleState vectorToSwerveModuleState(Vector2d vec, double speedMetersPerSecond) {
+        return new SwerveModuleState(speedMetersPerSecond, new Rotation2d(vec.toRadians()));
+    }
+
+    /**
+     * @param desiredState          The target state
+     * @param currentModuleRotation The current rotation of the module as normalized
+     *                              vector
+     * @param moduleSpeed           The current cruising velocity of the module in
+     *                              percent
      * @return A limited swerve module state based on the velocity
      */
-    public SwerveModuleState limitState(SwerveModuleState desiredState, Vector2d moduleRotation, double moduleSpeed) {
+    public SwerveModuleState limitState(SwerveModuleState desiredState, Vector2d currentModuleRotation,
+            double moduleSpeed) {
+        Vector2d moduleRotation = currentModuleRotation.clone();
+        Vector2d targetVector = Vector2d.fromRad(desiredState.angle.getRadians());
 
-        return new SwerveModuleState();
+        rotateModuleRotationIfNecessary(moduleRotation, targetVector);
+
+        Pair<Vector2d, Vector2d> limitedTargetVectors = moduleRotation.normalize()
+                .inverseDot(getLimitedDotProduct(moduleSpeed));
+
+        return vectorToSwerveModuleState(
+                getBestSolutionOfInverseDotProduct(limitedTargetVectors, moduleRotation, targetVector),
+                desiredState.speedMetersPerSecond);
     }
 }
