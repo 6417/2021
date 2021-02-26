@@ -160,6 +160,4 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
             }
         }
     }
-
-    
 }
