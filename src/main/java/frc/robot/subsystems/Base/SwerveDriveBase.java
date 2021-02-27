@@ -1,0 +1,36 @@
+package frc.robot.subsystems.Base;
+
+import java.util.HashMap;
+
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+
+public class SwerveDriveBase extends SubsystemBase {
+    public void drive(ChassisSpeeds requesteSpeeds) {
+
+    }
+
+    public void rotateAllModules(double speed) {
+
+    }
+
+    public HashMap<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
+        HashMap<Constants.SwerveDrive.MountingLocations, Boolean> defaultReturn = new HashMap<>();
+        for (var location : Constants.SwerveDrive.MountingLocations.values())
+            defaultReturn.put(location, false);
+        return defaultReturn;
+    }
+
+    public void stopAllMotors() {
+        
+    }
+
+    public void setCurrentModuleRotatoinToHome(Constants.SwerveDrive.MountingLocations moduleLocation) {
+        
+    }
+
+    public boolean areAllModulesZeroed() {
+        return false;
+    }
+}

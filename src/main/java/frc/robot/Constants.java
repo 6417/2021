@@ -7,6 +7,13 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import frc.robot.subsystems.Swerve.SwerveModule;
+import frc.robot.utilities.MotorInitializer;
+import frc.robot.utilities.PIDValues;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants.  This class should not be used for any other purpose.  All constants should be
@@ -16,7 +23,7 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static class Joystick{
+    public static final class Joystick{
         public static final int DRIVER_ID = 1;
         public static final int CONTROL_ID = 2;
         public static final int X_BUTTON_ID = 1;
@@ -33,7 +40,53 @@ public final class Constants {
         public static final int RIGHT_JOYSTICK_BUTTON_ID = 12;
     }
 
-    public static class Vision{
+    public static final class Vision{
         public static final boolean IS_ENABLED = true;
+    }
+
+    public static final class SwerveDrive {
+        public static enum MountingLocations {
+            FrontRight,
+            FrontLeft,
+            BackRight,
+            BackLeft
+        }
+
+        public static final boolean enabled = true;
+        public static final double zeroingSpeed = 0.0;
+        public static final double maxSpeedOfDrive = 0.0; // max velocity for swerve drive in encoder ticks per 100ms
+        public static final double maxRotationSpeed = Math.PI; // at full rotation speed the robot will turn by 180 degrees, in rad per second
+        public static final HashMap<MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
+
+        public static SwerveModule.Config commonConfigurations;
+        // setting up commmon configurations for all swerve modules
+        static {
+            commonConfigurations.driveMotorInitializer = null;
+            commonConfigurations.rotationMotorInitializer = null;
+            commonConfigurations.driveMotorTicksPerRotation = 0.0;
+            commonConfigurations.rotationMotorTicksPerRotation = 0.0;
+            commonConfigurations.drivePID = new PIDValues(0.0, 0.0, 0.0);
+            commonConfigurations.rotationPID = new PIDValues(0.0, 0.0, 0.0);
+            commonConfigurations.wheelCircumference = 0.0;
+        }
+
+        // adding module specific configurations
+        static {
+            SwerveModule.Config frontLeftConfig = commonConfigurations.clone();
+            frontLeftConfig.mountingPoint = new Translation2d();
+            swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
+
+            SwerveModule.Config frontRightConfig = commonConfigurations.clone();
+            frontRightConfig.mountingPoint = new Translation2d();
+            swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
+
+            SwerveModule.Config backLeftConfig = commonConfigurations.clone();
+            backLeftConfig.mountingPoint = new Translation2d();
+            swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
+
+            SwerveModule.Config backRightConfig = commonConfigurations.clone();
+            backRightConfig.mountingPoint = new Translation2d();
+            swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
+        }
     }
 }
