@@ -34,6 +34,12 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
+    public void set(double speed) {
+        super.set(speed);
+        this.speed = speed;
+    }
+
+    @Override
     public void setPosition(double position) {
         if (this.pidController != null) {
             this.pidController.setReference(position, ControlType.kPosition);

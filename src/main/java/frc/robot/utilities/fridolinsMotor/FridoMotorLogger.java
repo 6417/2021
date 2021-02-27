@@ -18,6 +18,7 @@ public class FridoMotorLogger implements FridolinsMotor {
         isLoggerActiv = true;
     }
 
+    @Override
     public void set(double speed){
         if(isLoggerActiv){
             logger.put("Speed", speed);

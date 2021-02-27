@@ -18,6 +18,8 @@ public interface FridolinsMotor {
     public enum DirectionType {
         followMaster, invertMaster
     }
+
+    public void set(double speed);
     
     public void setPosition(double position);
 

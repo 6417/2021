@@ -12,15 +12,15 @@ public class PIDValues implements Cloneable {
     public PIDValues(double kP, double kI, double kD) {
         this.kP = kP;
         this.kI = kI;
-    }
         this.kD = kD;
+    }
 
     public PIDValues(double kP, double kI, double kD, double kF) {
         this.kP = kP;
         this.kD = kD;
         this.kI = kI;
-    }
         this.kF = Optional.of(kF);
+    }
 
     @Override
     public PIDValues clone() {

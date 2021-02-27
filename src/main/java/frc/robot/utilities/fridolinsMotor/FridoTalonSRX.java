@@ -27,6 +27,7 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
         super(deviceID);
     }
 
+    @Override
     public void set(double speed){
         super.set(speed);
         this.speed = speed;
