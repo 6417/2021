@@ -7,7 +7,7 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import ch.fridolinsrobotik.utilities.CSVLogger;
+import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
