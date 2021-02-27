@@ -202,4 +202,9 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
             logger.put("PID F", kF);
         }      
     }
+
+    @Override
+    public double getEncoderVelocity() {
+        return super.getSelectedSensorVelocity();
+    }
 }

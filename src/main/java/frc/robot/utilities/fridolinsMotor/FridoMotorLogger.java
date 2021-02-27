@@ -121,4 +121,9 @@ public class FridoMotorLogger implements FridolinsMotor {
             System.out.println("P: " + pidValues.kP + " I: " + pidValues.kI + " D: " + pidValues.kD);
         }
     }
+
+    @Override
+    public double getEncoderVelocity() {
+        return 0;
+    }
 } 

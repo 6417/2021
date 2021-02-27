@@ -44,6 +44,8 @@ public interface FridolinsMotor {
     public void setEncoderPosition(double position);
 
     public double getEncoderTicks();
+    
+    public double getEncoderVelocity();
 
     public void factoryDefault();
 

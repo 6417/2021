@@ -7,10 +7,22 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpiutil.math.MathUtil;
 
 public class SwerveLimiter {
-    public static class Config {
+    public static class Config implements Cloneable {
         public double gauseStrechingFactor;
         public Supplier<Long> clock;
         public long defaultLoopTime;
+
+        public Config clone() {
+            try {
+                return (Config) super.clone();
+            } catch (CloneNotSupportedException e) {
+                Config copy = new Config();
+                copy.gauseStrechingFactor = gauseStrechingFactor;
+                copy.clock = clock;
+                copy.defaultLoopTime = defaultLoopTime;
+                return copy;
+            }
+        }
     }
 
     private double gauseStrechingFactor;

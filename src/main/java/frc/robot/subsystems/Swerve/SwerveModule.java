@@ -6,11 +6,13 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import frc.robot.utilities.PIDValues;
+import frc.robot.utilities.SwerveLimiter;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 public class SwerveModule {
     private boolean isEncoderZeroed = false;
+
     public static class Config implements Cloneable {
         public Supplier<FridolinsMotor> driveMotorInitializer;
         public Supplier<FridolinsMotor> rotationMotorInitializer;
@@ -20,6 +22,8 @@ public class SwerveModule {
         public double driveMotorTicksPerRotation;
         public double wheelCircumference; // in meter
         public Translation2d mountingPoint; // in meter
+        public Supplier<SwerveLimiter> limiterInitializer;
+        public double maxVelocity; // in drive motor encoder velocity unit
 
         @Override
         public Config clone() {
@@ -35,6 +39,7 @@ public class SwerveModule {
                 copy.driveMotorTicksPerRotation = driveMotorTicksPerRotation;
                 copy.wheelCircumference = wheelCircumference;
                 copy.mountingPoint = new Translation2d(mountingPoint.getX(), mountingPoint.getY());
+                copy.limiterInitializer = limiterInitializer;
                 return copy;
             }
         }
@@ -46,6 +51,7 @@ public class SwerveModule {
         public double rotatoinMotorTicksPerRotation;
         public double driveMotorTicksPerRotation;
         public double wheelCircumference;
+        public double maxVelocity;
 
         public Motors(FridolinsMotor drive, FridolinsMotor rotation) {
             this.drive = drive;
@@ -54,6 +60,7 @@ public class SwerveModule {
     }
 
     private Motors motors;
+    private SwerveLimiter limiter;
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.rotationMotorInitializer.get());
@@ -62,6 +69,8 @@ public class SwerveModule {
         motors.driveMotorTicksPerRotation = config.driveMotorTicksPerRotation;
         motors.rotatoinMotorTicksPerRotation = config.rotationMotorTicksPerRotation;
         motors.wheelCircumference = config.wheelCircumference;
+        limiter = config.limiterInitializer.get();
+        motors.maxVelocity = config.maxVelocity;
     }
 
     public Vector2d getModuleRotation() {
@@ -76,24 +85,34 @@ public class SwerveModule {
         return angle / (Math.PI * 2) * motors.rotatoinMotorTicksPerRotation;
     }
 
-    private double meterPerSecondToDriveMotorEncoderTicksPer100ms(double speedMs) {
+    private double meterPerSecondToDriveMotorEncoderVelocityUnits(double speedMs) {
         return (speedMs / motors.wheelCircumference) * motors.driveMotorTicksPerRotation * 10;
     }
 
+    private double driveMotorEncoderVelocityToPercent(double encoderSpeed) {
+        return encoderSpeed / motors.maxVelocity;
+    }
+
+    public double getSpeed() {
+        return motors.drive.getEncoderVelocity();
+    }
+
     public void setDesiredState(SwerveModuleState desiredState) {
+        desiredState = limiter.limitState(desiredState, getModuleRotation(), driveMotorEncoderVelocityToPercent(getSpeed()));
         SwerveModuleState.optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
         motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
-        motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderTicksPer100ms(desiredState.speedMetersPerSecond));
+        motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond));
     }
 
     public boolean isHalSensorTriggered() {
-        return motors.rotation.isForwardLimitSwitchActive(); // TODO: check to which limit switch the hal sensor is connected to
+        return motors.rotation.isForwardLimitSwitchActive(); // TODO: check to which limit switch the hal sensor is
+                                                             // connected to
     }
 
-	public void rotateModule(double speed) {
+    public void rotateModule(double speed) {
         motors.rotation.set(speed);
     }
-    
+
     public void stopDriveMotor() {
         motors.drive.set(0.0);
     }
