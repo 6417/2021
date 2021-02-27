@@ -133,6 +133,13 @@ public class Vector2d extends edu.wpi.first.wpilibj.drive.Vector2d implements Cl
         return String.format("Vector2d: [%f, %f]", x, y);
     }
 
+    /**
+     * @return The angle of the vector to the x-axis in radians, positive is counterclockwise.
+     */
+    public double toRadians() {
+        return Math.atan2(x, y);
+    }
+
     @Override
     public Vector2d clone() {
         return new Vector2d(x, y);
