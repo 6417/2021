@@ -18,6 +18,8 @@ public interface FridolinsMotor {
     public enum DirectionType {
         followMaster, invertMaster
     }
+
+    public static final boolean debugMode = false;
     
     public void setPosition(double position);
 
@@ -50,4 +52,6 @@ public interface FridolinsMotor {
     public void configOpenLoopRamp(double rate);
 
     public void setPID(PIDValues pidValues);
+
+    public void putDataInCSVFile(String filePath);
 }

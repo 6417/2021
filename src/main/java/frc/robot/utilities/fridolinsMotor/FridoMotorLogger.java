@@ -120,4 +120,23 @@ public class FridoMotorLogger implements FridolinsMotor {
             System.out.println("P: " + pidValues.kP + " I: " + pidValues.kI + " D: " + pidValues.kD);
         }
     }
+
+    @Override
+    public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
+        logger.open();
+        if(FridolinsMotor.debugMode){
+            logger = new CSVLogger(filePath);
+            logger.put("EncoderTicks", this.getEncoderTicks());
+            logger.put("Speed", 0);
+            logger.put("Sollwert velocity", 0);
+            logger.put("Sollwert position", 0);
+            logger.put("PID P", 0);
+            logger.put("PID I", 0);
+            logger.put("PID D", 0);  
+            logger.put("PID F", 0);
+
+            logger.writeToFile();
+            logger.close();       
+        }
+    }
 } 

@@ -8,6 +8,7 @@ import com.revrobotics.ControlType;
 import com.revrobotics.EncoderType;
 
 import ch.fridolinsrobotik.utilities.CSVLogger;
+import frc.robot.Constants;
 import frc.robot.utilities.PIDValues;
 
 public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
@@ -214,18 +215,24 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
             isKFEnabled = true;
         }
     }
-
+    
     public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
-        logger = new CSVLogger(filePath);
-        logger.put("EncoderTicks", this.getEncoderTicks());
-        logger.put("Speed", speed);
-        logger.put("setValue velocity", velocity);
-        logger.put("setValue position", position);
-        logger.put("PID P", kP);
-        logger.put("PID I", kI);
-        logger.put("PID D", kD);  
-        if(isKFEnabled){
-            logger.put("PID F", kF);
-        }      
+        logger.open();
+        if(FridolinsMotor.debugMode){
+            logger = new CSVLogger(filePath); 
+            logger.put("EncoderTicks", this.getEncoderTicks());
+            logger.put("Speed", speed);
+            logger.put("Sollwert velocity", velocity);
+            logger.put("Sollwert position", position);
+            logger.put("PID P", kP);
+            logger.put("PID I", kI);
+            logger.put("PID D", kD);  
+            if(isKFEnabled){
+                logger.put("PID F", kF);
+            }
+            logger.writeToFile();
+            logger.close();
+        }
+              
     }
 }
