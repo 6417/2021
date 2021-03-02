@@ -1,5 +1,7 @@
 package frc.robot.utilities;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -25,6 +27,25 @@ public class SwerveLimiter {
         }
     }
 
+    public static interface RotationDirectionCorectorGetter<MountingLocation extends Enum<MountingLocation>> {
+        public Map<MountingLocation, Boolean> getModuleRotationDirectionCorrections(
+                Map<MountingLocation, ModuleRotationVectors> rotationDirections, boolean isRobotRotating);
+    }
+
+    private static enum ModuleRotationDirection {
+        Clockwise, Counterclockwise
+    }
+
+    public static class ModuleRotationVectors {
+        public Vector2d moduleRotation;
+        public Vector2d desiredRotation;
+
+        public ModuleRotationVectors(Vector2d moduleRotation, Vector2d desiredRotation) {
+            this.moduleRotation = moduleRotation;
+            this.desiredRotation = desiredRotation;
+        }
+    }
+
     private double gauseStrechingFactor;
     private Timer loopTimeTimer;
     private long defaultLoopTime;
@@ -36,7 +57,8 @@ public class SwerveLimiter {
     }
 
     /**
-     * A gause function that is filiped along the x-axis and is 0 at {@link #x} = 0 and 1 at infinity.
+     * A gause function that is filiped along the x-axis and is 0 at {@link #x} = 0
+     * and 1 at infinity.
      */
     private double modifiedGauseCurve(double x) {
         return -Math.exp(-(x * x) * gauseStrechingFactor) + 1;
@@ -53,6 +75,24 @@ public class SwerveLimiter {
         else
             loopTimeTimer.start();
         return loopTime;
+    }
+
+    private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithOutRobotRotation(
+            Map<MountingLocation, ModuleRotationVectors> rotationDirections) {
+        return null;
+    }
+
+    public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotaionDirectionCorrections(
+            Map<MountingLocation, ModuleRotationVectors> rotationDirections, boolean isRobotRotating) {
+        if (isRobotRotating)
+            return getModuleRotationDirectionCorrectionsWithOutRobotRotation(rotationDirections);
+        else
+            return getModuleRotationDirectionCorrectionsWithRobotRotation(rotationDirections);
+    }
+
+    private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithRobotRotation(
+            Map<MountingLocation, ModuleRotationVectors> rotationDirections) {
+        return null;
     }
 
     /**

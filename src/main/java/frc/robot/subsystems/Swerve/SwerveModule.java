@@ -23,7 +23,7 @@ public class SwerveModule {
         public double wheelCircumference; // in meter
         public Translation2d mountingPoint; // in meter
         public Supplier<SwerveLimiter> limiterInitializer;
-        public double maxVelocity; // in drive motor encoder velocity unit
+        public double maxVelocity; // in drive motor encoder velocity units
 
         @Override
         public Config clone() {
@@ -61,6 +61,7 @@ public class SwerveModule {
 
     private Motors motors;
     private SwerveLimiter limiter;
+    private SwerveModuleState desiredState;
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.rotationMotorInitializer.get());
@@ -81,6 +82,14 @@ public class SwerveModule {
         return (motors.rotation.getEncoderTicks() / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2;
     }
 
+    public Vector2d getModuleRotationVector() {
+        return Vector2d.fromRad(getModuleRotationAngle());
+    }
+
+    public Vector2d getTargetVector() {
+        return Vector2d.fromRad(desiredState.angle.getRadians());
+    }
+
     private double angleToRotationMotorEncoderTicks(double angle) {
         return angle / (Math.PI * 2) * motors.rotatoinMotorTicksPerRotation;
     }
@@ -98,8 +107,12 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        desiredState = limiter.limitState(desiredState, getModuleRotation(), driveMotorEncoderVelocityToPercent(getSpeed()));
-        SwerveModuleState.optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
+        this.desiredState = limiter.limitState(desiredState, getModuleRotation(),
+                driveMotorEncoderVelocityToPercent(getSpeed()));
+        this.desiredState = SwerveModuleState.optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
+    }
+
+    public void drive() {
         motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
         motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond));
     }
@@ -133,5 +146,9 @@ public class SwerveModule {
     public void setCurrentRotationToEncoderHome() {
         isEncoderZeroed = true;
         motors.rotation.setEncoderPosition(0);
+    }
+
+    public void invertRotationDirection() {
+        desiredState.angle.rotateBy(Rotation2d.fromDegrees(180));
     }
 }

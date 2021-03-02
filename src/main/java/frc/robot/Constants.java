@@ -8,11 +8,16 @@
 package frc.robot;
 
 import java.util.HashMap;
+import java.util.Map;
+
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.Swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.SwerveLimiter;
+import frc.robot.utilities.Vector2d;
+import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -59,6 +64,10 @@ public final class Constants {
         public static final HashMap<MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
 
         public static SwerveLimiter.Config limiterConfig = new SwerveLimiter.Config();
+        public static final SwerveLimiter.RotationDirectionCorectorGetter<MountingLocations> directionCorectorGetter = (
+                Map<MountingLocations, SwerveLimiter.ModuleRotationVectors> rotationDirections,
+                boolean isRobotRotating) -> SwerveLimiter.getModuleRotaionDirectionCorrections(rotationDirections,
+                        isRobotRotating);
 
         // setting up limiter config
         static {

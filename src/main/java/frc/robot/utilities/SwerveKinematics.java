@@ -14,7 +14,8 @@ public class SwerveKinematics<MountingLocaiton extends Enum<MountingLocaiton>> e
     public SwerveKinematics(HashMap<MountingLocaiton, Translation2d> locations) {
         super(locations.values().toArray(Translation2d[]::new));
         for (int i = 0; i < locations.size(); i++) {
-            MountingLocaiton key = ((Entry<MountingLocaiton, Translation2d>) locations.entrySet().toArray()[i]).getKey();
+            MountingLocaiton key = ((Entry<MountingLocaiton, Translation2d>) locations.entrySet().toArray()[i])
+                    .getKey();
             indicies.put(i, key);
         }
     }
