@@ -1,8 +1,11 @@
 package frc.robot.utilities;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
@@ -77,22 +80,55 @@ public class SwerveLimiter {
         return loopTime;
     }
 
+    private static ModuleRotationDirection getRotationDirection(ModuleRotationVectors rotationVectorPair) {
+        if (Math.acos(rotationVectorPair.moduleRotation.dot(rotationVectorPair.desiredRotation)) > 0.0)
+            return ModuleRotationDirection.Counterclockwise;
+        return ModuleRotationDirection.Clockwise;
+    }
+
+    private static <MountingLocation extends Enum<MountingLocation>> int getNumberOfElementsInMap(
+            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, ModuleRotationDirection element) {
+        int count = 0;
+        for (var rotationVectorPair : rotationVectorPairs.values())
+            if (getRotationDirection(rotationVectorPair) == element)
+                count++;
+        return count;
+    }
+
+    private static <MountingLocation extends Enum<MountingLocation>> ModuleRotationDirection getCommonRotation(
+            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
+        int counterclockwiseCount = getNumberOfElementsInMap(rotationVectorPairs,
+                ModuleRotationDirection.Counterclockwise);
+        int clockwiseCount = getNumberOfElementsInMap(rotationVectorPairs, ModuleRotationDirection.Clockwise);
+        if (counterclockwiseCount < clockwiseCount)
+            return ModuleRotationDirection.Clockwise;
+        return ModuleRotationDirection.Counterclockwise;
+    }
+
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithOutRobotRotation(
-            Map<MountingLocation, ModuleRotationVectors> rotationDirections) {
-        return null;
+            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
+        ModuleRotationDirection commonRotation = getCommonRotation(rotationVectorPairs);
+        return rotationVectorPairs.entrySet().stream()
+                .map((rotationVectorEntry) -> new AbstractMap.SimpleEntry<>(rotationVectorEntry.getKey(),
+                        getRotationDirection(rotationVectorEntry.getValue()) == commonRotation))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotaionDirectionCorrections(
-            Map<MountingLocation, ModuleRotationVectors> rotationDirections, boolean isRobotRotating) {
+            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, boolean isRobotRotating) {
         if (isRobotRotating)
-            return getModuleRotationDirectionCorrectionsWithOutRobotRotation(rotationDirections);
+            return getModuleRotationDirectionCorrectionsWithRobotRotation(rotationVectorPairs);
         else
-            return getModuleRotationDirectionCorrectionsWithRobotRotation(rotationDirections);
+            return getModuleRotationDirectionCorrectionsWithOutRobotRotation(rotationVectorPairs);
     }
 
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithRobotRotation(
-            Map<MountingLocation, ModuleRotationVectors> rotationDirections) {
-        return null;
+            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
+        return rotationVectorPairs.entrySet().stream()
+                .map((rotationVectorPair) -> new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(),
+                        rotationVectorPair.getValue().moduleRotation
+                                .dot(rotationVectorPair.getValue().desiredRotation) < 0.0))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     /**
