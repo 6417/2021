@@ -9,8 +9,12 @@ import java.util.stream.Collectors;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpiutil.math.MathUtil;
+import frc.robot.utilities.baseClasses.SwerveLimiterBase;
+import frc.robot.utilities.baseClasses.SwerveLimiterBase.ModuleRotationDirection;
+import frc.robot.utilities.baseClasses.SwerveLimiterBase.ModuleRotationVectors;
+import frc.robot.utilities.baseClasses.SwerveLimiterBase.RotationDirectionCorectorGetter;
 
-public class SwerveLimiter {
+public class SwerveLimiter extends SwerveLimiterBase {
     public static class Config implements Cloneable {
         public double gauseStrechingFactor;
         public Supplier<Long> clock;
@@ -29,24 +33,6 @@ public class SwerveLimiter {
         }
     }
 
-    public static interface RotationDirectionCorectorGetter<MountingLocation extends Enum<MountingLocation>> {
-        public Map<MountingLocation, Boolean> getModuleRotationDirectionCorrections(
-                Map<MountingLocation, ModuleRotationVectors> rotationDirections, boolean isRobotRotating);
-    }
-
-    private static enum ModuleRotationDirection {
-        Clockwise, Counterclockwise
-    }
-
-    public static class ModuleRotationVectors {
-        public Vector2d moduleRotation;
-        public Vector2d desiredRotation;
-
-        public ModuleRotationVectors(Vector2d moduleRotation, Vector2d desiredRotation) {
-            this.moduleRotation = moduleRotation;
-            this.desiredRotation = desiredRotation;
-        }
-    }
 
     private double gauseStrechingFactor;
     private Timer loopTimeTimer;

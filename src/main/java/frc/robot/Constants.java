@@ -10,14 +10,10 @@ package frc.robot;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.Swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.SwerveLimiter;
-import frc.robot.utilities.Vector2d;
-import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
