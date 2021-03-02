@@ -1,7 +1,6 @@
 package frc.robot.utilities;
 
 import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
@@ -69,7 +68,7 @@ public class SwerveLimiter {
 
     /**
      * @return The past time since this function has been called last. If it hasn't
-     *         been called yet it will return {@link #defaultLoopTime}
+     *         been called yet it will return {@link #defaultLoopTime}.
      */
     private long getLoopTime() {
         long loopTime = defaultLoopTime;
@@ -80,12 +79,20 @@ public class SwerveLimiter {
         return loopTime;
     }
 
+    /**
+     * @return The rotation direction of a module with the provided vectors.
+     */
     private static ModuleRotationDirection getRotationDirection(ModuleRotationVectors rotationVectorPair) {
         if (Math.acos(rotationVectorPair.moduleRotation.dot(rotationVectorPair.desiredRotation)) > 0.0)
             return ModuleRotationDirection.Counterclockwise;
         return ModuleRotationDirection.Clockwise;
     }
 
+    /**
+     * @param rotationVectorPairs The map to be checked.
+     * @param element             The element of which the count shall be returned.
+     * @return The number of elements equal to {@link #element}.
+     */
     private static <MountingLocation extends Enum<MountingLocation>> int getNumberOfElementsInMap(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, ModuleRotationDirection element) {
         int count = 0;
@@ -95,6 +102,10 @@ public class SwerveLimiter {
         return count;
     }
 
+    /**
+     * @return The rotation direction that is most occurring, if there's an equal
+     *         count of both rotation directions it will return counterclockwise.
+     */
     private static <MountingLocation extends Enum<MountingLocation>> ModuleRotationDirection getCommonRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
         int counterclockwiseCount = getNumberOfElementsInMap(rotationVectorPairs,
@@ -105,6 +116,11 @@ public class SwerveLimiter {
         return ModuleRotationDirection.Counterclockwise;
     }
 
+    /**
+     * @return A map of booleans, true means the rotation direction of the module at
+     *         the mounting location of the key should be inverted. Calculated with
+     *         out robot rotation.
+     */
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithOutRobotRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
         ModuleRotationDirection commonRotation = getCommonRotation(rotationVectorPairs);
@@ -114,6 +130,16 @@ public class SwerveLimiter {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
+    /**
+     * @param <MountingLocation>  The enum with which the given map can be accessed
+     * @param rotationVectorPairs The current rotation and desired rotation of all
+     *                            modules in a map as
+     *                            {@link #ModuleRotationVectors}. All vectors have
+     *                            to be normalized.
+     * @param isRobotRotating     Whether the robot is rotating or not
+     * @return A map of booleans, true means the rotation direction of the module at
+     *         the mounting location of the key should be inverted.
+     */
     public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotaionDirectionCorrections(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, boolean isRobotRotating) {
         if (isRobotRotating)
@@ -122,6 +148,11 @@ public class SwerveLimiter {
             return getModuleRotationDirectionCorrectionsWithOutRobotRotation(rotationVectorPairs);
     }
 
+    /**
+     * @return A map of booleans, true means the rotation direction of the module at
+     *         the mounting location of the key should be inverted. Calculated with
+     *         out robot rotation.
+     */
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithRobotRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
         return rotationVectorPairs.entrySet().stream()
@@ -149,9 +180,9 @@ public class SwerveLimiter {
     }
 
     /**
-     * @param solutions The two vectors to be checked
+     * @param solutions The two vectors to be checked.
      * @return The vector of {@link #solutions} that is nearest to the
-     *         {@link #moduleRotation}
+     *         {@link #moduleRotation}.
      */
     private Vector2d getLimitedVectorCloserToModuleRotation(Pair<Vector2d, Vector2d> solutions, Vector2d moduleRotation,
             Vector2d actualTargetVector) {
@@ -162,7 +193,7 @@ public class SwerveLimiter {
     }
 
     /**
-     * @param solutions The two vectors to be checked
+     * @param solutions The two vectors to be checked.
      * @return The vector of {@link #solutions} that is nearest to the
      *         {@link #moduleRotation}. In case the {@link #actualTargetVector} is
      *         eaven closer to the module rotation it will return the
@@ -188,22 +219,22 @@ public class SwerveLimiter {
 
     /**
      * @param vec                  The rotation vector of the state the length is
-     *                             not used, if the length is 0 the angle will be 0
-     * @param speedMetersPerSecond The speed which the state will have
+     *                             not used, if the length is 0 the angle will be 0.
+     * @param speedMetersPerSecond The speed which the state will have.
      * @return A new {@link #SwerveModuleState} with an angle of {@link #vec} and a
-     *         speed of {@link #speedMetersPerSecond}
+     *         speed of {@link #speedMetersPerSecond}.
      */
     private SwerveModuleState vectorToSwerveModuleState(Vector2d vec, double speedMetersPerSecond) {
         return new SwerveModuleState(speedMetersPerSecond, new Rotation2d(vec.toRadians()));
     }
 
     /**
-     * @param desiredState          The target state
+     * @param desiredState          The target state.
      * @param currentModuleRotation The current rotation of the module as normalized
-     *                              vector
+     *                              vector.
      * @param moduleSpeed           The current cruising velocity of the module in
-     *                              percent
-     * @return A limited swerve module state based on the velocity
+     *                              percent.
+     * @return A limited swerve module state based on the velocity.
      */
     public SwerveModuleState limitState(SwerveModuleState desiredState, Vector2d currentModuleRotation,
             double moduleSpeed) {
