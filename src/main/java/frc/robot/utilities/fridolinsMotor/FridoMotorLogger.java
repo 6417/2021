@@ -1,6 +1,6 @@
 package frc.robot.utilities.fridolinsMotor;
 
-import frc.robot.utilities.CSVLogger;
+import ch.fridolinsrobotik.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoMotorLogger implements FridolinsMotor {
@@ -119,5 +119,54 @@ public class FridoMotorLogger implements FridolinsMotor {
         else{
             System.out.println("P: " + pidValues.kP + " I: " + pidValues.kI + " D: " + pidValues.kD);
         }
+    }
+
+    @Override
+    public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
+        logger.open();
+        if(FridolinsMotor.debugMode){
+            logger = new CSVLogger(filePath);
+            logger.put("EncoderTicks", this.getEncoderTicks());
+            logger.put("Speed", 0);
+            logger.put("Sollwert velocity", 0);
+            logger.put("Sollwert position", 0);
+            logger.put("PID P", 0);
+            logger.put("PID I", 0);
+            logger.put("PID D", 0);  
+            logger.put("PID F", 0);
+
+            logger.writeToFile();
+            logger.close();       
+        }
+    }
+
+    @Override
+    public double get() {
+        return 0;
+    }
+
+    @Override
+    public void setInverted(boolean isInverted) {
+
+    }
+
+    @Override
+    public boolean getInverted() {
+        return false;
+    }
+
+    @Override
+    public void disable() {
+
+    }
+
+    @Override
+    public void stopMotor() {
+
+    }
+
+    @Override
+    public void pidWrite(double output) {
+
     }
 } 

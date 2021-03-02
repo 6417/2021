@@ -1,8 +1,9 @@
 package frc.robot.utilities.fridolinsMotor;
 
+import edu.wpi.first.wpilibj.SpeedController;
 import frc.robot.utilities.PIDValues;
 
-public interface FridolinsMotor {
+public interface FridolinsMotor extends SpeedController{
     public enum LimitSwitchPolarity {
         kNormallyOpen, kNormallyClosed, kDisabled
     }
@@ -18,6 +19,8 @@ public interface FridolinsMotor {
     public enum DirectionType {
         followMaster, invertMaster
     }
+
+    public static final boolean debugMode = false;
     
     public void setPosition(double position);
 
@@ -50,4 +53,6 @@ public interface FridolinsMotor {
     public void configOpenLoopRamp(double rate);
 
     public void setPID(PIDValues pidValues);
+
+    public void putDataInCSVFile(String filePath);
 }
