@@ -234,4 +234,9 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
             logger.put("PID F", kF);
         }      
     }
+
+    @Override
+    public double getEncoderVelocity() {
+        return encoder.getVelocity();
+    }
 }

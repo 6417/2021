@@ -1,6 +1,10 @@
 package frc.robot.subsystems.Swerve;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
@@ -10,11 +14,13 @@ import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.Swerve.DefaultDriveCommand;
 import frc.robot.subsystems.Base.SwerveDriveBase;
 import frc.robot.utilities.SwerveKinematics;
+import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 public class SwerveDrive extends SwerveDriveBase {
     private static SwerveDriveBase instance = null;
     private SwerveKinematics<Constants.SwerveDrive.MountingLocations> kinematics;
     private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModule> modules = new HashMap<>();
+    private SwerveLimiter.RotationDirectionCorrectorGetter<Constants.SwerveDrive.MountingLocations> directionCorectorGetter;
 
     private SwerveDrive() {
         for (var location : Constants.SwerveDrive.MountingLocations.values())
@@ -23,6 +29,7 @@ public class SwerveDrive extends SwerveDriveBase {
         for (var element : Constants.SwerveDrive.swerveModuleConfigs.entrySet())
             mountingPoints.put(element.getKey(), element.getValue().mountingPoint);
         kinematics = new SwerveKinematics<Constants.SwerveDrive.MountingLocations>(mountingPoints);
+        directionCorectorGetter = Constants.SwerveDrive.directionCorectorGetter;
     }
 
     public static SwerveDriveBase getInstance() {
@@ -41,6 +48,28 @@ public class SwerveDrive extends SwerveDriveBase {
                 .toLabledSwerveModuleStates(requestedMovement);
         for (var labeledState : states.entrySet())
             modules.get(labeledState.getKey()).setDesiredState(labeledState.getValue());
+        correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
+        for (var module : modules.values())
+            module.drive();
+    }
+
+    private Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> getModuleRotationVectorMap() {
+        return modules.entrySet().stream().map((
+                Entry<Constants.SwerveDrive.MountingLocations, SwerveModule> entry) -> new AbstractMap.SimpleEntry<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors>(
+                        entry.getKey(),
+                        new SwerveLimiter.ModuleRotationVectors(entry.getValue().getModuleRotation(),
+                                entry.getValue().getTargetVector())))
+                .collect(Collectors.toMap(
+                        Entry<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors>::getKey,
+                        Entry<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors>::getValue));
+    }
+
+    private void correctRotationDirections(boolean isRobotRotating) {
+        Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> moduleRotatoinVectors = getModuleRotationVectorMap();
+        Map<Constants.SwerveDrive.MountingLocations, Boolean> corrections = directionCorectorGetter
+                .getModuleRotationDirectionCorrections(moduleRotatoinVectors, isRobotRotating);
+        corrections.entrySet().stream().filter((correctionEntry) -> correctionEntry.getValue())
+                .forEach((correctionEntry) -> modules.get(correctionEntry.getKey()).invertRotationDirection());
     }
 
     @Override
