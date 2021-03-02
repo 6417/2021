@@ -6,9 +6,9 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import frc.robot.utilities.PIDValues;
-import frc.robot.utilities.SwerveLimiter;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 public class SwerveModule {
     private boolean isEncoderZeroed = false;

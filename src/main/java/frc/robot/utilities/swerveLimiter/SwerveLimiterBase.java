@@ -1,4 +1,4 @@
-package frc.robot.utilities.baseClasses;
+package frc.robot.utilities.swerveLimiter;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -12,6 +12,9 @@ public abstract class SwerveLimiterBase {
     public abstract SwerveModuleState limitState(SwerveModuleState desiredSteate, Vector2d currentModuleRotation,
             double moduleSpeed);
 
+    /**
+     * Function for {@link #RotationDirectionCorectorGetter}, which does nothing.
+     */
     public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotaionDirectionCorrections(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, boolean isRobotRotating) {
         return rotationVectorPairs.entrySet().stream()
@@ -20,7 +23,7 @@ public abstract class SwerveLimiterBase {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
-    public static interface RotationDirectionCorectorGetter<MountingLocation extends Enum<MountingLocation>> {
+    public static interface RotationDirectionCorrectorGetter<MountingLocation extends Enum<MountingLocation>> {
         public Map<MountingLocation, Boolean> getModuleRotationDirectionCorrections(
                 Map<MountingLocation, ModuleRotationVectors> rotationDirections, boolean isRobotRotating);
     }
@@ -38,5 +41,4 @@ public abstract class SwerveLimiterBase {
             this.desiredRotation = desiredRotation;
         }
     }
-
 }

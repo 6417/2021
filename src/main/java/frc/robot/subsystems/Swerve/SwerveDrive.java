@@ -14,13 +14,13 @@ import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.Swerve.DefaultDriveCommand;
 import frc.robot.subsystems.Base.SwerveDriveBase;
 import frc.robot.utilities.SwerveKinematics;
-import frc.robot.utilities.SwerveLimiter;
+import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 public class SwerveDrive extends SwerveDriveBase {
     private static SwerveDriveBase instance = null;
     private SwerveKinematics<Constants.SwerveDrive.MountingLocations> kinematics;
     private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModule> modules = new HashMap<>();
-    private SwerveLimiter.RotationDirectionCorectorGetter<Constants.SwerveDrive.MountingLocations> directionCorectorGetter;
+    private SwerveLimiter.RotationDirectionCorrectorGetter<Constants.SwerveDrive.MountingLocations> directionCorectorGetter;
 
     private SwerveDrive() {
         for (var location : Constants.SwerveDrive.MountingLocations.values())

@@ -13,7 +13,8 @@ import java.util.Map;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.Swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
-import frc.robot.utilities.SwerveLimiter;
+import frc.robot.utilities.swerveLimiter.SwerveLimiter;
+import frc.robot.utilities.swerveLimiter.SwerveLimiterBase;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -60,7 +61,7 @@ public final class Constants {
         public static final HashMap<MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
 
         public static SwerveLimiter.Config limiterConfig = new SwerveLimiter.Config();
-        public static final SwerveLimiter.RotationDirectionCorectorGetter<MountingLocations> directionCorectorGetter = (
+        public static final SwerveLimiter.RotationDirectionCorrectorGetter<MountingLocations> directionCorectorGetter = (
                 Map<MountingLocations, SwerveLimiter.ModuleRotationVectors> rotationDirections,
                 boolean isRobotRotating) -> SwerveLimiter.getModuleRotaionDirectionCorrections(rotationDirections,
                         isRobotRotating);
