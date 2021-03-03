@@ -11,7 +11,9 @@ public class ZeroEncoders extends CommandBase {
 
     @Override
     public void initialize() {
-        SwerveDrive.getInstance().rotateAllModules(Constants.SwerveDrive.zeroingSpeed);  
+        SwerveDrive.getInstance().forEachModule((module) -> module.setEncoderZeroedFalse());
+        SwerveDrive.getInstance().stopAllMotors();
+        SwerveDrive.getInstance().rotateAllModules(Constants.SwerveDrive.zeroingSpeed);
     }
 
     @Override
@@ -19,6 +21,11 @@ public class ZeroEncoders extends CommandBase {
         for (var isHalSensorTriggeredOfMoudle : SwerveDrive.getInstance().areHalSensoredOfMoudlesTriggered().entrySet())
             if (isHalSensorTriggeredOfMoudle.getValue())
                 SwerveDrive.getInstance().setCurrentModuleRotatoinToHome(isHalSensorTriggeredOfMoudle.getKey());
+
+        SwerveDrive.getInstance().forEachModule((module) -> {
+            if (module.hasEncoderBeenZeroed())
+                module.stopAllMotors();
+        });
     }
 
     @Override

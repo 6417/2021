@@ -4,11 +4,14 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.Swerve.DefaultDriveCommand;
@@ -21,6 +24,7 @@ public class SwerveDrive extends SwerveDriveBase {
     private SwerveKinematics<Constants.SwerveDrive.MountingLocations> kinematics;
     private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModule> modules = new HashMap<>();
     private SwerveLimiter.RotationDirectionCorrectorGetter<Constants.SwerveDrive.MountingLocations> directionCorectorGetter;
+    private ChassisSpeeds currentChassisSpeeds = new ChassisSpeeds();
 
     private SwerveDrive() {
         for (var location : Constants.SwerveDrive.MountingLocations.values())
@@ -30,6 +34,8 @@ public class SwerveDrive extends SwerveDriveBase {
             mountingPoints.put(element.getKey(), element.getValue().mountingPoint);
         kinematics = new SwerveKinematics<Constants.SwerveDrive.MountingLocations>(mountingPoints);
         directionCorectorGetter = Constants.SwerveDrive.directionCorectorGetter;
+        for (var moduleEntry : modules.entrySet())
+            SendableRegistry.addLW(moduleEntry.getValue(), "Swerve Module " + moduleEntry.getKey().toString());
     }
 
     public static SwerveDriveBase getInstance() {
@@ -44,6 +50,7 @@ public class SwerveDrive extends SwerveDriveBase {
 
     @Override
     public void drive(ChassisSpeeds requestedMovement) {
+        currentChassisSpeeds = requestedMovement;
         HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
                 .toLabledSwerveModuleStates(requestedMovement);
         for (var labeledState : states.entrySet())
@@ -102,8 +109,29 @@ public class SwerveDrive extends SwerveDriveBase {
     }
 
     @Override
+    public void forEachModule(Consumer<SwerveModule> consumer) {
+        modules.values().stream().forEach(consumer);
+    }
+
+    @Override
     public void stopAllMotors() {
         for (var module : modules.values())
             module.stopAllMotors();
+    }
+
+    @Override
+    public boolean areAllModulesZeroed() {
+        boolean result = true;
+        for (var module : modules.values())
+            result = result && module.hasEncoderBeenZeroed();
+        return result;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        super.initSendable(builder);
+        builder.addDoubleProperty("Current chassi speed x", () -> currentChassisSpeeds.vxMetersPerSecond, null);
+        builder.addDoubleProperty("Current chassi speed y", () -> currentChassisSpeeds.vxMetersPerSecond, null);
+        builder.addDoubleProperty("Current chassi speed rotation", () -> currentChassisSpeeds.vxMetersPerSecond, null);
     }
 }

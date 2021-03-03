@@ -1,10 +1,12 @@
 package frc.robot.subsystems.Base;
 
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.Swerve.SwerveModule;
 
 public class SwerveDriveBase extends SubsystemBase {
     public void drive(ChassisSpeeds requesteSpeeds) {
@@ -28,6 +30,10 @@ public class SwerveDriveBase extends SubsystemBase {
 
     public void setCurrentModuleRotatoinToHome(Constants.SwerveDrive.MountingLocations moduleLocation) {
         
+    }
+
+    public void forEachModule(Consumer<SwerveModule> consumer) {
+
     }
 
     public boolean areAllModulesZeroed() {

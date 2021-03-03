@@ -2,15 +2,17 @@ package frc.robot.subsystems.Swerve;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
-public class SwerveModule {
+public class SwerveModule implements Sendable {
     private boolean isEncoderZeroed = false;
 
     public static class Config implements Cloneable {
@@ -61,7 +63,7 @@ public class SwerveModule {
 
     private Motors motors;
     private SwerveLimiter limiter;
-    private SwerveModuleState desiredState;
+    private SwerveModuleState desiredState = new SwerveModuleState();
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.rotationMotorInitializer.get());
@@ -82,10 +84,6 @@ public class SwerveModule {
         return (motors.rotation.getEncoderTicks() / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2;
     }
 
-    public Vector2d getModuleRotationVector() {
-        return Vector2d.fromRad(getModuleRotationAngle());
-    }
-
     public Vector2d getTargetVector() {
         return Vector2d.fromRad(desiredState.angle.getRadians());
     }
@@ -95,7 +93,7 @@ public class SwerveModule {
     }
 
     private double meterPerSecondToDriveMotorEncoderVelocityUnits(double speedMs) {
-        return (speedMs / motors.wheelCircumference) * motors.driveMotorTicksPerRotation * 10;
+        return (speedMs / motors.wheelCircumference) * motors.driveMotorTicksPerRotation;
     }
 
     private double driveMotorEncoderVelocityToPercent(double encoderSpeed) {
@@ -160,5 +158,17 @@ public class SwerveModule {
 
     public void invertRotationDirection() {
         desiredState.angle.rotateBy(Rotation2d.fromDegrees(180));
+    }
+
+    public void setEncoderZeroedFalse() {
+        isEncoderZeroed = false;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Desired state speed",() -> desiredState.speedMetersPerSecond, null);
+        builder.addDoubleProperty("Desired state angle",() -> desiredState.angle.getDegrees(), null);
+        builder.addDoubleProperty("Module angel", () -> getModuleRotation().toRadians(), null);
+        builder.addDoubleProperty("Moudle speed", () -> getSpeed(), null);
     }
 }
