@@ -106,10 +106,20 @@ public class SwerveModule {
         return motors.drive.getEncoderVelocity();
     }
 
+    private static SwerveModuleState optimize(SwerveModuleState desiredState, Rotation2d currentAngle) {
+        var delta = desiredState.angle.minus(currentAngle);
+        if (Math.abs(delta.getDegrees()) > 90.0) {
+            return new SwerveModuleState(-desiredState.speedMetersPerSecond,
+                    desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)));
+        } else {
+            return new SwerveModuleState(desiredState.speedMetersPerSecond, desiredState.angle);
+        }
+    }
+
     public void setDesiredState(SwerveModuleState desiredState) {
         this.desiredState = limiter.limitState(desiredState, getModuleRotation(),
                 driveMotorEncoderVelocityToPercent(getSpeed()));
-        this.desiredState = SwerveModuleState.optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
+        this.desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
     }
 
     public void drive() {

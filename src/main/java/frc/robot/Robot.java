@@ -7,11 +7,10 @@
 
 package frc.robot;
 
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
+import frc.robot.subsystems.Swerve.SwerveDrive;
+import frc.robot.utilities.Controller;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -33,6 +32,8 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
+        Controller.getInstance();
+        SwerveDrive.getInstance();
     }
 
     /**
@@ -83,13 +84,10 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
     }
 
-    FridoCANSparkMax testMotor = new FridoCANSparkMax(23, MotorType.kBrushless);
-    
 
     @Override
     public void teleopInit() {
-        testMotor.selectBuiltinFeedbackSensor();
-        testMotor.factoryDefault();
+
     }
 
     /**
@@ -97,8 +95,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        testMotor.set(0.1);
-        System.out.println(testMotor.getEncoderTicks());
+
     }
 
     @Override

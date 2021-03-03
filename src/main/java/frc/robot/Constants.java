@@ -45,7 +45,7 @@ public final class Constants {
     }
 
     public static final class Vision {
-        public static final boolean IS_ENABLED = true;
+        public static final boolean IS_ENABLED = false;
     }
 
     public static final class SwerveDrive {
@@ -73,7 +73,7 @@ public final class Constants {
             limiterConfig.gauseStrechingFactor = -Math.log(Math.PI / 4.28e8);
         }
 
-        public static SwerveModule.Config commonConfigurations;
+        public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
         // setting up commmon configurations for all swerve modules
         static {
             commonConfigurations.driveMotorTicksPerRotation = 0.0;
