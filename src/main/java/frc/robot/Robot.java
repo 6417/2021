@@ -10,7 +10,14 @@ package frc.robot;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.PickUpSubsystem;
+import frc.robot.subsystems.Base.PickUpBase;
+import frc.robot.utilities.GroveColorSensor;
+import frc.robot.utilities.GroveColorSensorI2C.Gain;
+import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 
 /**
@@ -83,13 +90,13 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
     }
 
-    FridoCANSparkMax testMotor = new FridoCANSparkMax(23, MotorType.kBrushless);
-    
+    PickUpBase testSubsystem = PickUpSubsystem.getInstance();
+
+
 
     @Override
     public void teleopInit() {
-        testMotor.selectBuiltinFeedbackSensor();
-        testMotor.factoryDefault();
+        
     }
 
     /**
@@ -97,8 +104,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        testMotor.set(0.1);
-        System.out.println(testMotor.getEncoderTicks());
+       testSubsystem.test();
     }
 
     @Override

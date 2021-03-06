@@ -1,18 +1,34 @@
 package frc.robot.subsystems.Base;
 
-import frc.robot.subsystems.PickUpSubsystem; 
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class PickUpBase extends PickUpSubsystem{
+
+public class PickUpBase extends SubsystemBase{
 
     public PickUpBase(){
-        super();
     }
 
-    public static void getInput(){}
+    public void setPickUpMotor(){
+    }
 
-    public static void setPickUpMotor(){}
+    public void setTunnelMotor(){
+    }
 
-    public PickUpSubsystem getInstance(){
-        return null;
+    public void stopPickUpMotor(){
+    }
+
+    public void stopTunnelMotor(){
+    }
+
+    public void stopMotors(){
+    }
+    
+    public void test(){
+    }
+
+    public void pickUpBall(){
+    }
+
+    public void transportBall(){
     }
 }

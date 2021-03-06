@@ -7,6 +7,14 @@
 
 package frc.robot;
 
+import java.util.function.Supplier;
+
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
+import frc.robot.utilities.fridolinsMotor.FridoMotorLogger;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants.  This class should not be used for any other purpose.  All constants should be
@@ -15,6 +23,7 @@ package frc.robot;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
+
 public final class Constants {
     public static class Joystick{
         public static final int DRIVER_ID = 1;
@@ -34,6 +43,17 @@ public final class Constants {
     }
 
     public static class Vision{
-        public static final boolean IS_ENABLED = true;
+        public static final boolean IS_ENABLED = false;
+    }
+
+    public static class BallPickUp{
+        public static boolean isEnabled = true;
+        public static final int pickUpMotor_ID = 0;     // TODO IDs
+        public static final int tunnelMotor_ID = 0;    // TODO IDs
+
+        public static Supplier <FridolinsMotor> pickUpMotor = () -> new FridoCANSparkMax(pickUpMotor_ID, MotorType.kBrushless);
+        public static Supplier <FridolinsMotor> tunnelMotor = () -> new FridoCANSparkMax(tunnelMotor_ID, MotorType.kBrushless);
+
+        // TODO Encoder???
     }
 }

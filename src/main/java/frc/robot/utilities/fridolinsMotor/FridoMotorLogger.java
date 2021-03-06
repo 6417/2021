@@ -139,4 +139,34 @@ public class FridoMotorLogger implements FridolinsMotor {
             logger.close();       
         }
     }
+
+    @Override
+    public double get() {
+        return 0;
+    }
+
+    @Override
+    public void setInverted(boolean isInverted) {
+
+    }
+
+    @Override
+    public boolean getInverted() {
+        return false;
+    }
+
+    @Override
+    public void disable() {
+
+    }
+
+    @Override
+    public void stopMotor() {
+
+    }
+
+    @Override
+    public void pidWrite(double output) {
+
+    }
 } 
