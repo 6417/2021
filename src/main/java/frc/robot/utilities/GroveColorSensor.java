@@ -69,13 +69,13 @@ public class GroveColorSensor {
         }
     }
 
-    private ByteBuffer colorSensorReadActionNoExcept(ReadAction action) {
+    private ByteBuffer colorSensorReadActionNoExcept(ReadAction action, ByteBuffer defaultReturn) {
         try {
             return action.run();
         } catch (GroveColorSensorI2C.Exception e) {
             DriverStation.getInstance().reportError(e.getMessage(), true);
         }
-        return null;
+        return defaultReturn;
     }
 
     public GroveColorSensorI2C i2c;
@@ -92,7 +92,8 @@ public class GroveColorSensor {
     }
 
     public void disable() {
-        byte reg = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.ENABLE, 1)).get(0);
+        byte reg = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.ENABLE, 1),
+                ByteBuffer.wrap(new byte[] { 0 })).get(0);
         colorSensorWriteActionNoExcept(() -> i2c.write(GroveColorSensorI2C.Register.ENABLE,
                 (byte) (reg & ~(GroveColorSensorI2C.Register.ENABLE_PON.address
                         | GroveColorSensorI2C.Register.ENABLE_AEN.address))));
@@ -131,7 +132,8 @@ public class GroveColorSensor {
     }
 
     public void setInterrupt(boolean i) {
-        byte reg = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.ENABLE, 1)).get(0);
+        byte reg = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.ENABLE, 1),
+                ByteBuffer.wrap(new byte[] { 0 })).get(0);
         if (i)
             reg |= GroveColorSensorI2C.Register.ENABLE_AIEN.address;
         else
@@ -146,14 +148,14 @@ public class GroveColorSensor {
 
     public RawColor getRawColor() {
         RawColor recieved = new RawColor();
-        recieved.clear = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.CDATAL, 2))
-                .getShort(0);
-        recieved.red = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.RDATAL, 2))
-                .getShort(0);
-        recieved.green = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.GDATAL, 2))
-                .getShort(0);
-        recieved.blue = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.BDATAL, 2))
-                .getShort(0);
+        recieved.clear = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.CDATAL, 2),
+                ByteBuffer.wrap(new byte[] { 0, 0 })).getShort(0);
+        recieved.red = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.RDATAL, 2),
+                ByteBuffer.wrap(new byte[] { 0, 0 })).getShort(0);
+        recieved.green = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.GDATAL, 2),
+                ByteBuffer.wrap(new byte[] { 0, 0 })).getShort(0);
+        recieved.blue = colorSensorReadActionNoExcept(() -> i2c.read(GroveColorSensorI2C.Register.BDATAL, 2),
+                ByteBuffer.wrap(new byte[] { 0, 0 })).getShort(0);
         return recieved;
     }
 }
