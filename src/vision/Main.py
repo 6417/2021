@@ -16,53 +16,10 @@ import cv2
 import ctypes
 from math import tan
 
-#			JSON	format:
-#			{
-#							"team":	<team	number>,
-#							"ntmode":	<"client"	or	"server",	"client"	if	unspecified>
-#							"cameras":	[
-#											{
-#															"name":	<camera	name>
-#															"path":	<path,	e.g.	"/dev/video0">
-#															"pixel	format":	<"MJPEG",	"YUYV",	etc>			//	optional
-#															"width":	<video	mode	width>														//	optional
-#															"height":	<video	mode	height>												//	optional
-#															"fps":	<video	mode	fps>																		//	optional
-#															"brightness":	<percentage	brightness>				//	optional
-#															"white	balance":	<"auto",	"hold",	value>	//	optional
-#															"exposure":	<"auto",	"hold",	value>						//	optional
-#															"properties":	[																										//	optional
-#																			{
-#																							"name":	<property	name>
-#																							"value":	<property	value>
-#																			}
-#															],
-#															"stream":	{																														//	optional
-#																			"properties":	[
-#																							{
-#																											"name":	<stream	property	name>
-#																											"value":	<stream	property	value>
-#																							}
-#																			]
-#															}
-#											}
-#							]
-#							"switched	cameras":	[
-#											{
-#															"name":	<virtual	camera	name>
-#															"key":	<network	table	key	used	for	selection>
-#															//	if	NT	value	is	a	string,	it's	treated	as	a	name
-#															//	if	NT	value	is	a	double,	it's	treated	as	an	integer	index
-#											}
-#							]
-#			}
-
 configFile = "/boot/frc.json"
-
 
 class CameraConfig:
     pass
-
 
 team = None
 server = False
@@ -88,7 +45,7 @@ horizontal_fov = 62.2
 
 res = [1640, 922]
 
-
+# Class for the interruptable threads
 class thread(threading.Thread):
     def __init__(self,	name,	target=0):
         threading.Thread.__init__(self)
@@ -97,9 +54,13 @@ class thread(threading.Thread):
 
     def run(self):
         try:
+
+            # Instructions to run for the threads that get the cvSink
             if self.name == "cvSinkGetter":
                 time.sleep(2)
                 self.cvSink = cs.getVideo()
+
+            # Instructions to run for the watchdog thread
             elif self.name == "watchdog":
                 self.cvSink = 0
                 print("started watchdog")
@@ -130,7 +91,7 @@ class thread(threading.Thread):
         threading.Thread.join(self)
         return self.cvSink
 
-
+# Methods for conversion and formatting
 def removeArrayInnerBraces(array):
     output = []
     for element in array:
@@ -174,6 +135,9 @@ def getTargetAngle(MiddleLineLengthDifference):
         return targetAngle
     else:
         return 0
+
+def getTargetAngleFromSideStripes(StripeHeightDifference):
+    return -0.053898 * StripeHeightDifference**2 + 3.17743 * StripeHeightDifference + 1.38581
 
 
 def parseError(str):
@@ -287,6 +251,7 @@ def startNetworkTables():
             notified[0] = True
             condition.notify()
 
+    #initialize the networktables
     NetworkTables.initialize(server="10.64.17.2")
     NetworkTables.addConnectionListener(
         connectionListener,	immediateNotify=True)
@@ -304,7 +269,12 @@ def startNetworkTables():
 
     return networkTablesInstance,	dashboard
 
+# Generating the image for the debug mode with all the information on it
 def generateDebugImage(img):
+    cv2.putText(img,	"Small Y Difference:    " + str(round(y_differences[0], 3)),
+                (0,	190),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
+    cv2.putText(img,	"Large Y Difference:    " + str(round(y_differences[1], 3)),
+                (0,	220),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
     cv2.putText(img,	"Distance_total:    " + str(round(distance, 3)),
                 (0,	250),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
     cv2.putText(img,	"Robot	Viewing	dir(rel	to	target):    " + str(round(toAimingSystem(getMidPoint(
@@ -315,12 +285,13 @@ def generateDebugImage(img):
                 (0, 340), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
     cv2.putText(img, "TargetAngle: " + str(round(targetAngle, 1)),
                 (0, 370), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-    cv2.putText(img, "Viewing Side: " + str(round(side, 1)),
+    cv2.putText(img, "Viewing Side: " + str(round(viewingSide, 1)),
                 (0, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
     cv2.line(img, (int(locations[0][0]), int(locations[0][1])), (int(
         locations[1][0]), int(locations[1][1])), (0, 255, 0), thickness=2)
     return img
 
+# Filtering the image to binary for contour recognition
 def filterImage(rawImage):
     hsv_img = cv2.cvtColor(rawImage, cv2.COLOR_BGR2HSV)
     binary_img = cv2.inRange(
@@ -329,11 +300,15 @@ def filterImage(rawImage):
     binary_img = cv2.erode(binary_img, erode_kernel, iterations=3)
     return binary_img
 
+
+
+# Main
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         configFile = sys.argv[1]
 
-    #	read	configuration
+    #	read configuration
     if not readConfig():
         sys.exit(1)
 
@@ -348,7 +323,7 @@ if __name__ == "__main__":
 
     cs = servers[0]
 
-    #Starting two threads in case the cvSinkGetter fails it can be restarted
+    #Starting one thread to get the cvSink and another to kill it in case it failss
     print("getting	Sink")
     cvSinkGetter = thread("cvSinkGetter")
     watchdog = thread("watchdog", cvSinkGetter)
@@ -357,20 +332,23 @@ if __name__ == "__main__":
     cvSink = cvSinkGetter.join()
     watchdog.join()
 
-    # Starting the streams
-    # outputStream = cs.putVideo("Processed_Image", res[0], res[1])
-    # binaryStream	=	cs.putVideo("Binary	Image",	res[0],	res[1])
+
+    # Start the camera stream in debug mode
+    outputStream = cs.putVideo("Processed_Image", res[0], res[1])
+    binaryStream	=	cs.putVideo("Binary	Image",	res[0],	res[1])
 
     print("Started vision program")
 
-    img = np.zeros((res[1], res[0], 3), dtype=np.uint8)
 
+    #Setting variables 
+    img = np.zeros((res[1], res[0], 3), dtype=np.uint8)
     kernel = np.ones((5, 5), dtype=np.uint8)
     erode_kernel = np.ones((3, 3), dtype=np.uint8)
 
     startTime = time.time()
 
-    #	loop	forever
+
+    #	loop forever
     while True:
         # check for connection timeout and restart if there's one
         if dashboard.getBoolean('connected',	False) == False:
@@ -394,7 +372,6 @@ if __name__ == "__main__":
             second = 0
             second_difference = 0
             locations = []
-            heights = np.array([])
             distances = np.array([])
 
             for contour in contours:
@@ -421,7 +398,9 @@ if __name__ == "__main__":
 
             for box in boxes:
                 try:
-                    # cv2.drawContours(img,	[box],	-1,	(0,	0,	255),	thickness=1)
+                    # draw the boxes
+
+                    cv2.drawContours(img,	[box],	-1,	(0,	0,	255),	thickness=1)
                     
                     #Get the locations of the side stripes
                     midpoint = getMidPoint(box)
@@ -433,23 +412,27 @@ if __name__ == "__main__":
                     print("no	boxes")
 
             #Determine the side from wich the robot is looking at the target
-            viewingSide = (locations[0][0] > locations[1][0]) * 2 - 1
-
-            np.sort(heights)
+            try:
+                viewingSide = (locations[0][0] > locations[1][0]) * 2 - 1
+            except:
+                print("Failed to calculate the side")
 
             for i in range(2):
                 distances = np.append(distances, ((
                     size_reference / y_differences[i])**2 - (target_height - camera_height)**2)**0.5)
 
-            distance = (distances[0] + distances[1])/2
+            distance = min([distances[0], distances[1]])
             robotAngle = toAimingSystem(getMidPoint(locations))[
                 0] * (horizontal_fov/2)
             lineLength = (abs(locations[0][0] - locations[1][0])
                           ** 2 + abs(locations[0][1] - locations[1][1])**2)**0.5
             straightLineLength = getMiddleLineLengthStraight(distance)
             targetAngle = getTargetAngle(abs(straightLineLength - lineLength))
+
+            # targetAngle = getTargetAngleFromSideStripes(abs(y_differences[0] - y_differences[1]))
             
-            # img = generateDebugImage(img)
+            #Generating the debug image
+            img = generateDebugImage(img)
 
             if distance <= 4.5:
                 targetInView = True
@@ -457,6 +440,8 @@ if __name__ == "__main__":
         if targetInView == False:
             distance = 0
             robotAngle = 0
+            targetAngle = 0
+            viewingSide = 0
 
         # writing fps on debug image
 
@@ -466,8 +451,8 @@ if __name__ == "__main__":
         #             cv2.FONT_HERSHEY_SIMPLEX,	1,	(0,	0,	255))
 
         #manually toggle streams on and off
-        # outputStream.putFrame(img)
-        # binaryStream.putFrame(binary_img)
+        outputStream.putFrame(img)
+        binaryStream.putFrame(binary_img)
 
         #send values through networktables
         dashboard.putNumber('distance',	distance)
@@ -476,4 +461,4 @@ if __name__ == "__main__":
         dashboard.putBoolean('currentValues',	True)
         dashboard.putNumber('targetAngle', targetAngle)
         dashboard.putNumber('viewingSide', viewingSide)
-        dashboard.putNumber('fps', fps)
+        dashboard.putNumber('fps', fps) 

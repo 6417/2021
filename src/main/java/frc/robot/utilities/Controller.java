@@ -10,7 +10,7 @@ public class Controller {
     public DriveJoystick driveJoystick;
     public ControlJoystick controlJoystick;
 
-    public Controller() {
+    private Controller() {
         driveJoystick = new DriveJoystick();
         controlJoystick = new ControlJoystick();
     }
@@ -23,7 +23,7 @@ public class Controller {
     }
 
     // Class for basic Joystick functionality
-    public class SuperJoystick {
+    private class SuperJoystick {
         Joystick controller = new Joystick(-1);
 
         public double getLeftStickY() {
@@ -50,7 +50,7 @@ public class Controller {
     public class DriveJoystick extends SuperJoystick {
         // Define Buttons to make Bindings
 
-        public DriveJoystick() {
+        private DriveJoystick() {
             super();
             super.controller = new Joystick(Constants.Joystick.DRIVER_ID);
             configureButtonBindings();
@@ -66,7 +66,7 @@ public class Controller {
     public class ControlJoystick extends SuperJoystick {
         // Define Buttons to make Bindings
 
-        public ControlJoystick() {
+        private ControlJoystick() {
             super();
             super.controller = new Joystick(Constants.Joystick.CONTROL_ID);
             configureButtonBindings();

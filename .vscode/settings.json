@@ -12,5 +12,9 @@
     "**/.settings": true,
     "**/.factorypath": true,
     "**/*~": true
+  },
+  "files.associations": {
+    "*.tcc": "cpp",
+    "fstream": "cpp"
   }
 }
