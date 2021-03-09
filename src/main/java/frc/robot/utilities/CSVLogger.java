@@ -1,4 +1,4 @@
-package frc.robot.utilities;
+package ch.fridolinsrobotik.utilities;
 
 import java.io.FileWriter;
 import java.io.IOException;
