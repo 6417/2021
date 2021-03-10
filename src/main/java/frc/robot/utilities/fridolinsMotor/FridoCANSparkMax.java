@@ -206,6 +206,11 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         this.pidController.setI(pidValues.kI);
         this.pidController.setD(pidValues.kD);
         pidValues.kF.ifPresent((kF) -> this.pidController.setFF(kF));
+        
+        double[] speedLimit = {-1, 1};
+        pidValues.lowerSpeedLimit.ifPresent((lowerLimit) -> speedLimit[0] = lowerLimit);
+        pidValues.upperSpeedLimit.ifPresent((upperLimit) -> speedLimit[1] = upperLimit);
+        this.pidController.setOutputRange(speedLimit[0], speedLimit[1]);
 
         this.kP = pidValues.kP;
         this.kI = pidValues.kI;
