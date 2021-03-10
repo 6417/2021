@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+<<<<<<< refs/remotes/origin/develop
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,10 +23,17 @@ import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
+=======
+import java.util.Optional;
+>>>>>>> Turn the feederMotor and turn the Turret to a given angle
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+<<<<<<< refs/remotes/origin/develop
+=======
+import frc.robot.utilities.PIDValues;
+>>>>>>> Turn the feederMotor and turn the Turret to a given angle
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
@@ -286,5 +294,38 @@ public final class Constants {
         public static final double releaseSpeed = 0.3;  // TODO optimal speed 
 
         public static final boolean isLightBarrierInverted = true;
+    public static class Vision {
+        public static final boolean IS_ENABLED = true;
+    }
+
+    public static class Thrower {
+        public static final boolean IS_ENABLED = true;
+        public static final double GEAR_RATIO_TURRET_DIRECTION = 40.4;
+        public static final int GEAR_RATIO_SHOOTING_ANGLE = 1;
+
+        public static class PIDControllers {
+            public static class DirectionMotor {
+                public static PIDValues values = new PIDValues(0.2, 0, 0);
+                static {
+                    values.lowerSpeedLimit = Optional.of(-0.4);
+                    values.upperSpeedLimit = Optional.of(0.4);
+                }
+            }
+        }
+
+        public static class Motors {
+            public static final int LOADER_ID = 1;
+            public static final int SHOOT_DIRECTION_ID = 8;
+            public static final int SHOOT_ANGLE_ID = 2;
+            public static final int SHOOT_ID = 3;
+            public static final Supplier<FridolinsMotor> loaderMotor = () -> new FridoCANSparkMax(LOADER_ID,
+                    MotorType.kBrushless);
+            public static final Supplier<FridolinsMotor> directionMotor = () -> new FridoCANSparkMax(SHOOT_DIRECTION_ID,
+                    MotorType.kBrushless);
+            public static final Supplier<FridolinsMotor> angleMotor = () -> new FridoCANSparkMax(SHOOT_ANGLE_ID,
+                    MotorType.kBrushless);
+            public static final Supplier<FridolinsMotor> shootMotor = () -> new FridoCANSparkMax(SHOOT_ID,
+                    MotorType.kBrushless);
+        }
     }
 }
