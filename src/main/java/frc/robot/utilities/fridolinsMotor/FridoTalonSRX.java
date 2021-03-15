@@ -24,6 +24,7 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     private boolean isKFEnabled = false;
     
     public FridoTalonSRX(int deviceID) {
+
         super(deviceID);
     }
 
@@ -173,6 +174,7 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
             super.config_kI(pidValues.slotIdX.get(), pidValues.kI);
             super.config_kD(pidValues.slotIdX.get(), pidValues.kD);
             pidValues.kF.ifPresent((kF) -> super.config_kF(pidValues.slotIdX.get(), kF));
+            super.selectProfileSlot(pidValues.slotIdX.get(), 0);
         } else {
             try {
                 throw new Exception("You have to give a slotID for TalonSRX pidControllers");

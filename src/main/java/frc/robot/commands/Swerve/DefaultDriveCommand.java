@@ -18,7 +18,12 @@ public class DefaultDriveCommand extends CommandBase {
                     .joystickInputToMetersPerSecond(Controller.getInstance().driveJoystick.getLeftStickX());
             double ySpeed = SwerveDrive
                     .joystickInputToMetersPerSecond(Controller.getInstance().driveJoystick.getLeftStickY());
-            double rotationSpeed = Controller.getInstance().driveJoystick.getRightStickX() * Constants.SwerveDrive.maxRotationSpeed;
+            if (Constants.SwerveDrive.joystickYinverted)
+                ySpeed *= -1;
+            if (Constants.SwerveDrive.joystickXinverted)
+                xSpeed *= -1;
+            double rotationSpeed = Controller.getInstance().driveJoystick.getRightStickX()
+                    * Constants.SwerveDrive.maxRotationSpeed;
             SwerveDrive.getInstance().drive(new ChassisSpeeds(xSpeed, ySpeed, rotationSpeed));
         }
     }

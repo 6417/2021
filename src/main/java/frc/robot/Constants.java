@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.Swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 /**
@@ -59,6 +60,8 @@ public final class Constants {
         }
         
         public static final boolean enabled = true;
+        public static final boolean joystickYinverted = true;
+        public static final boolean joystickXinverted = true;
         public static final double zeroingSpeed = 0.3;
         public static final double maxSpeedOfDrive = 14132.0; // max velocity for swerve drive in encoder ticks per 100ms
         public static final double maxRotationSpeed = Math.PI; // at full rotation speed the robot will turn by 180
@@ -82,7 +85,7 @@ public final class Constants {
         // setting up commmon configurations for all swerve modules
         static {
             commonConfigurations.driveMotorTicksPerRotation = 196608.0;
-            commonConfigurations.rotationMotorTicksPerRotation = 11564.0;
+            commonConfigurations.rotationMotorTicksPerRotation = 115640.0;
             commonConfigurations.drivePID = new PIDValues(0.015, 0.0, 0.0, 0.03375);
             commonConfigurations.drivePID.slotIdX = Optional.of(0);
             commonConfigurations.rotationPID = new PIDValues(0.6, 0.16, 4.0);
@@ -90,6 +93,8 @@ public final class Constants {
             commonConfigurations.wheelCircumference = 0.1 * Math.PI;
             commonConfigurations.limiterInitializer = () -> new SwerveLimiter(limiterConfig);
             commonConfigurations.maxVelocity = maxSpeedOfDrive;
+            commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
+            commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
         }
 
         // adding module specific configurations
@@ -98,24 +103,32 @@ public final class Constants {
             frontLeftConfig.mountingPoint = new Translation2d(0.32, -0.305);
             frontLeftConfig.driveMotorInitializer = () -> new FridoTalonSRX(32);
             frontLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(33);
+            frontLeftConfig.driveMotorInverted = true;
+            frontLeftConfig.driveSensorInverted = true;
             swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
 
             SwerveModule.Config frontRightConfig = commonConfigurations.clone();
             frontRightConfig.mountingPoint = new Translation2d(0.32, 0.305);
             frontRightConfig.driveMotorInitializer = () -> new FridoTalonSRX(38);
             frontRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(39);
+            frontRightConfig.driveMotorInverted = true;
+            frontRightConfig.driveSensorInverted = true;
             swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
 
             SwerveModule.Config backLeftConfig = commonConfigurations.clone();
             backLeftConfig.mountingPoint = new Translation2d(-0.32, -0.305);
             backLeftConfig.driveMotorInitializer = () -> new FridoTalonSRX(34);
             backLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(35);
+            backLeftConfig.driveMotorInverted = true;
+            backLeftConfig.driveSensorInverted = true;
             swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
 
             SwerveModule.Config backRightConfig = commonConfigurations.clone();
             backRightConfig.mountingPoint = new Translation2d(-0.32, 0.305);
             backRightConfig.driveMotorInitializer = () -> new FridoTalonSRX(36);
             backRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(37);
+            backRightConfig.driveMotorInverted = false;
+            backRightConfig.driveSensorInverted = true;
             swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
         }
     }

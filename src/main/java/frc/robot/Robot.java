@@ -62,6 +62,10 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
+        SwerveDrive.getInstance().forEachModule((module) -> {
+            module.csvLogger.writeToFile();
+            module.csvLogger.close();
+        });
     }
 
     @Override
@@ -84,10 +88,9 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
     }
 
-
     @Override
     public void teleopInit() {
-
+        SwerveDrive.getInstance().forEachModule((module) -> module.csvLogger.open());
     }
 
     /**

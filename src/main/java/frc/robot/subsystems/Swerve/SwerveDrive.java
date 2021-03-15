@@ -16,6 +16,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.Swerve.DefaultDriveCommand;
 import frc.robot.subsystems.Base.SwerveDriveBase;
+import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.SwerveKinematics;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
@@ -34,8 +35,11 @@ public class SwerveDrive extends SwerveDriveBase {
             mountingPoints.put(element.getKey(), element.getValue().mountingPoint);
         kinematics = new SwerveKinematics<Constants.SwerveDrive.MountingLocations>(mountingPoints);
         directionCorectorGetter = Constants.SwerveDrive.directionCorectorGetter;
-        for (var moduleEntry : modules.entrySet())
+        for (var moduleEntry : modules.entrySet()) {
             SendableRegistry.addLW(moduleEntry.getValue(), "Swerve Module " + moduleEntry.getKey().toString());
+            moduleEntry.getValue().csvLogger = new CSVLogger("tmp/" + SendableRegistry.getName(moduleEntry.getValue()) + ".csv");
+        }
+        
     }
 
     public static SwerveDriveBase getInstance() {
