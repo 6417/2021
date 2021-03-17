@@ -11,7 +11,8 @@ public class DefaultDriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        TankDriveSubsystem.getInstance().drive(Controller.getInstance().driveJoystick.getLeftStickY(),
+        TankDriveSubsystem.getInstance().drive(Controller.getInstance().driveJoystick.getLeftStickX(),
+                Controller.getInstance().driveJoystick.getLeftStickY(), 
                 Controller.getInstance().driveJoystick.getRightStickX());
     }
 }
