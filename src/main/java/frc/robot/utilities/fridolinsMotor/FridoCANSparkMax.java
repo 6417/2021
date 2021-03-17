@@ -7,7 +7,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.EncoderType;
 
-import ch.fridolinsrobotik.utilities.CSVLogger;
+import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
