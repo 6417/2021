@@ -1,8 +1,9 @@
 package frc.robot.utilities.fridolinsMotor;
 
+import edu.wpi.first.wpilibj.SpeedController;
 import frc.robot.utilities.PIDValues;
 
-public interface FridolinsMotor {
+public interface FridolinsMotor extends SpeedController{
     public enum LimitSwitchPolarity {
         kNormallyOpen, kNormallyClosed, kDisabled
     }
