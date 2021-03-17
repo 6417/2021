@@ -12,7 +12,7 @@ public interface FridolinsMotor {
     }
 
     public enum FeedbackDevice {
-        QuadEncoder, CANEncoder
+        QuadEncoder, BuiltIn
     }
 
     public enum DirectionType {
