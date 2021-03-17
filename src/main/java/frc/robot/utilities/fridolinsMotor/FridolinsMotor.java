@@ -20,6 +20,8 @@ public interface FridolinsMotor {
     }
 
     public static final boolean debugMode = false;
+
+    public void set(double velocity);
     
     public void setPosition(double position);
 
