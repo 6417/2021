@@ -11,6 +11,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.TankDrive;
+import frc.robot.subsystems.TankDriveSubsystem;
+import frc.robot.subsystems.Base.TankDriveSubsystemBase;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 
 /**
@@ -33,6 +36,7 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
+        TankDriveSubsystem.getInstance();
     }
 
     /**
@@ -81,24 +85,18 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-    }
-
-    FridoCANSparkMax testMotor = new FridoCANSparkMax(23, MotorType.kBrushless);
-    
+    }    
 
     @Override
     public void teleopInit() {
-        testMotor.selectBuiltinFeedbackSensor();
-        testMotor.factoryDefault();
     }
 
     /**
      * This function is called periodically during operator control.
      */
+
     @Override
     public void teleopPeriodic() {
-        testMotor.set(0.1);
-        System.out.println(testMotor.getEncoderTicks());
     }
 
     @Override

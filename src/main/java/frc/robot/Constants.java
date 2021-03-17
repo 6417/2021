@@ -7,6 +7,14 @@
 
 package frc.robot;
 
+import java.util.function.Supplier;
+
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
+import frc.robot.utilities.fridolinsMotor.FridoTalon;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants.  This class should not be used for any other purpose.  All constants should be
@@ -35,5 +43,22 @@ public final class Constants {
 
     public static class Vision{
         public static final boolean IS_ENABLED = true;
+    }
+    public static class TankDrive{
+        public static final boolean IS_ENABLED = true;
+
+        public static final int MOTOR_DRIVE_FRONT_RIGHT_ID = 12;
+        public static final int MOTOR_DRIVE_FRONT_LEFT_ID = 10;
+        public static final int MOTOR_DRIVE_BACK_RIGHT_ID = 13;
+        public static final int MOTOR_DRIVE_BACK_LEFT_ID = 11;
+        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoTalon(0);
+        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoTalon(1);
+        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoTalon(2);
+        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoTalon(3);
+
+        // public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoCANSparkMax(12, MotorType.kBrushless);
+        // public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoCANSparkMax(13, MotorType.kBrushless);
+        // public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoCANSparkMax(10, MotorType.kBrushless);
+        // public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoCANSparkMax(11, MotorType.kBrushless);
     }
 }
