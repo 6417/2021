@@ -9,9 +9,9 @@ package frc.robot;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.kauailabs.navx.frc.AHRS;
 
-import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.utilities.fridolinsMotor.FridoTalon;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
@@ -51,14 +51,23 @@ public final class Constants {
         public static final int MOTOR_DRIVE_FRONT_LEFT_ID = 10;
         public static final int MOTOR_DRIVE_BACK_RIGHT_ID = 13;
         public static final int MOTOR_DRIVE_BACK_LEFT_ID = 11;
-        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoTalon(0);
-        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoTalon(1);
-        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoTalon(2);
-        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoTalon(3);
+        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoTalon(MOTOR_DRIVE_FRONT_RIGHT_ID, 1, 0);
+        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoTalon(MOTOR_DRIVE_BACK_RIGHT_ID, 3, 2);
+        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoTalon(MOTOR_DRIVE_FRONT_LEFT_ID, 5, 4);
+        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoTalon(MOTOR_DRIVE_BACK_LEFT_ID, 7, 6);
 
         // public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoCANSparkMax(12, MotorType.kBrushless);
         // public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoCANSparkMax(13, MotorType.kBrushless);
         // public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoCANSparkMax(10, MotorType.kBrushless);
         // public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoCANSparkMax(11, MotorType.kBrushless);
+
+        public static final int ticksPerRotation = 512;
+        public static final double wheelDiameter = 0.133;
+        public static final Supplier<Translation2d> frontLeftWheelDisplacementMeters = () -> new Translation2d(0.26, 0.19);
+        public static final Supplier<Translation2d> frontRightWheelDisplacementMeters = () -> new Translation2d(-0.26, 0.19);
+        public static final Supplier<Translation2d> backLeftWheelDisplacementMeters  = () -> new Translation2d(0.26, -0.19);
+        public static final Supplier<Translation2d> backRightWheelDisplacementMeters = () -> new Translation2d(-0.26, -0.19);
+
+        public static final Supplier<AHRS> navxInitializer = () -> new AHRS();
     }
 }

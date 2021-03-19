@@ -6,14 +6,13 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
 import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
 
     // variables for CSVLogger:
-    private CSVLogger logger; 
+    private CSVLogger logger;
     private double speed;
     private double position;
     private double velocity;
@@ -22,12 +21,14 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     private double kD;
     private double kF;
     private boolean isKFEnabled = false;
-    
+
     public FridoTalonSRX(int deviceID) {
         super(deviceID);
+        if (FridolinsMotor.debugMode)
+            logger = new CSVLogger("/tmp/logFridoTalon_id_" + deviceID + ".csv");
     }
 
-    public void set(double speed){
+    public void set(double speed) {
         super.set(speed);
         this.speed = speed;
     }
@@ -154,6 +155,12 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
         switch (device) {
             case QuadEncoder:
                 return com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder;
+            case BuiltIn:
+                try {
+                    throw new Exception("You cannot use Builtin Encoders with the TalonSRX Controllers");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             default:
                 return com.ctre.phoenix.motorcontrol.FeedbackDevice.QuadEncoder;
@@ -172,6 +179,7 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
             super.config_kI(pidValues.slotIdX.get(), pidValues.kI);
             super.config_kD(pidValues.slotIdX.get(), pidValues.kD);
             pidValues.kF.ifPresent((kF) -> super.config_kF(pidValues.slotIdX.get(), kF));
+            //TODO: Add pid Limiting
         } else {
             try {
                 throw new Exception("You have to give a slotID for TalonSRX pidControllers");
@@ -189,16 +197,20 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     }
     
     public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
-        logger = new CSVLogger(filePath);
-        logger.put("EncoderTicks", this.getEncoderTicks());
-        logger.put("Speed", speed);
-        logger.put("setValue velocity", velocity);
-        logger.put("setValue position", position);
-        logger.put("PID P", kP);
-        logger.put("PID I", kI);
-        logger.put("PID D", kD);  
-        if(isKFEnabled){
-            logger.put("PID F", kF);
-        }      
+        logger.open();
+        if(FridolinsMotor.debugMode){ 
+            logger.put("EncoderTicks", this.getEncoderTicks());
+            logger.put("Speed", speed);
+            logger.put("setValue velocity", velocity);
+            logger.put("setValue position", position);
+            logger.put("PID P", kP);
+            logger.put("PID I", kI);
+            logger.put("PID D", kD);  
+            if(isKFEnabled){
+                logger.put("PID F", kF);
+            }
+            logger.writeToFile();
+            logger.close(); 
+        }     
     }
 }

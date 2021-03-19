@@ -1,104 +1,145 @@
 package frc.robot.utilities.fridolinsMotor;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Talon;
 import frc.robot.utilities.PIDValues;
 
 public class FridoTalon extends Talon implements FridolinsMotor {
+    Encoder encoder;
+    int encoderChannel1;
+    int encoderChannel2;
 
-    public FridoTalon(int channel) {
+    public FridoTalon(int channel, int encoderChannel1, int encoderChannel2) {
         super(channel);
+        this.encoderChannel1 = encoderChannel1;
+        this.encoderChannel2 = encoderChannel2;
+    }
+
+    @Override
+    public void setPosition(double position) {
+        // TODO Auto-generated method stub
+
     }
 
     @Override
     public void setVelocity(double velocity) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
+
     }
 
     @Override
     public void enableForwardLimitSwitch(LimitSwitchPolarity polarity, boolean enable) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void enableReverseLimitSwitch(LimitSwitchPolarity polarity, boolean enable) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public boolean isForwardLimitSwitchActive() {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
     public boolean isReverseLimitSwitchActive() {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
     public void setIdleMode(IdleModeType type) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void follow(FridolinsMotor master, DirectionType direction) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void setDirection(boolean forward) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void setEncoderDirection(boolean inverted) {
-        throw new Error("Not implemented");
-
+        if (this.encoder == null) {
+            try {
+                throw new Exception("Encoder not initialized");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        this.encoder.setReverseDirection(inverted);
     }
 
     @Override
     public void setEncoderPosition(double position) {
-        throw new Error("Not implemented");
+        if (this.encoder == null) {
+            try {
+                throw new Exception("Encoder not initialized");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
+        if (position != 0) {
+            try {
+                throw new Exception("DIO encoders can't set the position");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        this.encoder.reset();
     }
 
     @Override
     public double getEncoderTicks() {
-        throw new Error("Not implemented");
-    
+        if (this.encoder == null) {
+            try {
+                throw new Exception("Encoder not initialized");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return encoder.get();
     }
 
     @Override
     public void factoryDefault() {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void configEncoder(FeedbackDevice device, int countsPerRev) {
-        throw new Error("Not implemented");
-
+        this.encoder = new Encoder(encoderChannel1, encoderChannel2);
     }
 
     @Override
     public void configOpenLoopRamp(double rate) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void setPID(PIDValues pidValues) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void putDataInCSVFile(String filePath) {
-        throw new Error("Not implemented");
+        // TODO Auto-generated method stub
 
     }
 

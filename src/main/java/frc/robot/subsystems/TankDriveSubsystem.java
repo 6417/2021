@@ -1,15 +1,19 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.MecanumDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.Base.TankDriveSubsystemBase;
-import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor.FeedbackDevice;
 
 public class TankDriveSubsystem extends TankDriveSubsystemBase {
     private static TankDriveSubsystemBase instance;
@@ -17,19 +21,20 @@ public class TankDriveSubsystem extends TankDriveSubsystemBase {
     private FridolinsMotor backrightMotor;
     private FridolinsMotor frontleftMotor;
     private FridolinsMotor backleftMotor;
-    private SpeedControllerGroup rightMotors;
-    private SpeedControllerGroup leftMotors;
     private MecanumDrive drive;
-    private Encoder encoderFrontLeft;
-    
-    private Vector2d joystickVector;
+    private MecanumDriveKinematics mecanumDriveKinematics;
+    private MecanumDriveOdometry odometry;
+    private MecanumDriveWheelSpeeds wheelSpeeds;
+    private AHRS navx;
 
     private TankDriveSubsystem() {
-        encoderFrontLeft = new Encoder(2, 3);
         configureMotors();
         drive = new MecanumDrive(frontleftMotor, backleftMotor, frontrightMotor, backrightMotor);
         drive.setRightSideInverted(false);
-        joystickVector  = new Vector2d(); 
+        mecanumDriveKinematics = new MecanumDriveKinematics(Constants.TankDrive.frontLeftWheelDisplacementMeters.get(), Constants.TankDrive.frontRightWheelDisplacementMeters.get(), Constants.TankDrive.backLeftWheelDisplacementMeters.get(), Constants.TankDrive.backRightWheelDisplacementMeters.get());
+        wheelSpeeds = new MecanumDriveWheelSpeeds();
+        navx = Constants.TankDrive.navxInitializer.get();
+        odometry = new MecanumDriveOdometry(mecanumDriveKinematics, navx.getRotation2d(), new Pose2d(0, 0, new Rotation2d(0)));
     }
 
     private void configureMotors() {
@@ -37,7 +42,15 @@ public class TankDriveSubsystem extends TankDriveSubsystemBase {
         backrightMotor = Constants.TankDrive.backRightMotorInitializer.get();
         frontleftMotor = Constants.TankDrive.frontLeftMotorInitializer.get();
         backleftMotor = Constants.TankDrive.backLeftMotorInitializer.get();
-        frontleftMotor.setInverted(true);
+
+        frontrightMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
+        backrightMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
+        frontleftMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
+        backleftMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
+
+        frontleftMotor.setDirection(false);
+        frontleftMotor.setEncoderDirection(true);
+        backleftMotor.setEncoderDirection(true);
 
         // FridolinsMotor[] motors = {frontrightMotor, backrightMotor, frontleftMotor, backleftMotor};
         // for (FridoCANSparkMax motor: motors){
@@ -86,11 +99,16 @@ public class TankDriveSubsystem extends TankDriveSubsystemBase {
     }
 
     @Override
+    public void updateOdometry() {
+        
+    }
+
+    @Override
     public void drive(double xSpeed, double ySpeed, double zRotation){
-        joystickVector.x = xSpeed;
-        joystickVector.y = ySpeed;
-        drive.driveCartesian(xSpeed, -ySpeed, zRotation);
+        //drive.driveCartesian(xSpeed, -ySpeed, zRotation);
+        SmartDashboard.putNumber("EncoderFrontLeft", frontleftMotor.getEncoderTicks());
+        SmartDashboard.putNumber("EncoderBackLeft", backleftMotor.getEncoderTicks());
+        SmartDashboard.putNumber("EncoderFrontRight", frontrightMotor.getEncoderTicks());
+        SmartDashboard.putNumber("EncoderBackRight", backrightMotor.getEncoderTicks());
     } 
-
-
 }

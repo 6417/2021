@@ -13,7 +13,7 @@ public interface FridolinsMotor extends SpeedController{
     }
 
     public enum FeedbackDevice {
-        QuadEncoder, CANEncoder
+        QuadEncoder, BuiltIn
     }
 
     public enum DirectionType {
@@ -21,6 +21,8 @@ public interface FridolinsMotor extends SpeedController{
     }
 
     public static final boolean debugMode = false;
+
+    public void set(double velocity);
     
     public void setPosition(double position);
 

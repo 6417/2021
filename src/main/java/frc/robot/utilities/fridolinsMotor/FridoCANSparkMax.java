@@ -184,11 +184,15 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
 
     @Override
     public void configEncoder(FridolinsMotor.FeedbackDevice device, int countsPerRev) {
+        if (device == FridolinsMotor.FeedbackDevice.BuiltIn) {
+            selectBuiltinFeedbackSensor();
+            return;
+        }
         this.encoder = super.getEncoder(convertFromFridoFeedbackDevice(device), countsPerRev);
         this.encoder.setPositionConversionFactor(countsPerRev);
     }
 
-    public void selectBuiltinFeedbackSensor() {
+    private void selectBuiltinFeedbackSensor() {
         this.encoder = super.getEncoder();
         super.getEncoder().setPositionConversionFactor(0);
     }
@@ -205,6 +209,11 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         this.pidController.setI(pidValues.kI);
         this.pidController.setD(pidValues.kD);
         pidValues.kF.ifPresent((kF) -> this.pidController.setFF(kF));
+        
+        double[] speedLimit = {-1, 1};
+        pidValues.lowerSpeedLimit.ifPresent((lowerLimit) -> speedLimit[0] = lowerLimit);
+        pidValues.upperSpeedLimit.ifPresent((upperLimit) -> speedLimit[1] = upperLimit);
+        this.pidController.setOutputRange(speedLimit[0], speedLimit[1]);
 
         this.kP = pidValues.kP;
         this.kI = pidValues.kI;
@@ -214,18 +223,24 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
             isKFEnabled = true;
         }
     }
-
+    
     public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
-        logger = new CSVLogger(filePath);
-        logger.put("EncoderTicks", this.getEncoderTicks());
-        logger.put("Speed", speed);
-        logger.put("setValue velocity", velocity);
-        logger.put("setValue position", position);
-        logger.put("PID P", kP);
-        logger.put("PID I", kI);
-        logger.put("PID D", kD);  
-        if(isKFEnabled){
-            logger.put("PID F", kF);
-        }      
+        logger.open();
+        if(FridolinsMotor.debugMode){
+            logger = new CSVLogger(filePath); 
+            logger.put("EncoderTicks", this.getEncoderTicks());
+            logger.put("Speed", speed);
+            logger.put("Sollwert velocity", velocity);
+            logger.put("Sollwert position", position);
+            logger.put("PID P", kP);
+            logger.put("PID I", kI);
+            logger.put("PID D", kD);  
+            if(isKFEnabled){
+                logger.put("PID F", kF);
+            }
+            logger.writeToFile();
+            logger.close();
+        }
+              
     }
 }
