@@ -213,4 +213,9 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
             logger.close(); 
         }     
     }
+
+    @Override
+    public double getEncoderSpeed() {
+        return super.getSelectedSensorVelocity();
+    }
 }

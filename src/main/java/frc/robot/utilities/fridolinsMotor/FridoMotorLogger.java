@@ -175,4 +175,10 @@ public class FridoMotorLogger implements FridolinsMotor {
         // TODO Auto-generated method stub
 
     }
+
+    @Override
+    public double getEncoderSpeed() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 } 

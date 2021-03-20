@@ -23,6 +23,7 @@ import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
+
 public final class Constants {
     public static class Joystick{
         public static final int DRIVER_ID = 1;
@@ -46,11 +47,12 @@ public final class Constants {
     }
     public static class TankDrive{
         public static final boolean IS_ENABLED = true;
+        public static final double SECONDS_TO_ACCELERATE = 0.125;
 
-        public static final int MOTOR_DRIVE_FRONT_RIGHT_ID = 12;
-        public static final int MOTOR_DRIVE_FRONT_LEFT_ID = 10;
-        public static final int MOTOR_DRIVE_BACK_RIGHT_ID = 13;
-        public static final int MOTOR_DRIVE_BACK_LEFT_ID = 11;
+        public static final int MOTOR_DRIVE_FRONT_RIGHT_ID = 0;
+        public static final int MOTOR_DRIVE_FRONT_LEFT_ID = 2;
+        public static final int MOTOR_DRIVE_BACK_RIGHT_ID = 1;
+        public static final int MOTOR_DRIVE_BACK_LEFT_ID = 3;
         public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoTalon(MOTOR_DRIVE_FRONT_RIGHT_ID, 1, 0);
         public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoTalon(MOTOR_DRIVE_BACK_RIGHT_ID, 3, 2);
         public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoTalon(MOTOR_DRIVE_FRONT_LEFT_ID, 5, 4);
@@ -62,7 +64,7 @@ public final class Constants {
         // public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoCANSparkMax(11, MotorType.kBrushless);
 
         public static final int ticksPerRotation = 512;
-        public static final double wheelDiameter = 0.133;
+        public static final double wheelDiameter = 0.10;
         public static final Supplier<Translation2d> frontLeftWheelDisplacementMeters = () -> new Translation2d(0.26, 0.19);
         public static final Supplier<Translation2d> frontRightWheelDisplacementMeters = () -> new Translation2d(-0.26, 0.19);
         public static final Supplier<Translation2d> backLeftWheelDisplacementMeters  = () -> new Translation2d(0.26, -0.19);

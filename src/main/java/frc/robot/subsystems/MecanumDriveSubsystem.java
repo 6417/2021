@@ -2,39 +2,73 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.subsystems.Base.TankDriveSubsystemBase;
+import frc.robot.subsystems.Base.MecanumDriveSubsystemBase;
+import frc.robot.utilities.ShuffleBoardInformation;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.FeedbackDevice;
 
-public class TankDriveSubsystem extends TankDriveSubsystemBase {
-    private static TankDriveSubsystemBase instance;
+public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
+    private static MecanumDriveSubsystemBase instance;
+
+    private SlewRateLimiter inputLimiterX;
+    private SlewRateLimiter inputLimiterY;
+    private SlewRateLimiter inputLimiterRotation;
+
+    private DriveMode driveMode;
+    
     private FridolinsMotor frontrightMotor;
     private FridolinsMotor backrightMotor;
     private FridolinsMotor frontleftMotor;
     private FridolinsMotor backleftMotor;
+
     private MecanumDrive drive;
-    private MecanumDriveKinematics mecanumDriveKinematics;
-    private MecanumDriveOdometry odometry;
     private MecanumDriveWheelSpeeds wheelSpeeds;
+    private MecanumDriveKinematics mecanumDriveKinematics;
+
     private AHRS navx;
 
-    private TankDriveSubsystem() {
+    private MecanumDriveOdometry odometry;
+
+    private MecanumDriveSubsystem() {
+        inputLimiterX = new SlewRateLimiter(1.0 / Constants.TankDrive.SECONDS_TO_ACCELERATE);
+        inputLimiterY = new SlewRateLimiter(1.0 / Constants.TankDrive.SECONDS_TO_ACCELERATE);
+        inputLimiterRotation = new SlewRateLimiter(1.0 / Constants.TankDrive.SECONDS_TO_ACCELERATE);
+
+        driveMode = DriveMode.RobotOriented;
+
         configureMotors();
-        drive = new MecanumDrive(frontleftMotor, backleftMotor, frontrightMotor, backrightMotor);
-        drive.setRightSideInverted(false);
+        
         mecanumDriveKinematics = new MecanumDriveKinematics(Constants.TankDrive.frontLeftWheelDisplacementMeters.get(), Constants.TankDrive.frontRightWheelDisplacementMeters.get(), Constants.TankDrive.backLeftWheelDisplacementMeters.get(), Constants.TankDrive.backRightWheelDisplacementMeters.get());
         wheelSpeeds = new MecanumDriveWheelSpeeds();
+        
+        drive = new MecanumDrive(frontleftMotor, backleftMotor, frontrightMotor, backrightMotor);
+        drive.setRightSideInverted(false);
+
         navx = Constants.TankDrive.navxInitializer.get();
         odometry = new MecanumDriveOdometry(mecanumDriveKinematics, navx.getRotation2d(), new Pose2d(0, 0, new Rotation2d(0)));
+    }
+
+    public static MecanumDriveSubsystemBase getInstance() {
+        if (instance == null) {
+            if (Constants.TankDrive.IS_ENABLED) {
+                instance = new MecanumDriveSubsystem();
+                instance.setDefaultCommand(new DefaultDriveCommand());
+            }
+            else
+                instance = new MecanumDriveSubsystemBase();
+        }
+        return instance;
     }
 
     private void configureMotors() {
@@ -43,14 +77,15 @@ public class TankDriveSubsystem extends TankDriveSubsystemBase {
         frontleftMotor = Constants.TankDrive.frontLeftMotorInitializer.get();
         backleftMotor = Constants.TankDrive.backLeftMotorInitializer.get();
 
+        frontleftMotor.setDirection(false);
+
         frontrightMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
         backrightMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
         frontleftMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
         backleftMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
 
-        frontleftMotor.setDirection(false);
-        frontleftMotor.setEncoderDirection(true);
         backleftMotor.setEncoderDirection(true);
+        frontleftMotor.setEncoderDirection(true);
 
         // FridolinsMotor[] motors = {frontrightMotor, backrightMotor, frontleftMotor, backleftMotor};
         // for (FridoCANSparkMax motor: motors){
@@ -86,29 +121,68 @@ public class TankDriveSubsystem extends TankDriveSubsystemBase {
 
     }
 
-    public static TankDriveSubsystemBase getInstance() {
-        if (instance == null) {
-            if (Constants.TankDrive.IS_ENABLED) {
-                instance = new TankDriveSubsystem();
-                instance.setDefaultCommand(new DefaultDriveCommand());
-            }
-            else
-                instance = new TankDriveSubsystemBase();
-        }
-        return instance;
+    private void resetEncoders() {
+        frontleftMotor.setEncoderPosition(0);
+        frontrightMotor.setEncoderPosition(0);
+        backleftMotor.setEncoderPosition(0);
+        backrightMotor.setEncoderPosition(0);
+    }
+
+    private double convertEncoderSpeedToMetersPerSecond(double encoderSpeed) {
+        return encoderSpeed / Constants.TankDrive.ticksPerRotation * Constants.TankDrive.wheelDiameter * Math.PI;
     }
 
     @Override
     public void updateOdometry() {
-        
+        this.wheelSpeeds.frontLeftMetersPerSecond = convertEncoderSpeedToMetersPerSecond(frontleftMotor.getEncoderSpeed());
+        this.wheelSpeeds.frontRightMetersPerSecond = convertEncoderSpeedToMetersPerSecond(frontrightMotor.getEncoderSpeed());
+        this.wheelSpeeds.rearLeftMetersPerSecond = convertEncoderSpeedToMetersPerSecond(backleftMotor.getEncoderSpeed());
+        this.wheelSpeeds.rearRightMetersPerSecond = convertEncoderSpeedToMetersPerSecond(backrightMotor.getEncoderSpeed());
+        odometry.update(navx.getRotation2d(), this.wheelSpeeds);
+    }
+
+    @Override
+    public void resetOdometry() {
+        navx.reset();
+        resetEncoders();
+        odometry.resetPosition(new Pose2d((double)0, (double)0, new Rotation2d(0)), navx.getRotation2d());
+    }
+
+    @Override
+    public Pose2d getPosition() {
+        return odometry.getPoseMeters();
+    }
+
+    @Override
+    public void toggleDriveMode() {
+        switch (driveMode)
+        {
+            case FieldOriented:
+                driveMode = DriveMode.RobotOriented;
+                break;
+            case RobotOriented:
+                driveMode = DriveMode.FieldOriented;
+                break;
+        }    
     }
 
     @Override
     public void drive(double xSpeed, double ySpeed, double zRotation){
-        //drive.driveCartesian(xSpeed, -ySpeed, zRotation);
-        SmartDashboard.putNumber("EncoderFrontLeft", frontleftMotor.getEncoderTicks());
-        SmartDashboard.putNumber("EncoderBackLeft", backleftMotor.getEncoderTicks());
-        SmartDashboard.putNumber("EncoderFrontRight", frontrightMotor.getEncoderTicks());
-        SmartDashboard.putNumber("EncoderBackRight", backrightMotor.getEncoderTicks());
+        switch (driveMode)
+        {
+            case RobotOriented:
+                drive.driveCartesian(inputLimiterX.calculate(xSpeed), inputLimiterY.calculate(-ySpeed), inputLimiterRotation.calculate(zRotation));
+                break;
+            case FieldOriented:
+                drive.driveCartesian(inputLimiterX.calculate(xSpeed), inputLimiterY.calculate(-ySpeed), inputLimiterRotation.calculate(zRotation), navx.getAngle());
+                break;
+        }
+        this.updateOdometry();
     } 
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addStringProperty("driveMode", () -> driveMode.toString(), null);
+        super.initSendable(builder);
+    }
 }

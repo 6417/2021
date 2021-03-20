@@ -16,6 +16,11 @@ public class FridoTalon extends Talon implements FridolinsMotor {
     }
 
     @Override
+    public void set(double speed) {
+        super.set(speed);
+    }
+
+    @Override
     public void setPosition(double position) {
         // TODO Auto-generated method stub
 
@@ -65,8 +70,7 @@ public class FridoTalon extends Talon implements FridolinsMotor {
 
     @Override
     public void setDirection(boolean forward) {
-        // TODO Auto-generated method stub
-
+        super.setInverted(!forward);
     }
 
     @Override
@@ -141,6 +145,11 @@ public class FridoTalon extends Talon implements FridolinsMotor {
     public void putDataInCSVFile(String filePath) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public double getEncoderSpeed() {
+        return this.encoder.getRate();
     }
 
 }

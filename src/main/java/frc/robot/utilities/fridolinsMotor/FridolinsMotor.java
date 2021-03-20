@@ -48,6 +48,8 @@ public interface FridolinsMotor extends SpeedController{
 
     public double getEncoderTicks();
 
+    public double getEncoderSpeed();
+
     public void factoryDefault();
 
     public void configEncoder(FeedbackDevice device, int countsPerRev);

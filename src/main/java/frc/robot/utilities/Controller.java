@@ -1,7 +1,9 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
+import frc.robot.subsystems.MecanumDriveSubsystem;
 
 public class Controller {
 
@@ -58,8 +60,10 @@ public class Controller {
 
         public void configureButtonBindings() {
             // Initialize the buttons
+            JoystickButton yButton = new JoystickButton(controller, Constants.Joystick.Y_BUTTON_ID); 
 
             // Configure the bindings
+            yButton.whenPressed(MecanumDriveSubsystem.getInstance()::toggleDriveMode);
         }
     }
 

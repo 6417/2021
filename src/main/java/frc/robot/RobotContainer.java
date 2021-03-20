@@ -7,8 +7,8 @@
 
 package frc.robot;
 
-import frc.robot.subsystems.TankDriveSubsystem;
-import frc.robot.subsystems.Base.TankDriveSubsystemBase;
+import frc.robot.subsystems.MecanumDriveSubsystem;
+import frc.robot.subsystems.Base.MecanumDriveSubsystemBase;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -21,6 +21,6 @@ public class RobotContainer {
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    TankDriveSubsystemBase tankDriveSubsystem = TankDriveSubsystem.getInstance();
+    MecanumDriveSubsystemBase tankDriveSubsystem = MecanumDriveSubsystem.getInstance();
   }
 }

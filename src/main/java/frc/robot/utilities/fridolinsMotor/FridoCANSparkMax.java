@@ -243,4 +243,9 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         }
               
     }
+
+    @Override
+    public double getEncoderSpeed() {
+        return this.encoder.getVelocity();
+    }
 }

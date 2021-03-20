@@ -7,14 +7,17 @@
 
 package frc.robot;
 
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.TankDrive;
-import frc.robot.subsystems.TankDriveSubsystem;
-import frc.robot.subsystems.Base.TankDriveSubsystemBase;
-import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
+import frc.robot.subsystems.MecanumDriveSubsystem;
+import frc.robot.subsystems.Base.MecanumDriveSubsystemBase;
+import frc.robot.utilities.Controller;
+import frc.robot.utilities.fridolinsMotor.FridoTalon;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -36,7 +39,7 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
-        TankDriveSubsystem.getInstance();
+        MecanumDriveSubsystem.getInstance();
     }
 
     /**
@@ -87,8 +90,11 @@ public class Robot extends TimedRobot {
     public void autonomousPeriodic() {
     }    
 
+    MecanumDriveSubsystemBase drive = MecanumDriveSubsystem.getInstance();
+
     @Override
     public void teleopInit() {
+        drive.resetOdometry();
     }
 
     /**
@@ -97,6 +103,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+        Pose2d position = drive.getPosition();
+        SmartDashboard.putNumber("PositionX", position.getX());
+        SmartDashboard.putNumber("PositionY", position.getY());
     }
 
     @Override
