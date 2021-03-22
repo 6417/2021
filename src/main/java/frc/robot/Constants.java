@@ -337,10 +337,10 @@ public final class Constants {
         }
 
         public static class Motors {
-            public static final int LOADER_ID = 1;
+            public static final int LOADER_ID = 15;
             public static final int SHOOT_DIRECTION_ID = 8;
             public static final int SHOOT_ANGLE_ID = 2;
-            public static final int SHOOT_ID = 3;
+            public static final int SHOOT_ID = 14;
             public static final Supplier<FridolinsMotor> loaderMotor = () -> new FridoCANSparkMax(LOADER_ID,
                     MotorType.kBrushless);
             public static final Supplier<FridolinsMotor> directionMotor = () -> new FridoCANSparkMax(SHOOT_DIRECTION_ID,
