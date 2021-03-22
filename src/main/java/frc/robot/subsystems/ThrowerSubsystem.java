@@ -35,11 +35,13 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     if (instance == null) {
         if (Constants.Thrower.IS_ENABLED) 
             instance = new ThrowerSubsystem();
+        else {
+          instance = new ThrowerSubsystemBase();
+        }
     }
     return instance;
   }
 
-  //TODO: change to private
   public void initMotors() {
     loaderMotor.factoryDefault();
     turretDirectionMotor.factoryDefault();
@@ -76,19 +78,33 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     return loaderMotor.isReverseLimitSwitchActive();
   }
 
+  @Override
   public void runLoaderMotor(double speed) {
     loaderMotor.set(speed);
   }
 
+  @Override
   public void setTurretShootingDirection(double angle) {
     turretDirectionMotor.setPosition(convertTurretAngleToEncoderTicks(angle));
     System.out.println("Set the position to " + convertTurretAngleToEncoderTicks(angle) + "    " + turretDirectionMotor.getEncoderTicks());
   }
 
+  @Override
+  public void runTurretShootingAngleMotor(double percent) {
+    turretAngleMotor.set(percent);
+  }
+  
+  @Override
   public void setTurretShootingAngle(double angle) {
     turretAngleMotor.setPosition(convertTurretAngleToEncoderTicks(angle));    
   }
 
+  @Override
+  public void runShooterMotor(double speed) {
+    shootMotor.set(speed);
+  }
+
+  @Override
   public void setShooterSpeed(double speed) {
     shootMotor.setVelocity(speed);
   }
