@@ -37,9 +37,10 @@ public class SwerveDrive extends SwerveDriveBase {
         directionCorectorGetter = Constants.SwerveDrive.directionCorectorGetter;
         for (var moduleEntry : modules.entrySet()) {
             SendableRegistry.addLW(moduleEntry.getValue(), "Swerve Module " + moduleEntry.getKey().toString());
-            moduleEntry.getValue().csvLogger = new CSVLogger("tmp/" + SendableRegistry.getName(moduleEntry.getValue()) + ".csv");
+            moduleEntry.getValue().csvLogger = new CSVLogger(
+                    "tmp/" + SendableRegistry.getName(moduleEntry.getValue()) + ".csv");
         }
-        
+
     }
 
     public static SwerveDriveBase getInstance() {
@@ -50,6 +51,16 @@ public class SwerveDrive extends SwerveDriveBase {
             } else
                 instance = new SwerveDriveBase();
         return instance;
+    }
+
+    @Override 
+    public boolean isModuleZeroed(Constants.SwerveDrive.MountingLocations mountingLocation) {
+        return modules.get(mountingLocation).hasEncoderBeenZeroed();
+    }
+
+    @Override
+    public void withModule(Constants.SwerveDrive.MountingLocations mountingLocation, Consumer<SwerveModule> consumer) {
+        consumer.accept(modules.get(mountingLocation));
     }
 
     @Override
@@ -137,5 +148,11 @@ public class SwerveDrive extends SwerveDriveBase {
         builder.addDoubleProperty("Current chassi speed x", () -> currentChassisSpeeds.vxMetersPerSecond, null);
         builder.addDoubleProperty("Current chassi speed y", () -> currentChassisSpeeds.vxMetersPerSecond, null);
         builder.addDoubleProperty("Current chassi speed rotation", () -> currentChassisSpeeds.vxMetersPerSecond, null);
+    }
+
+    @Override
+    public void forEachModuleEntry(
+            Consumer<Map.Entry<Constants.SwerveDrive.MountingLocations, SwerveModule>> consumer) {
+        modules.entrySet().stream().forEach(consumer);
     }
 }

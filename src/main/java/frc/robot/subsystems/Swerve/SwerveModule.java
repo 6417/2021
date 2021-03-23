@@ -10,8 +10,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
+import frc.robot.utilities.ShuffleBoardInformation;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 public class SwerveModule implements Sendable {
@@ -32,6 +34,7 @@ public class SwerveModule implements Sendable {
         public FridolinsMotor.FeedbackDevice rotationEncoderType;
         public boolean driveSensorInverted;
         public boolean driveMotorInverted;
+        public SwerveModuleState homeState;
 
         @Override
         public Config clone() {
@@ -64,6 +67,7 @@ public class SwerveModule implements Sendable {
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
                 boolean driveSensorInverted, FridolinsMotor rotation,
                 FridolinsMotor.FeedbackDevice rotationEncoderType) {
+            // DO NOT MAKE FACTORY DEFAULTS, for some reason it breaks every thing
             this.drive = drive;
             this.rotation = rotation;
             this.drive.configEncoder(driveEncoderType, (int) driveMotorTicksPerRotation);
@@ -95,6 +99,15 @@ public class SwerveModule implements Sendable {
     }
 
     public double getModuleRotationAngle() {
+        // return ((motors.rotation.getEncoderTicks() /
+        // motors.rotatoinMotorTicksPerRotation) * Math.PI * 2) % (Math.PI * 2);
+        return Vector2d
+                .fromRad(((motors.rotation.getEncoderTicks() / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2)
+                        % (Math.PI * 2))
+                .toRadians();
+    }
+
+    public double getRawModuleRotationAngle() {
         return ((motors.rotation.getEncoderTicks() / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2)
                 % (Math.PI * 2);
     }
@@ -103,8 +116,17 @@ public class SwerveModule implements Sendable {
         return Vector2d.fromRad(desiredState.angle.getRadians());
     }
 
+    private double rotationMotorEncoderTicksToAngle(double ticks) {
+        return (ticks / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2;
+    }
+
     private double angleToRotationMotorEncoderTicks(double angle) {
-        return angle / (Math.PI * 2) * motors.rotatoinMotorTicksPerRotation;
+        double angleDelta = (angle % (Math.PI * 2))
+                - (rotationMotorEncoderTicksToAngle(getRawModuleRotationAngle() % motors.rotatoinMotorTicksPerRotation)
+                        % (Math.PI * 2));
+        double angleToSteer = rotationMotorEncoderTicksToAngle(getRawModuleRotationAngle()) + angleDelta;
+        return angleToSteer / (Math.PI * 2) * motors.rotatoinMotorTicksPerRotation;
+        // return angle / (Math.PI * 2) * motors.rotatoinMotorTicksPerRotation;
     }
 
     private double meterPerSecondToDriveMotorEncoderVelocityUnits(double speedMs) {
@@ -129,6 +151,8 @@ public class SwerveModule implements Sendable {
         }
     }
 
+    private int timeStampOfCSV = 0;
+
     public void setDesiredState(SwerveModuleState desiredState) {
         // this.desiredState = limiter.limitState(desiredState, getModuleRotation(),
         // driveMotorEncoderVelocityToPercent(getSpeed()));
@@ -139,13 +163,34 @@ public class SwerveModule implements Sendable {
         csvLogger.put("desired state speed", desiredState.speedMetersPerSecond);
         csvLogger.put("rotation angle", getModuleRotationAngle());
         csvLogger.put("rotation encoder ticks", motors.rotation.getEncoderTicks());
+        csvLogger.put("time stamp", timeStampOfCSV);
+        timeStampOfCSV++;
+    }
+
+    public void enableLimitSwitch() {
+        motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, true);
+    }
+
+    public void disableLimitSwitch() {
+        motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
 
     public void drive() {
-        motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians())); // TODO: Fix bug
-                                                                                                        // that module
-                                                                                                        // rotates to
-                                                                                                        // many times
+        // Vector2d desiredRotation = Vector2d.fromRad(desiredState.angle.getRadians());
+        // double angleDelta = Math.acos(getModuleRotation().dot(desiredRotation));
+        // double angleDelta = getModuleRotationAngle() -
+        // desiredState.angle.getRadians();
+        // double angleToSteer = getModuleRotationAngle() + angleDelta;
+        // System.out.println(String.format("angle to steer: %f, angle delta: %f, module
+        // rotation ticks %f, desired ticks %f, angle of desired state %f",
+        // angleToSteer, angleDelta, motors.rotation.getEncoderTicks(),
+        // angleToRotationMotorEncoderTicks(angleToSteer)),
+        // desiredState.angle.getDegrees());
+        // motors.rotation.setPosition(angleToRotationMotorEncoderTicks(angleToSteer));
+
+        // motors.rotation.setPosition(angleToRotationMotorEncoderTicks(angleDelta));
+        motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
+
         motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond));
     }
 
@@ -194,7 +239,12 @@ public class SwerveModule implements Sendable {
         builder.addDoubleProperty("Desired state speed encoder velocity units",
                 () -> meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond), null);
         builder.addDoubleProperty("Desired state angle", () -> desiredState.angle.getDegrees(), null);
+        builder.addDoubleProperty("Desired state rotation encoder ticks",
+                () -> angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()), null);
         builder.addDoubleProperty("Module angel", () -> getModuleRotationAngle() * 360 / (Math.PI * 2), null);
         builder.addDoubleProperty("Moudle speed", () -> getSpeed(), null);
+        builder.addDoubleProperty("Module Rotation Encoder Ticks", motors.rotation::getEncoderTicks, null);
+        builder.addBooleanProperty("forward limit switch", motors.rotation::isForwardLimitSwitchActive, null);
+        builder.addBooleanProperty("Module Zeroed", this::hasEncoderBeenZeroed, null);
     }
 }
