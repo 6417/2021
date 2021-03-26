@@ -70,7 +70,7 @@ public class SwerveDrive extends SwerveDriveBase {
                 .toLabledSwerveModuleStates(requestedMovement);
         for (var labeledState : states.entrySet())
             modules.get(labeledState.getKey()).setDesiredState(labeledState.getValue());
-        correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
+        // correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
         for (var module : modules.values())
             module.drive();
     }

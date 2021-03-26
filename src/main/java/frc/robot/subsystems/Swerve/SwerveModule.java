@@ -59,7 +59,7 @@ public class SwerveModule implements Sendable {
     private static class Motors {
         public FridolinsMotor drive;
         public FridolinsMotor rotation;
-        public double rotatoinMotorTicksPerRotation;
+        public double rotationMotorTicksPerRotation;
         public double driveMotorTicksPerRotation;
         public double wheelCircumference;
         public double maxVelocity;
@@ -71,7 +71,7 @@ public class SwerveModule implements Sendable {
             this.drive = drive;
             this.rotation = rotation;
             this.drive.configEncoder(driveEncoderType, (int) driveMotorTicksPerRotation);
-            this.rotation.configEncoder(rotationEncoderType, (int) rotatoinMotorTicksPerRotation);
+            this.rotation.configEncoder(rotationEncoderType, (int) rotationMotorTicksPerRotation);
             this.drive.setEncoderDirection(driveSensorInverted);
             this.drive.setDirection(driveMotorInverted);
         }
@@ -88,7 +88,7 @@ public class SwerveModule implements Sendable {
         motors.drive.setPID(config.drivePID);
         motors.rotation.setPID(config.rotationPID);
         motors.driveMotorTicksPerRotation = config.driveMotorTicksPerRotation;
-        motors.rotatoinMotorTicksPerRotation = config.rotationMotorTicksPerRotation;
+        motors.rotationMotorTicksPerRotation = config.rotationMotorTicksPerRotation;
         motors.wheelCircumference = config.wheelCircumference;
         limiter = config.limiterInitializer.get();
         motors.maxVelocity = config.maxVelocity;
@@ -99,34 +99,27 @@ public class SwerveModule implements Sendable {
     }
 
     public double getModuleRotationAngle() {
-        // return ((motors.rotation.getEncoderTicks() /
-        // motors.rotatoinMotorTicksPerRotation) * Math.PI * 2) % (Math.PI * 2);
         return Vector2d
-                .fromRad(((motors.rotation.getEncoderTicks() / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2)
+                .fromRad(((motors.rotation.getEncoderTicks() / motors.rotationMotorTicksPerRotation) * Math.PI * 2)
                         % (Math.PI * 2))
                 .toRadians();
     }
 
     public double getRawModuleRotationAngle() {
-        return ((motors.rotation.getEncoderTicks() / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2)
-                % (Math.PI * 2);
+        return (motors.rotation.getEncoderTicks() / motors.rotationMotorTicksPerRotation) * Math.PI * 2;
     }
 
     public Vector2d getTargetVector() {
         return Vector2d.fromRad(desiredState.angle.getRadians());
     }
 
-    private double rotationMotorEncoderTicksToAngle(double ticks) {
-        return (ticks / motors.rotatoinMotorTicksPerRotation) * Math.PI * 2;
-    }
-
     private double angleToRotationMotorEncoderTicks(double angle) {
-        double angleDelta = (angle % (Math.PI * 2))
-                - (rotationMotorEncoderTicksToAngle(getRawModuleRotationAngle() % motors.rotatoinMotorTicksPerRotation)
-                        % (Math.PI * 2));
-        double angleToSteer = rotationMotorEncoderTicksToAngle(getRawModuleRotationAngle()) + angleDelta;
-        return angleToSteer / (Math.PI * 2) * motors.rotatoinMotorTicksPerRotation;
-        // return angle / (Math.PI * 2) * motors.rotatoinMotorTicksPerRotation;
+        double angleDelta = Math.acos(getModuleRotation().dot(Vector2d.fromRad(angle)));
+        double steeringDirection = Math.signum(getModuleRotation().cross(Vector2d.fromRad(angle))); // don't know why it
+                                                                                                    // works, but it
+                                                                                                    // works
+        return motors.rotation.getEncoderTicks()
+                + steeringDirection * (angleDelta / (Math.PI * 2)) * motors.rotationMotorTicksPerRotation;
     }
 
     private double meterPerSecondToDriveMotorEncoderVelocityUnits(double speedMs) {
@@ -157,14 +150,12 @@ public class SwerveModule implements Sendable {
         // this.desiredState = limiter.limitState(desiredState, getModuleRotation(),
         // driveMotorEncoderVelocityToPercent(getSpeed()));
         this.desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
-        csvLogger.put("desired state angle", desiredState.angle.getDegrees());
-        csvLogger.put("desired rotation motor encoder ticks",
-                angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
-        csvLogger.put("desired state speed", desiredState.speedMetersPerSecond);
-        csvLogger.put("rotation angle", getModuleRotationAngle());
-        csvLogger.put("rotation encoder ticks", motors.rotation.getEncoderTicks());
-        csvLogger.put("time stamp", timeStampOfCSV);
-        timeStampOfCSV++;
+        // csvLogger.put("desired state angle", desiredState.angle.getDegrees());
+        // csvLogger.put("desired state speed", desiredState.speedMetersPerSecond);
+        // csvLogger.put("rotation angle", getModuleRotationAngle());
+        // csvLogger.put("rotation encoder ticks", motors.rotation.getEncoderTicks());
+        // csvLogger.put("time stamp", timeStampOfCSV);
+        // timeStampOfCSV++;
     }
 
     public void enableLimitSwitch() {
@@ -176,21 +167,7 @@ public class SwerveModule implements Sendable {
     }
 
     public void drive() {
-        // Vector2d desiredRotation = Vector2d.fromRad(desiredState.angle.getRadians());
-        // double angleDelta = Math.acos(getModuleRotation().dot(desiredRotation));
-        // double angleDelta = getModuleRotationAngle() -
-        // desiredState.angle.getRadians();
-        // double angleToSteer = getModuleRotationAngle() + angleDelta;
-        // System.out.println(String.format("angle to steer: %f, angle delta: %f, module
-        // rotation ticks %f, desired ticks %f, angle of desired state %f",
-        // angleToSteer, angleDelta, motors.rotation.getEncoderTicks(),
-        // angleToRotationMotorEncoderTicks(angleToSteer)),
-        // desiredState.angle.getDegrees());
-        // motors.rotation.setPosition(angleToRotationMotorEncoderTicks(angleToSteer));
-
-        // motors.rotation.setPosition(angleToRotationMotorEncoderTicks(angleDelta));
         motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
-
         motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond));
     }
 

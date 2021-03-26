@@ -86,8 +86,8 @@ public final class Constants {
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
         // setting up commmon configurations for all swerve modules
         static {
-            commonConfigurations.driveMotorTicksPerRotation = 196608.0;
-            commonConfigurations.rotationMotorTicksPerRotation = 115640.0;
+            commonConfigurations.driveMotorTicksPerRotation = 11564.0;
+            commonConfigurations.rotationMotorTicksPerRotation = 196608.0;
             commonConfigurations.drivePID = new PIDValues(0.015, 0.0, 0.0, 0.03375);
             commonConfigurations.drivePID.slotIdX = Optional.of(0);
             commonConfigurations.rotationPID = new PIDValues(0.6, 0.16, 4.0);

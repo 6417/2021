@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Swerve.SwerveDrive;
 import frc.robot.utilities.Controller;
+import frc.robot.utilities.ShuffleBoardInformation;
 
 public class DefaultDriveCommand extends CommandBase {
     public DefaultDriveCommand() {
