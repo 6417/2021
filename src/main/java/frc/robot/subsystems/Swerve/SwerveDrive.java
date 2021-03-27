@@ -155,4 +155,9 @@ public class SwerveDrive extends SwerveDriveBase {
             Consumer<Map.Entry<Constants.SwerveDrive.MountingLocations, SwerveModule>> consumer) {
         modules.entrySet().stream().forEach(consumer);
     }
+
+    @Override
+    public void setModuleRotationEncoderTicks(MountingLocations mountingLocation, double ticks) {
+         modules.get(mountingLocation).setRotationEncoderTicks(ticks);
+    }
 }

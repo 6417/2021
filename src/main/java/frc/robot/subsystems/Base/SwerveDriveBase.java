@@ -33,6 +33,10 @@ public class SwerveDriveBase extends SubsystemBase {
 
     }
 
+    public void setModuleRotationEncoderTicks(Constants.SwerveDrive.MountingLocations mountingLocation, double ticks) {
+        
+    }
+
     public void forEachModule(Consumer<SwerveModule> consumer) {
 
     }

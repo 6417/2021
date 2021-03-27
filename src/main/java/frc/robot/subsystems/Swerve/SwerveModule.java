@@ -34,7 +34,7 @@ public class SwerveModule implements Sendable {
         public FridolinsMotor.FeedbackDevice rotationEncoderType;
         public boolean driveSensorInverted;
         public boolean driveMotorInverted;
-        public SwerveModuleState homeState;
+        public double halSensorPosition;
 
         @Override
         public Config clone() {
@@ -81,6 +81,7 @@ public class SwerveModule implements Sendable {
     private SwerveLimiter limiter;
     private SwerveModuleState desiredState = new SwerveModuleState();
     public CSVLogger csvLogger;
+    public final double halSensorPosition;
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.driveEncoderType, config.driveMotorInverted,
@@ -92,6 +93,7 @@ public class SwerveModule implements Sendable {
         motors.wheelCircumference = config.wheelCircumference;
         limiter = config.limiterInitializer.get();
         motors.maxVelocity = config.maxVelocity;
+        halSensorPosition = config.halSensorPosition;
     }
 
     public Vector2d getModuleRotation() {
@@ -188,6 +190,14 @@ public class SwerveModule implements Sendable {
         motors.rotation.set(0.0);
     }
 
+    public double getRotationEncoderTicks() {
+        return motors.rotation.getEncoderTicks(); 
+    }
+
+    public void setDesiredRotationMotorTicks(double position) {
+        motors.rotation.setPosition(position);
+    }
+
     public void stopAllMotors() {
         stopDriveMotor();
         stopRotationMotor();
@@ -224,4 +234,9 @@ public class SwerveModule implements Sendable {
         builder.addBooleanProperty("forward limit switch", motors.rotation::isForwardLimitSwitchActive, null);
         builder.addBooleanProperty("Module Zeroed", this::hasEncoderBeenZeroed, null);
     }
+
+	public void setRotationEncoderTicks(double ticks) {
+        isEncoderZeroed = true;
+        motors.rotation.setEncoderPosition(ticks);
+	}
 }

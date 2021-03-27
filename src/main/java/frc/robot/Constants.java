@@ -64,7 +64,9 @@ public final class Constants {
         public static final boolean enabled = true;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
-        public static final double zeroingSpeed = 0.3;
+        public static final double zeroingSpeed = 500.0;
+        public static final double deadBand = 0.075;
+        public static final double finetuningZeroFactor = 0.1;
         public static final double maxSpeedOfDrive = 14132.0; // max velocity for swerve drive in encoder ticks per 100ms
         public static final double maxRotationSpeed = Math.PI; // at full rotation speed the robot will turn by 180
                                                                // degrees, in rad per second
@@ -97,7 +99,7 @@ public final class Constants {
             commonConfigurations.maxVelocity = maxSpeedOfDrive;
             commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
             commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
-            commonConfigurations.homeState = new SwerveModuleState();
+            commonConfigurations.halSensorPosition = 196608.0;
         }
 
         // adding module specific configurations
@@ -108,7 +110,7 @@ public final class Constants {
             frontLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(33);
             frontLeftConfig.driveMotorInverted = true;
             frontLeftConfig.driveSensorInverted = true;
-            frontLeftConfig.homeState = new SwerveModuleState(0.0, Rotation2d.fromDegrees(143.04738844690416));
+            frontLeftConfig.halSensorPosition = 0.0;
             swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
 
             SwerveModule.Config frontRightConfig = commonConfigurations.clone();
@@ -117,7 +119,7 @@ public final class Constants {
             frontRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(39);
             frontRightConfig.driveMotorInverted = true;
             frontRightConfig.driveSensorInverted = true;
-            frontRightConfig.homeState = new SwerveModuleState(0.0, Rotation2d.fromDegrees(147.03528193739));
+            frontRightConfig.halSensorPosition = 196608.0;
             swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
 
             SwerveModule.Config backLeftConfig = commonConfigurations.clone();
@@ -126,7 +128,7 @@ public final class Constants {
             backLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(35);
             backLeftConfig.driveMotorInverted = true;
             backLeftConfig.driveSensorInverted = true;
-            backLeftConfig.homeState = new SwerveModuleState(0.0, Rotation2d.fromDegrees(163.66551366309236));
+            backLeftConfig.halSensorPosition = 196608.0;
             swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
 
             SwerveModule.Config backRightConfig = commonConfigurations.clone();
@@ -135,7 +137,7 @@ public final class Constants {
             backRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(37);
             backRightConfig.driveMotorInverted = false;
             backRightConfig.driveSensorInverted = true;
-            backRightConfig.homeState = new SwerveModuleState(0.0, Rotation2d.fromDegrees(147.8714285714286));
+            backRightConfig.halSensorPosition = 196608.0;
             swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
         }
     }
