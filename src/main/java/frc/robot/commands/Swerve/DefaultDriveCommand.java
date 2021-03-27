@@ -31,17 +31,26 @@ public class DefaultDriveCommand extends CommandBase {
      */
     private double[] applyDeadBandToXYJoystick() {
         double[] output = new double[3];
-        Vector2d xyVector = new Vector2d(Controller.getInstance().driveJoystick.getLeftStickX(),
-                Controller.getInstance().driveJoystick.getLeftStickY());
-        xyVector.normalize();
-        xyVector.mult(map(
-                Math.hypot(Controller.getInstance().driveJoystick.getLeftStickX(),
-                        Controller.getInstance().driveJoystick.getLeftStickY()),
-                0.0, 1.0, Constants.SwerveDrive.deadBand, 1.0));
-        output[0] = xyVector.x;
-        output[1] = xyVector.y;
-        output[2] = map(Controller.getInstance().driveJoystick.getRightStickX(), 0.0, 1.0,
-                Constants.SwerveDrive.deadBand, 1.0);
+        if (Math.abs(Controller.getInstance().driveJoystick.getLeftStickX()) > 0.0
+                || Math.abs(Controller.getInstance().driveJoystick.getLeftStickY()) > 0.0) {
+            Vector2d xyVector = new Vector2d(Controller.getInstance().driveJoystick.getLeftStickX(),
+                    Controller.getInstance().driveJoystick.getLeftStickY());
+            xyVector = xyVector.normalize();
+            xyVector = xyVector.mult(map(
+                    Math.hypot(Controller.getInstance().driveJoystick.getLeftStickX(),
+                            Controller.getInstance().driveJoystick.getLeftStickY()),
+                    Constants.SwerveDrive.deadBand, 1.0, 0.0, 1.0));
+            output[0] = xyVector.x;
+            output[1] = xyVector.y;
+        } else {
+            output[0] = 0.0;
+            output[1] = 0.0;
+        }
+        if (Math.abs(Controller.getInstance().driveJoystick.getRightStickX()) > Constants.SwerveDrive.deadBand)
+            output[2] = map(Controller.getInstance().driveJoystick.getRightStickX(), Constants.SwerveDrive.deadBand,
+                    1.0, 0.0, 1.0);
+        else
+            output[2] = 0.0;
         return output;
     }
 
