@@ -60,8 +60,10 @@ public final class Constants {
         public static final class ButtounIds {
             public static final int zeroEncoders = Joystick.X_BUTTON_ID;
         }
-        
+
+
         public static final boolean enabled = true;
+        public static final boolean rotateAllModulesInSameDirection = true; 
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
         public static final double zeroingSpeed = 500.0;
@@ -101,6 +103,8 @@ public final class Constants {
             commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
             commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
             commonConfigurations.halSensorPosition = 196608.0;
+            commonConfigurations.centricSwerve = false;
+            commonConfigurations.limitModuleStates = false;
         }
 
         // adding module specific configurations

@@ -35,6 +35,8 @@ public class SwerveModule implements Sendable {
         public boolean driveSensorInverted;
         public boolean driveMotorInverted;
         public double halSensorPosition;
+        public boolean limitModuleStates;
+        public boolean centricSwerve;
 
         @Override
         public Config clone() {
@@ -83,6 +85,8 @@ public class SwerveModule implements Sendable {
     private SwerveModuleState desiredState = new SwerveModuleState();
     public CSVLogger csvLogger;
     public final double halSensorPosition;
+    public final boolean centricSwerve;
+    public final boolean limitedModuleStates;
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.driveEncoderType, config.driveMotorInverted,
@@ -95,6 +99,8 @@ public class SwerveModule implements Sendable {
         limiter = config.limiterInitializer.get();
         motors.maxVelocity = config.maxVelocity;
         halSensorPosition = config.halSensorPosition;
+        centricSwerve = config.centricSwerve;
+        limitedModuleStates = config.limitModuleStates;
     }
 
     public Vector2d getModuleRotation() {
@@ -148,10 +154,18 @@ public class SwerveModule implements Sendable {
     }
 
     public void setDesiredState(SwerveModuleState state) {
-        desiredState = limiter.limitState(state, getModuleRotation(),
-                driveMotorEncoderVelocityToPercent(getSpeed()));
-        desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
-        // desiredState = optimize(state, new Rotation2d(getModuleRotationAngle()));
+        if (limitedModuleStates)
+            desiredState = limiter.limitState(state, getModuleRotation(),
+                    driveMotorEncoderVelocityToPercent(getSpeed()));
+        else
+            desiredState = state;
+
+        if (centricSwerve)
+            desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
+        else if (desiredState.speedMetersPerSecond < 0.0) {
+            desiredState.angle.rotateBy(Rotation2d.fromDegrees(180));
+            desiredState.speedMetersPerSecond *= -1;
+        }
     }
 
     public void enableLimitSwitch() {

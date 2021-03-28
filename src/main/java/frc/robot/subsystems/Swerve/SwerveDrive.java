@@ -91,7 +91,8 @@ public class SwerveDrive extends SwerveDriveBase {
         states = normalizeStates(states);
         for (var labeledState : states.entrySet())
             modules.get(labeledState.getKey()).setDesiredState(labeledState.getValue());
-        correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
+        if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
+            correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
         for (var module : modules.values())
             module.drive();
     }
