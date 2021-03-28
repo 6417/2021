@@ -1,6 +1,6 @@
 package frc.robot.utilities.fridolinsMotor;
 
-import ch.fridolinsrobotik.utilities.CSVLogger;
+import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoMotorLogger implements FridolinsMotor {
@@ -169,5 +169,10 @@ public class FridoMotorLogger implements FridolinsMotor {
     @Override
     public void pidWrite(double output) {
 
+    }
+
+    @Override
+    public double getEncoderVelocity() {
+        return 0;
     }
 } 
