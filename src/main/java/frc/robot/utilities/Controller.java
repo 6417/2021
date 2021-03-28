@@ -1,7 +1,9 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
+import frc.robot.commands.Swerve.ZeroEncoders;
 
 public class Controller {
 
@@ -49,6 +51,7 @@ public class Controller {
 
     public class DriveJoystick extends SuperJoystick {
         // Define Buttons to make Bindings
+        JoystickButton zeroEncodersButton;
 
         public DriveJoystick() {
             super();
@@ -58,8 +61,10 @@ public class Controller {
 
         public void configureButtonBindings() {
             // Initialize the buttons
+            zeroEncodersButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.zeroEncoders);
 
-            // Configure the bindings
+            // Configure the binding
+            zeroEncodersButton.whenPressed(new ZeroEncoders());
         }
     }
 
