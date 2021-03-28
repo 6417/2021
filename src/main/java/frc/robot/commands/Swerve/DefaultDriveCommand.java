@@ -67,6 +67,6 @@ public class DefaultDriveCommand extends CommandBase {
             double rotationSpeed = xyr[2] * Constants.SwerveDrive.maxRotationSpeed;
             SwerveDrive.getInstance().drive(new ChassisSpeeds(xSpeed, ySpeed, rotationSpeed));
         } else
-            SwerveDrive.getInstance().forEachModule((module) -> module.stopDriveMotor());
+            SwerveDrive.getInstance().stopAllMotors();
     }
 }

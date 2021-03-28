@@ -56,4 +56,8 @@ public class SwerveDriveBase extends SubsystemBase {
     public void withModule(Constants.SwerveDrive.MountingLocations mountingLocation, Consumer<SwerveModule> consumer) {
 
     }
+
+    public void setSpeedFactor(double speedFactor) {
+        
+    }
 }

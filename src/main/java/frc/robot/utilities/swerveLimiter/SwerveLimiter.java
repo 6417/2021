@@ -2,6 +2,7 @@ package frc.robot.utilities.swerveLimiter;
 
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -55,12 +56,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
      *         been called yet it will return {@link #defaultLoopTime}.
      */
     private long getLoopTime() {
-        long loopTime = defaultLoopTime;
-        if (loopTimeTimer.getPastTime().isPresent())
-            loopTime = loopTimeTimer.getPastTimeAndRestart().get();
-        else
-            loopTimeTimer.start();
-        return loopTime;
+        return loopTimeTimer.getPastTimeAndRestart().orElse(defaultLoopTime);
     }
 
     /**
@@ -186,7 +182,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
     private Vector2d getBestSolutionOfInverseDotProduct(Pair<Vector2d, Vector2d> solutions, Vector2d moduleRotation,
             Vector2d actualTargetVector) {
         Vector2d bestSoution = getLimitedVectorCloserToModuleRotation(solutions, moduleRotation, actualTargetVector);
-        if (Math.abs(moduleRotation.dot(actualTargetVector)) > moduleRotation.dot(bestSoution))
+        if (Math.abs(moduleRotation.dot(actualTargetVector)) > Math.abs(moduleRotation.dot(bestSoution)))
             return actualTargetVector;
         return bestSoution;
     }
@@ -223,13 +219,19 @@ public class SwerveLimiter extends SwerveLimiterBase {
     @Override
     public SwerveModuleState limitState(SwerveModuleState desiredState, Vector2d currentModuleRotation,
             double moduleSpeed) {
+        System.out.print("moduleSpeed: " + moduleSpeed + " ");
         Vector2d moduleRotation = currentModuleRotation.clone();
         Vector2d targetVector = Vector2d.fromRad(desiredState.angle.getRadians());
 
         rotateModuleRotationIfNecessary(moduleRotation, targetVector);
 
-        Pair<Vector2d, Vector2d> limitedTargetVectors = moduleRotation.normalize()
-                .inverseDot(getLimitedDotProduct(moduleSpeed));
+        double limitedDotProduct = getLimitedDotProduct(Math.abs(moduleSpeed));
+        System.out.print("limiited dot product: " + limitedDotProduct + " ");
+        Pair<Vector2d, Vector2d> limitedTargetVectors = moduleRotation.normalize().inverseDot(limitedDotProduct);
+
+        System.out.println("dot product of limited target vector and currentModuleRotation: "
+                + getBestSolutionOfInverseDotProduct(limitedTargetVectors, moduleRotation, targetVector)
+                        .dot(currentModuleRotation));
 
         return vectorToSwerveModuleState(
                 getBestSolutionOfInverseDotProduct(limitedTargetVectors, moduleRotation, targetVector),

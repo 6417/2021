@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Swerve;
 
 import java.util.AbstractMap;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,6 +27,7 @@ public class SwerveDrive extends SwerveDriveBase {
     private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModule> modules = new HashMap<>();
     private SwerveLimiter.RotationDirectionCorrectorGetter<Constants.SwerveDrive.MountingLocations> directionCorectorGetter;
     private ChassisSpeeds currentChassisSpeeds = new ChassisSpeeds();
+    private double speedFactor = Constants.SwerveDrive.defaultSpeedFactor;
 
     private SwerveDrive() {
         for (var location : Constants.SwerveDrive.MountingLocations.values())
@@ -53,7 +55,7 @@ public class SwerveDrive extends SwerveDriveBase {
         return instance;
     }
 
-    @Override 
+    @Override
     public boolean isModuleZeroed(Constants.SwerveDrive.MountingLocations mountingLocation) {
         return modules.get(mountingLocation).hasEncoderBeenZeroed();
     }
@@ -63,14 +65,33 @@ public class SwerveDrive extends SwerveDriveBase {
         consumer.accept(modules.get(mountingLocation));
     }
 
+    private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> normalizeStates(
+            HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states) {
+        double maxOfCurrentSpeeds = states.values().stream()
+                .max(Comparator.comparing((SwerveModuleState state) -> state.speedMetersPerSecond))
+                .get().speedMetersPerSecond;
+        if (maxOfCurrentSpeeds > Constants.SwerveDrive.maxSpeedOfDrive * speedFactor) {
+            HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> normalizedStates = new HashMap<>();
+            for (var stateEntry : states.entrySet()) {
+                SwerveModuleState normalizedState = stateEntry.getValue();
+                normalizedState.speedMetersPerSecond /= maxOfCurrentSpeeds;
+                normalizedState.speedMetersPerSecond *= speedFactor;
+                normalizedStates.put(stateEntry.getKey(), normalizedState);
+            }
+            return normalizedStates;
+        } else
+            return states;
+    }
+
     @Override
     public void drive(ChassisSpeeds requestedMovement) {
         currentChassisSpeeds = requestedMovement;
         HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
                 .toLabledSwerveModuleStates(requestedMovement);
+        states = normalizeStates(states);
         for (var labeledState : states.entrySet())
             modules.get(labeledState.getKey()).setDesiredState(labeledState.getValue());
-        // correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
+        correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
         for (var module : modules.values())
             module.drive();
     }
@@ -114,9 +135,7 @@ public class SwerveDrive extends SwerveDriveBase {
     }
 
     public static double joystickInputToMetersPerSecond(double joystickValue) {
-        return (((joystickValue * Constants.SwerveDrive.maxSpeedOfDrive)
-                / Constants.SwerveDrive.commonConfigurations.driveMotorTicksPerRotation))
-                * Constants.SwerveDrive.commonConfigurations.wheelCircumference;
+        return joystickValue * Constants.SwerveDrive.maxSpeedOfDrive;
     }
 
     public static double joystickInputToRadPerSecond(double joystickValue) {
@@ -158,6 +177,12 @@ public class SwerveDrive extends SwerveDriveBase {
 
     @Override
     public void setModuleRotationEncoderTicks(MountingLocations mountingLocation, double ticks) {
-         modules.get(mountingLocation).setRotationEncoderTicks(ticks);
+        modules.get(mountingLocation).setRotationEncoderTicks(ticks);
+    }
+
+    @Override
+    public void setSpeedFactor(double speedFactor) {
+        assert speedFactor > 0.0 : "speedFactor must be grater than zero";
+        this.speedFactor = speedFactor;
     }
 }

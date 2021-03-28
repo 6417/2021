@@ -63,6 +63,7 @@ public class SwerveModule implements Sendable {
         public double driveMotorTicksPerRotation;
         public double wheelCircumference;
         public double maxVelocity;
+        public double defaultSpeedFactor;
 
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
                 boolean driveSensorInverted, FridolinsMotor rotation,
@@ -129,7 +130,7 @@ public class SwerveModule implements Sendable {
     }
 
     private double driveMotorEncoderVelocityToPercent(double encoderSpeed) {
-        return encoderSpeed / motors.maxVelocity;
+        return encoderSpeed / meterPerSecondToDriveMotorEncoderVelocityUnits(motors.maxVelocity);
     }
 
     public double getSpeed() {
@@ -146,18 +147,11 @@ public class SwerveModule implements Sendable {
         }
     }
 
-    private int timeStampOfCSV = 0;
-
-    public void setDesiredState(SwerveModuleState desiredState) {
-        // this.desiredState = limiter.limitState(desiredState, getModuleRotation(),
-        // driveMotorEncoderVelocityToPercent(getSpeed()));
-        this.desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
-        // csvLogger.put("desired state angle", desiredState.angle.getDegrees());
-        // csvLogger.put("desired state speed", desiredState.speedMetersPerSecond);
-        // csvLogger.put("rotation angle", getModuleRotationAngle());
-        // csvLogger.put("rotation encoder ticks", motors.rotation.getEncoderTicks());
-        // csvLogger.put("time stamp", timeStampOfCSV);
-        // timeStampOfCSV++;
+    public void setDesiredState(SwerveModuleState state) {
+        desiredState = limiter.limitState(state, getModuleRotation(),
+                driveMotorEncoderVelocityToPercent(getSpeed()));
+        desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
+        // desiredState = optimize(state, new Rotation2d(getModuleRotationAngle()));
     }
 
     public void enableLimitSwitch() {
@@ -191,7 +185,7 @@ public class SwerveModule implements Sendable {
     }
 
     public double getRotationEncoderTicks() {
-        return motors.rotation.getEncoderTicks(); 
+        return motors.rotation.getEncoderTicks();
     }
 
     public void setDesiredRotationMotorTicks(double position) {
@@ -235,8 +229,8 @@ public class SwerveModule implements Sendable {
         builder.addBooleanProperty("Module Zeroed", this::hasEncoderBeenZeroed, null);
     }
 
-	public void setRotationEncoderTicks(double ticks) {
+    public void setRotationEncoderTicks(double ticks) {
         isEncoderZeroed = true;
         motors.rotation.setEncoderPosition(ticks);
-	}
+    }
 }
