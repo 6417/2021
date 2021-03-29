@@ -11,9 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import frc.robot.subsystems.Swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
@@ -102,7 +100,6 @@ public final class Constants {
             commonConfigurations.maxVelocity = maxSpeedOfDrive;
             commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
             commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
-            commonConfigurations.halSensorPosition = 196608.0;
             commonConfigurations.centricSwerve = false;
             commonConfigurations.limitModuleStates = false;
         }

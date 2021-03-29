@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 public class SwerveKinematics<MountingLocaiton extends Enum<MountingLocaiton>> extends SwerveDriveKinematics {
     private HashMap<Integer, MountingLocaiton> indicies;
 
+    @SuppressWarnings("unchecked")
     public SwerveKinematics(HashMap<MountingLocaiton, Translation2d> locations) {
         super(locations.values().toArray(Translation2d[]::new));
         indicies = new HashMap<>();

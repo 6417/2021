@@ -27,13 +27,21 @@ public class SwerveDrive extends SwerveDriveBase {
     private ChassisSpeeds currentChassisSpeeds = new ChassisSpeeds();
     private double speedFactor = Constants.SwerveDrive.defaultSpeedFactor;
 
-    private SwerveDrive() {
-        for (var location : Constants.SwerveDrive.MountingLocations.values())
-            modules.put(location, new SwerveModule(Constants.SwerveDrive.swerveModuleConfigs.get(location)));
+    private void setUpSwerveKinematics() {
         HashMap<Constants.SwerveDrive.MountingLocations, Translation2d> mountingPoints = new HashMap<>();
         for (var element : Constants.SwerveDrive.swerveModuleConfigs.entrySet())
             mountingPoints.put(element.getKey(), element.getValue().mountingPoint);
         kinematics = new SwerveKinematics<Constants.SwerveDrive.MountingLocations>(mountingPoints);
+    }
+
+    private void setUpSwerveModules() {
+        for (var location : Constants.SwerveDrive.MountingLocations.values())
+            modules.put(location, new SwerveModule(Constants.SwerveDrive.swerveModuleConfigs.get(location)));
+    }
+
+    private SwerveDrive() {
+        setUpSwerveModules();
+        setUpSwerveKinematics();
         directionCorectorGetter = Constants.SwerveDrive.directionCorectorGetter;
     }
 
@@ -81,12 +89,14 @@ public class SwerveDrive extends SwerveDriveBase {
         HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
                 .toLabledSwerveModuleStates(requestedMovement);
         states = normalizeStates(states);
-        for (var labeledState : states.entrySet())
-            modules.get(labeledState.getKey()).setDesiredState(labeledState.getValue());
+        states.entrySet()
+                .forEach((Entry<Constants.SwerveDrive.MountingLocations, SwerveModuleState> labeledState) -> modules
+                        .get(labeledState.getKey()).setDesiredState(labeledState.getValue()));
+
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
-        for (var module : modules.values())
-            module.drive();
+
+        forEachModule((module) -> module.drive());
     }
 
     private Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> getModuleRotationVectorMap() {
@@ -117,8 +127,8 @@ public class SwerveDrive extends SwerveDriveBase {
     @Override
     public HashMap<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
         HashMap<Constants.SwerveDrive.MountingLocations, Boolean> result = new HashMap<>();
-        for (var labeledModule : modules.entrySet())
-            result.put(labeledModule.getKey(), labeledModule.getValue().isHalSensorTriggered());
+        forEachModuleEntry(
+                (labeledModule) -> result.put(labeledModule.getKey(), labeledModule.getValue().isHalSensorTriggered()));
         return result;
     }
 
