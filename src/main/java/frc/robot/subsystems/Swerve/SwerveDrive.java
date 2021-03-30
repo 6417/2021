@@ -12,12 +12,10 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.Swerve.DefaultDriveCommand;
 import frc.robot.subsystems.Base.SwerveDriveBase;
-import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.SwerveKinematics;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
@@ -29,20 +27,22 @@ public class SwerveDrive extends SwerveDriveBase {
     private ChassisSpeeds currentChassisSpeeds = new ChassisSpeeds();
     private double speedFactor = Constants.SwerveDrive.defaultSpeedFactor;
 
-    private SwerveDrive() {
-        for (var location : Constants.SwerveDrive.MountingLocations.values())
-            modules.put(location, new SwerveModule(Constants.SwerveDrive.swerveModuleConfigs.get(location)));
+    private void setUpSwerveKinematics() {
         HashMap<Constants.SwerveDrive.MountingLocations, Translation2d> mountingPoints = new HashMap<>();
         for (var element : Constants.SwerveDrive.swerveModuleConfigs.entrySet())
             mountingPoints.put(element.getKey(), element.getValue().mountingPoint);
         kinematics = new SwerveKinematics<Constants.SwerveDrive.MountingLocations>(mountingPoints);
-        directionCorectorGetter = Constants.SwerveDrive.directionCorectorGetter;
-        for (var moduleEntry : modules.entrySet()) {
-            SendableRegistry.addLW(moduleEntry.getValue(), "Swerve Module " + moduleEntry.getKey().toString());
-            moduleEntry.getValue().csvLogger = new CSVLogger(
-                    "tmp/" + SendableRegistry.getName(moduleEntry.getValue()) + ".csv");
-        }
+    }
 
+    private void setUpSwerveModules() {
+        for (var location : Constants.SwerveDrive.MountingLocations.values())
+            modules.put(location, new SwerveModule(Constants.SwerveDrive.swerveModuleConfigs.get(location)));
+    }
+
+    private SwerveDrive() {
+        setUpSwerveModules();
+        setUpSwerveKinematics();
+        directionCorectorGetter = Constants.SwerveDrive.directionCorectorGetter;
     }
 
     public static SwerveDriveBase getInstance() {
@@ -89,12 +89,14 @@ public class SwerveDrive extends SwerveDriveBase {
         HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
                 .toLabledSwerveModuleStates(requestedMovement);
         states = normalizeStates(states);
-        for (var labeledState : states.entrySet())
-            modules.get(labeledState.getKey()).setDesiredState(labeledState.getValue());
+        states.entrySet()
+                .forEach((Entry<Constants.SwerveDrive.MountingLocations, SwerveModuleState> labeledState) -> modules
+                        .get(labeledState.getKey()).setDesiredState(labeledState.getValue()));
+
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
-        for (var module : modules.values())
-            module.drive();
+
+        forEachModule((module) -> module.drive());
     }
 
     private Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> getModuleRotationVectorMap() {
@@ -125,8 +127,8 @@ public class SwerveDrive extends SwerveDriveBase {
     @Override
     public HashMap<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
         HashMap<Constants.SwerveDrive.MountingLocations, Boolean> result = new HashMap<>();
-        for (var labeledModule : modules.entrySet())
-            result.put(labeledModule.getKey(), labeledModule.getValue().isHalSensorTriggered());
+        forEachModuleEntry(
+                (labeledModule) -> result.put(labeledModule.getKey(), labeledModule.getValue().isHalSensorTriggered()));
         return result;
     }
 

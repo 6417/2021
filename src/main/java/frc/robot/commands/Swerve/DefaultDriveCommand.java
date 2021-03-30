@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Swerve.SwerveDrive;
 import frc.robot.utilities.Controller;
-import frc.robot.utilities.ShuffleBoardInformation;
 import frc.robot.utilities.Vector2d;
 
 public class DefaultDriveCommand extends CommandBase {
@@ -25,47 +24,69 @@ public class DefaultDriveCommand extends CommandBase {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
-    /**
-     * @return index 0 is the maped x and index 1 is the maped y index 2 is the
-     *         maped rotation
-     */
-    private double[] applyDeadBandToXYJoystick() {
-        double[] output = new double[3];
-        if (Math.abs(Controller.getInstance().driveJoystick.getLeftStickX()) > 0.0
-                || Math.abs(Controller.getInstance().driveJoystick.getLeftStickY()) > 0.0) {
-            Vector2d xyVector = new Vector2d(Controller.getInstance().driveJoystick.getLeftStickX(),
-                    Controller.getInstance().driveJoystick.getLeftStickY());
-            xyVector = xyVector.normalize();
-            xyVector = xyVector.mult(map(
-                    Math.hypot(Controller.getInstance().driveJoystick.getLeftStickX(),
-                            Controller.getInstance().driveJoystick.getLeftStickY()),
-                    Constants.SwerveDrive.deadBand, 1.0, 0.0, 1.0));
-            output[0] = xyVector.x;
-            output[1] = xyVector.y;
+    private static class JoystickInput {
+        public double x;
+        public double y;
+        public double r;
+    }
+
+    private Vector2d getXYvectorWithAppliedDeadBandFromJoystick() {
+        Vector2d xyVector = new Vector2d(Controller.getInstance().driveJoystick.getLeftStickX(),
+                Controller.getInstance().driveJoystick.getLeftStickY());
+        xyVector = xyVector.normalize();
+        double xyVectorLength = Math.hypot(Controller.getInstance().driveJoystick.getLeftStickX(),
+                Controller.getInstance().driveJoystick.getLeftStickY());
+        xyVector = xyVector.mult(map(xyVectorLength, Constants.SwerveDrive.deadBand, 1.0, 0.0, 1.0));
+        return xyVector;
+    }
+
+    private JoystickInput applyDeadBandToXandY() {
+        JoystickInput result = new JoystickInput();
+        boolean xyNotInDeadBand = Math.abs(Controller.getInstance().driveJoystick.getLeftStickX()) > 0.0
+                || Math.abs(Controller.getInstance().driveJoystick.getLeftStickY()) > 0.0;
+        if (xyNotInDeadBand) {
+            Vector2d xyVector = getXYvectorWithAppliedDeadBandFromJoystick();
+            result.x = xyVector.x;
+            result.y = xyVector.y;
         } else {
-            output[0] = 0.0;
-            output[1] = 0.0;
+            result.x = 0.0;
+            result.y = 0.0;
         }
-        if (Math.abs(Controller.getInstance().driveJoystick.getRightStickX()) > Constants.SwerveDrive.deadBand)
-            output[2] = map(Controller.getInstance().driveJoystick.getRightStickX(), Constants.SwerveDrive.deadBand,
-                    1.0, 0.0, 1.0);
-        else
-            output[2] = 0.0;
-        return output;
+        return result;
+    }
+
+    private double getJoystickRotationWithAppliedDeadBand() {
+        boolean rotaionNotInDeadBand = Math
+                .abs(Controller.getInstance().driveJoystick.getRightStickX()) > Constants.SwerveDrive.deadBand;
+        if (rotaionNotInDeadBand)
+            return map(Controller.getInstance().driveJoystick.getRightStickX(), Constants.SwerveDrive.deadBand, 1.0,
+                    0.0, 1.0);
+        return 0.0;
+    }
+
+    private JoystickInput applyDeadBandToJoystickInput() {
+        JoystickInput result = applyDeadBandToXandY();
+        result.r = getJoystickRotationWithAppliedDeadBand();
+        return result;
+    }
+
+    private Vector2d convertJoystickInputToVector(JoystickInput xyr) {
+        double xSpeed = SwerveDrive.joystickInputToMetersPerSecond(xyr.x);
+        double ySpeed = SwerveDrive.joystickInputToMetersPerSecond(xyr.y);
+        if (Constants.SwerveDrive.joystickYinverted)
+            ySpeed *= -1;
+        if (Constants.SwerveDrive.joystickXinverted)
+            xSpeed *= -1;
+        return new Vector2d(xSpeed, ySpeed);
     }
 
     @Override
     public void execute() {
         if (SwerveDrive.getInstance().areAllModulesZeroed() && joystickNotInDeadBand()) {
-            double[] xyr = applyDeadBandToXYJoystick();
-            double xSpeed = SwerveDrive.joystickInputToMetersPerSecond(xyr[0]);
-            double ySpeed = SwerveDrive.joystickInputToMetersPerSecond(xyr[1]);
-            if (Constants.SwerveDrive.joystickYinverted)
-                ySpeed *= -1;
-            if (Constants.SwerveDrive.joystickXinverted)
-                xSpeed *= -1;
-            double rotationSpeed = xyr[2] * Constants.SwerveDrive.maxRotationSpeed;
-            SwerveDrive.getInstance().drive(new ChassisSpeeds(xSpeed, ySpeed, rotationSpeed));
+            JoystickInput xyr = applyDeadBandToJoystickInput();
+            Vector2d xyVector = convertJoystickInputToVector(xyr);
+            double rotationSpeed = xyr.r * Constants.SwerveDrive.maxRotationSpeed;
+            SwerveDrive.getInstance().drive(new ChassisSpeeds(xyVector.x, xyVector.y, rotationSpeed));
         } else
             SwerveDrive.getInstance().stopAllMotors();
     }

@@ -7,10 +7,7 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
-import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
-import frc.robot.utilities.ShuffleBoardInformation;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
@@ -65,7 +62,6 @@ public class SwerveModule implements Sendable {
         public double driveMotorTicksPerRotation;
         public double wheelCircumference;
         public double maxVelocity;
-        public double defaultSpeedFactor;
 
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
                 boolean driveSensorInverted, FridolinsMotor rotation,
@@ -83,7 +79,6 @@ public class SwerveModule implements Sendable {
     private Motors motors;
     private SwerveLimiter limiter;
     private SwerveModuleState desiredState = new SwerveModuleState();
-    public CSVLogger csvLogger;
     public final double halSensorPosition;
     public final boolean centricSwerve;
     public final boolean limitedModuleStates;

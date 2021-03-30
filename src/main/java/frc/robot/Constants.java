@@ -11,9 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import frc.robot.subsystems.Swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
@@ -61,17 +59,26 @@ public final class Constants {
             public static final int zeroEncoders = Joystick.X_BUTTON_ID;
         }
 
+        private static void setSwerveDriveConstants() {
+            //TODO: implement this method
+        }
+
+        private static void setSwerveDriveConstantsFor2019Test() {
+            zeroingSpeed = 500.0;
+            maxSpeedOfDrive = 0.8531647523;
+        }
 
         public static final boolean enabled = true;
-        public static final boolean rotateAllModulesInSameDirection = true; 
+        public static final boolean rotateAllModulesInSameDirection = true;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
-        public static final double zeroingSpeed = 500.0;
+        private static final boolean swerveTestOn2019Robot = true;
+        public static double zeroingSpeed;
         public static final double deadBand = 0.075;
         public static final double finetuningZeroFactor = 0.1;
-        public static final double maxSpeedOfDrive = 0.853164752314132; // in meters per second
+        public static double maxSpeedOfDrive; // in meters per second
         public static final double maxRotationSpeed = Math.PI / 4; // at full rotation speed the robot will turn by 180
-                                                               // degrees, in rad per second
+        // degrees, in rad per second
         public static final HashMap<MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
 
         public static SwerveLimiter.Config limiterConfig = new SwerveLimiter.Config();
@@ -79,6 +86,13 @@ public final class Constants {
                 Map<MountingLocations, SwerveLimiter.ModuleRotationVectors> rotationDirections,
                 boolean isRobotRotating) -> SwerveLimiter.getModuleRotaionDirectionCorrections(rotationDirections,
                         isRobotRotating);
+        
+        static {
+            if (swerveTestOn2019Robot)
+                setSwerveDriveConstantsFor2019Test();
+            else
+                setSwerveDriveConstants();
+        }
 
         // setting up limiter config
         static {
@@ -88,62 +102,83 @@ public final class Constants {
         }
 
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
-		public static double defaultSpeedFactor = 0.45;
+        public static double defaultSpeedFactor = 0.45;
         // setting up commmon configurations for all swerve modules
         static {
-            commonConfigurations.driveMotorTicksPerRotation = 11564.0;
-            commonConfigurations.rotationMotorTicksPerRotation = 196608.0;
-            commonConfigurations.drivePID = new PIDValues(0.015, 0.0, 0.0, 0.03375);
-            commonConfigurations.drivePID.slotIdX = Optional.of(0);
-            commonConfigurations.rotationPID = new PIDValues(0.6, 0.16, 4.0);
-            commonConfigurations.rotationPID.slotIdX = Optional.of(0);
-            commonConfigurations.wheelCircumference = 0.1 * Math.PI;
-            commonConfigurations.limiterInitializer = () -> new SwerveLimiter(limiterConfig);
-            commonConfigurations.maxVelocity = maxSpeedOfDrive;
-            commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
-            commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
-            commonConfigurations.halSensorPosition = 196608.0;
-            commonConfigurations.centricSwerve = false;
-            commonConfigurations.limitModuleStates = false;
+            if (swerveTestOn2019Robot) 
+                addCommonModuleConfigurarionsFor2019Test();
+            else
+                addCommonModuleConfigurarions(); 
         }
 
         // adding module specific configurations
         static {
-            SwerveModule.Config frontLeftConfig = commonConfigurations.clone();
-            frontLeftConfig.mountingPoint = new Translation2d(0.32, 0.305);
-            frontLeftConfig.driveMotorInitializer = () -> new FridoTalonSRX(32);
-            frontLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(33);
-            frontLeftConfig.driveMotorInverted = true;
-            frontLeftConfig.driveSensorInverted = true;
-            frontLeftConfig.halSensorPosition = 0.0;
-            swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
+            if (swerveTestOn2019Robot) 
+                addModuleSpecificConfigurationsFor2019Test();
+            else
+                addModuleSpecificConfigurarions();
+        }
 
-            SwerveModule.Config frontRightConfig = commonConfigurations.clone();
-            frontRightConfig.mountingPoint = new Translation2d(-0.32, 0.305);
-            frontRightConfig.driveMotorInitializer = () -> new FridoTalonSRX(38);
-            frontRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(39);
-            frontRightConfig.driveMotorInverted = true;
-            frontRightConfig.driveSensorInverted = true;
-            frontRightConfig.halSensorPosition = 196608.0;
-            swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
+        private static void addCommonModuleConfigurarions() {
+            // TODO: implement this method
+        }
 
-            SwerveModule.Config backLeftConfig = commonConfigurations.clone();
-            backLeftConfig.mountingPoint = new Translation2d(0.32, -0.305);
-            backLeftConfig.driveMotorInitializer = () -> new FridoTalonSRX(34);
-            backLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(35);
-            backLeftConfig.driveMotorInverted = true;
-            backLeftConfig.driveSensorInverted = true;
-            backLeftConfig.halSensorPosition = 196608.0;
-            swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
+        private static void addModuleSpecificConfigurarions() {
+            // TODO: implement this method
+        }
 
-            SwerveModule.Config backRightConfig = commonConfigurations.clone();
-            backRightConfig.mountingPoint = new Translation2d(-0.32, -0.305);
-            backRightConfig.driveMotorInitializer = () -> new FridoTalonSRX(36);
-            backRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(37);
-            backRightConfig.driveMotorInverted = false;
-            backRightConfig.driveSensorInverted = true;
-            backRightConfig.halSensorPosition = 196608.0;
-            swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
+        private  static void addCommonModuleConfigurarionsFor2019Test() {
+                commonConfigurations.driveMotorTicksPerRotation = 11564.0;
+                commonConfigurations.rotationMotorTicksPerRotation = 196608.0;
+                commonConfigurations.drivePID = new PIDValues(0.015, 0.0, 0.0, 0.03375);
+                commonConfigurations.drivePID.slotIdX = Optional.of(0);
+                commonConfigurations.rotationPID = new PIDValues(0.6, 0.16, 4.0);
+                commonConfigurations.rotationPID.slotIdX = Optional.of(0);
+                commonConfigurations.wheelCircumference = 0.1 * Math.PI;
+                commonConfigurations.limiterInitializer = () -> new SwerveLimiter(limiterConfig);
+                commonConfigurations.maxVelocity = maxSpeedOfDrive;
+                commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
+                commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
+                commonConfigurations.centricSwerve = false;
+                commonConfigurations.limitModuleStates = false;
+        }
+
+        private static void addModuleSpecificConfigurationsFor2019Test() {
+                SwerveModule.Config frontLeftConfig = commonConfigurations.clone();
+                frontLeftConfig.mountingPoint = new Translation2d(0.32, 0.305);
+                frontLeftConfig.driveMotorInitializer = () -> new FridoTalonSRX(32);
+                frontLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(33);
+                frontLeftConfig.driveMotorInverted = true;
+                frontLeftConfig.driveSensorInverted = true;
+                frontLeftConfig.halSensorPosition = 0.0;
+                swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
+
+                SwerveModule.Config frontRightConfig = commonConfigurations.clone();
+                frontRightConfig.mountingPoint = new Translation2d(-0.32, 0.305);
+                frontRightConfig.driveMotorInitializer = () -> new FridoTalonSRX(38);
+                frontRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(39);
+                frontRightConfig.driveMotorInverted = true;
+                frontRightConfig.driveSensorInverted = true;
+                frontRightConfig.halSensorPosition = 196608.0;
+                swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
+
+                SwerveModule.Config backLeftConfig = commonConfigurations.clone();
+                backLeftConfig.mountingPoint = new Translation2d(0.32, -0.305);
+                backLeftConfig.driveMotorInitializer = () -> new FridoTalonSRX(34);
+                backLeftConfig.rotationMotorInitializer = () -> new FridoTalonSRX(35);
+                backLeftConfig.driveMotorInverted = true;
+                backLeftConfig.driveSensorInverted = true;
+                backLeftConfig.halSensorPosition = 196608.0;
+                swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
+
+                SwerveModule.Config backRightConfig = commonConfigurations.clone();
+                backRightConfig.mountingPoint = new Translation2d(-0.32, -0.305);
+                backRightConfig.driveMotorInitializer = () -> new FridoTalonSRX(36);
+                backRightConfig.rotationMotorInitializer = () -> new FridoTalonSRX(37);
+                backRightConfig.driveMotorInverted = false;
+                backRightConfig.driveSensorInverted = true;
+                backRightConfig.halSensorPosition = 196608.0;
+                swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
         }
     }
 }
