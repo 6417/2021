@@ -28,6 +28,7 @@ import java.util.Optional;
 >>>>>>> Turn the feederMotor and turn the Turret to a given angle
 import java.util.function.Supplier;
 
+
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 <<<<<<< refs/remotes/origin/develop
@@ -302,13 +303,14 @@ public final class Constants {
         public static final boolean IS_ENABLED = true;
         public static final double GEAR_RATIO_TURRET_DIRECTION = 40.4;
         public static final int GEAR_RATIO_SHOOTING_ANGLE = 1;
+        public static final double TURRET_DIRECTION_ANGLE_TOLERATION = 1;
 
         public static class PIDControllers {
             public static class DirectionMotor {
-                public static PIDValues values = new PIDValues(0.2, 0, 0);
+                public static PIDValues values = new PIDValues(0.25, 0, 10);
                 static {
-                    values.lowerSpeedLimit = Optional.of(-0.4);
-                    values.upperSpeedLimit = Optional.of(0.4);
+                    values.lowerSpeedLimit = Optional.of(-0.1);
+                    values.upperSpeedLimit = Optional.of(0.1);
                 }
             }
         }

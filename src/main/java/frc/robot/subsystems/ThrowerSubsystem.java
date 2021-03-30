@@ -7,11 +7,14 @@
 
 package frc.robot.subsystems;
 
-
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.subsystems.Base.ThrowerSubsystemBase;
+import frc.robot.utilities.VisionService.Values;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 
 public class ThrowerSubsystem extends ThrowerSubsystemBase {
@@ -19,13 +22,13 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   private static ThrowerSubsystemBase instance;
   private FridolinsMotor loaderMotor;
   private FridoCANSparkMax turretDirectionMotor;
-  private FridolinsMotor turretAngleMotor;
+  private FridoCANSparkMax turretAngleMotor;
   private FridolinsMotor shootMotor;
   
   public ThrowerSubsystem() {
     loaderMotor = Constants.Thrower.Motors.loaderMotor.get();
     turretDirectionMotor = (FridoCANSparkMax)Constants.Thrower.Motors.directionMotor.get();
-    turretAngleMotor = Constants.Thrower.Motors.angleMotor.get();
+    turretAngleMotor = (FridoCANSparkMax)Constants.Thrower.Motors.angleMotor.get();
     shootMotor = Constants.Thrower.Motors.shootMotor.get();
 
     initMotors();
@@ -42,6 +45,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     return instance;
   }
 
+  @Override
   public void initMotors() {
     loaderMotor.factoryDefault();
     turretDirectionMotor.factoryDefault();
@@ -52,6 +56,13 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     loaderMotor.enableReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
 
     turretDirectionMotor.selectBuiltinFeedbackSensor();
+    turretDirectionMotor.setDirection(false);
+    turretDirectionMotor.setIdleMode(IdleModeType.kBrake);
+
+    turretAngleMotor.selectBuiltinFeedbackSensor();
+    turretAngleMotor.setDirection(false);
+
+    turretAngleMotor.setEncoderPosition(0);
 
     turretDirectionMotor.setPID(Constants.Thrower.PIDControllers.DirectionMotor.values);
     turretDirectionMotor.setEncoderPosition(0);
@@ -79,8 +90,43 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   }
 
   @Override
+  public double getShootingDirectionMotorSpeed() {
+    return turretDirectionMotor.getEncoder().getVelocity();
+  }
+
+  @Override
+  public double getShootingAngleMotorSpeed() {
+    return turretAngleMotor.getEncoder().getVelocity();
+  }
+
+  @Override
+  public double getCurrentTurretShootingDirection() {
+    return convertEncoderTicksToTurretAngle(turretDirectionMotor.getEncoderTicks());
+  }
+
+  @Override
   public void runLoaderMotor(double speed) {
     loaderMotor.set(speed);
+  }
+
+  @Override
+  public void runShootingDirectionMotor(double speed) {
+    turretDirectionMotor.set(speed);
+  }
+
+  @Override
+  public void runShootingAngleMotor(double speed) {
+    turretAngleMotor.set(speed);
+  }
+
+  @Override
+  public void runShooter(double speed) {
+    shootMotor.set(speed);
+  }
+
+  @Override
+  public void calibrateShootingDirection() {
+    
   }
 
   @Override
@@ -90,18 +136,18 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   }
 
   @Override
-  public void runTurretShootingAngleMotor(double percent) {
-    turretAngleMotor.set(percent);
-  }
-  
-  @Override
-  public void setTurretShootingAngle(double angle) {
-    turretAngleMotor.setPosition(convertTurretAngleToEncoderTicks(angle));    
+  public void setDirectionEncoderPosition(double position) {
+    turretDirectionMotor.setEncoderPosition(position);
   }
 
   @Override
-  public void runShooterMotor(double speed) {
-    shootMotor.set(speed);
+  public void setShootingAngleEncoderPosition(double position) {
+    turretAngleMotor.setEncoderPosition(position);
+  }
+
+  @Override
+  public void setTurretShootingAngle(double angle) {
+    turretAngleMotor.setPosition(convertTurretAngleToEncoderTicks(angle));    
   }
 
   @Override
@@ -111,7 +157,22 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Encoder Value of the Thrower", turretDirectionMotor.getEncoderTicks());
+  }
+
+  @Override
+  public double calculateTurretAngleTicks(Values values) {
+    return 0;
+  }  
+
+  @Override
+  public double calculateTurretDirection(Values values) {
+    return convertEncoderTicksToTurretAngle(turretDirectionMotor.getEncoderTicks()) + values.robotAngle ;
+  }
+  
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    super.initSendable(builder);
   }
 }
 

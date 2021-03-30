@@ -11,6 +11,7 @@ import frc.robot.utilities.baseClasses.VisionServiceBase;
 public class VisionService extends VisionServiceBase {
     private NetworkTableInstance networkTableInstance;
     private NetworkTable smartDashboard;
+    private Values values;
     private static VisionServiceBase instance;
 
     private VisionService() {
@@ -50,8 +51,7 @@ public class VisionService extends VisionServiceBase {
         }
     }
 
-    @Override
-    public Optional<Values> getValues() {
+    public Optional<Values> getValuesOptional() {
         if (smartDashboard.getEntry("currentValues").getBoolean(false)) {
             if (smartDashboard.getEntry("connected").getBoolean(false) == false)
             setConnectionStatus();
@@ -65,6 +65,14 @@ public class VisionService extends VisionServiceBase {
         }
         return Optional.empty();
     }
+
+    @Override
+    public Values getValues() {
+        getValuesOptional().ifPresent((a) -> this.values = a);
+        return this.values;
+    }
+
+
 
     @Override
     public void setConnectionStatus() {

@@ -24,6 +24,7 @@ public class RobotContainer {
   // private final JoystickButton pickUpButton = new JoystickButton(Controller.getInstance().controlJoystick, 2);
 
   public RobotContainer() {
+    controller = Controller.getInstance();
   }
 
 }
