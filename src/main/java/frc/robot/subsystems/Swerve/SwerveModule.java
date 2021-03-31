@@ -223,6 +223,10 @@ public class SwerveModule implements Sendable {
         isEncoderZeroed = false;
     }
 
+    public SwerveModuleState getDesiredModuleState() {
+        return desiredState; 
+    }
+
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("Desired state speed", () -> desiredState.speedMetersPerSecond, null);

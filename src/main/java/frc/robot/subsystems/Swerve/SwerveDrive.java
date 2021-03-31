@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
@@ -16,7 +17,9 @@ import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.Swerve.DefaultDriveCommand;
 import frc.robot.subsystems.Base.SwerveDriveBase;
+import frc.robot.utilities.Pair;
 import frc.robot.utilities.SwerveKinematics;
+import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 public class SwerveDrive extends SwerveDriveBase {
@@ -93,10 +96,36 @@ public class SwerveDrive extends SwerveDriveBase {
                 .forEach((Entry<Constants.SwerveDrive.MountingLocations, SwerveModuleState> labeledState) -> modules
                         .get(labeledState.getKey()).setDesiredState(labeledState.getValue()));
 
+        correctRotaionVectors();
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
 
         forEachModule((module) -> module.drive());
+    }
+
+    private double getAverageDotproductOfTargetAndModuleVector() {
+        return modules.values().stream().map((module) -> module.getModuleRotation().dot(module.getTargetVector()))
+                .reduce((Double d1, Double d2) -> d1 + d2).get() / modules.size();
+    }
+
+    private Vector2d getBestSolutionOfCorrectedModuleVectors(SwerveModule module, Pair<Vector2d, Vector2d> solutions) {
+        if (module.getModuleRotation().dot(solutions.first) > module.getModuleRotation().dot(solutions.second)
+                && module.getTargetVector().dot(solutions.first) > module.getTargetVector().dot(solutions.second))
+            return solutions.first;
+        return solutions.second;
+    }
+
+    private void correctRotaionVectors() {
+        forEachModule((module) -> {
+            if (module.getModuleRotation()
+                    .dot(module.getTargetVector()) > getAverageDotproductOfTargetAndModuleVector())
+                return;
+            Pair<Vector2d, Vector2d> solutions = module.getModuleRotation()
+                    .inverseDot(getAverageDotproductOfTargetAndModuleVector());
+            Vector2d correctedModuleRotationVector = getBestSolutionOfCorrectedModuleVectors(module, solutions);
+            module.setDesiredState(new SwerveModuleState(module.getDesiredModuleState().speedMetersPerSecond,
+                    new Rotation2d(correctedModuleRotationVector.toRadians())));
+        });
     }
 
     private Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> getModuleRotationVectorMap() {

@@ -140,7 +140,7 @@ public final class Constants {
                 commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
                 commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.QuadEncoder;
                 commonConfigurations.centricSwerve = false;
-                commonConfigurations.limitModuleStates = false;
+                commonConfigurations.limitModuleStates = true;
         }
 
         private static void addModuleSpecificConfigurationsFor2019Test() {
