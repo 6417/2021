@@ -61,8 +61,8 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
     turretAngleMotor.selectBuiltinFeedbackSensor();
     turretAngleMotor.setDirection(false);
-
     turretAngleMotor.setEncoderPosition(0);
+    turretAngleMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, true);
 
     turretDirectionMotor.setPID(Constants.Thrower.PIDControllers.DirectionMotor.values);
     turretDirectionMotor.setEncoderPosition(0);
