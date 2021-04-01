@@ -77,10 +77,6 @@ public class Controller {
         JoystickButton slowSpeedFactorButton;
         JoystickButton zeroNavxButton;
         JoystickButton calibrateThrowerButton;
-        JoystickButton setAngleButton;
-        JoystickButton shootButton;
-        JoystickButton calibrateThrowerAngleButton;
-        JoystickButton angleUpButton;
 
         public DriveJoystick() {
             super(Constants.Joystick.DRIVER_ID);
@@ -96,10 +92,6 @@ public class Controller {
             slowSpeedFactorButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.slowSpeedMode);
             zeroNavxButton = new JoystickButton(controller, Constants.zeroNavxButtonID);
             calibrateThrowerButton = new JoystickButton(this.controller, Constants.Joystick.A_BUTTON_ID);
-            setAngleButton = new JoystickButton(this.controller, Constants.Joystick.B_BUTTON_ID);
-            shootButton = new JoystickButton(this.controller, Constants.Joystick.RT_BUTTON_ID);
-            calibrateThrowerAngleButton = new JoystickButton(this.controller, Constants.Joystick.X_BUTTON_ID);
-            angleUpButton = new JoystickButton(this.controller, Constants.Joystick.LT_BUTTON_ID);
 
             // Configure the binding
             zeroEncodersButton.whenPressed(new ZeroEncoders());
@@ -110,11 +102,7 @@ public class Controller {
             slowSpeedFactorButton.whenReleased(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
             zeroNavxButton.whenPressed(Robot.getNavx()::reset);
             // Configure the bindings
-            calibrateThrowerButton.whenPressed(new CalibrateTurretShootingDirectionCommand());
-            shootButton.whileHeld(new ShootCommand());
-            calibrateThrowerAngleButton.whenPressed(new CalibrateShootingAngleCommand());
-            angleUpButton.whileHeld(() -> ThrowerSubsystem.getInstance().runShootingAngleMotor(0.2));
-            angleUpButton.whenReleased(() -> ThrowerSubsystem.getInstance().runShootingAngleMotor(0));
+            calibrateThrowerButton.whenPressed(new CalibrateShootingAngleCommand());
         }
     }
 
