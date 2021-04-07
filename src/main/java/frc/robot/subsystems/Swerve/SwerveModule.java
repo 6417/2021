@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Swerve;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.Sendable;
@@ -29,11 +30,12 @@ public class SwerveModule implements Sendable {
         public double maxVelocity; // in drive motor encoder velocity units
         public FridolinsMotor.FeedbackDevice driveEncoderType;
         public FridolinsMotor.FeedbackDevice rotationEncoderType;
-        public boolean driveSensorInverted;
+        public Optional<Boolean> driveSensorInverted = Optional.empty();
         public boolean driveMotorInverted;
         public double halSensorPosition;
         public boolean limitModuleStates;
         public boolean centricSwerve;
+        public LimitSwitchPolarity limitSwitchPolarity;
 
         @Override
         public Config clone() {
@@ -64,15 +66,16 @@ public class SwerveModule implements Sendable {
         public double maxVelocity;
 
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
-                boolean driveSensorInverted, FridolinsMotor rotation,
-                FridolinsMotor.FeedbackDevice rotationEncoderType) {
+                Optional<Boolean> driveSensorInverted, FridolinsMotor rotation,
+                FridolinsMotor.FeedbackDevice rotationEncoderType, LimitSwitchPolarity limitSwitchPolarity) {
             // DO NOT MAKE FACTORY DEFAULTS, for some reason it breaks every thing
             this.drive = drive;
             this.rotation = rotation;
             this.drive.configEncoder(driveEncoderType, (int) driveMotorTicksPerRotation);
             this.rotation.configEncoder(rotationEncoderType, (int) rotationMotorTicksPerRotation);
-            this.drive.setEncoderDirection(driveSensorInverted);
+            driveSensorInverted.ifPresent(this.drive::setEncoderDirection);
             this.drive.setDirection(driveMotorInverted);
+            this.rotation.enableForwardLimitSwitch(limitSwitchPolarity, true);
         }
     }
 
@@ -85,7 +88,7 @@ public class SwerveModule implements Sendable {
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.driveEncoderType, config.driveMotorInverted,
-                config.driveSensorInverted, config.rotationMotorInitializer.get(), config.rotationEncoderType);
+                config.driveSensorInverted, config.rotationMotorInitializer.get(), config.rotationEncoderType, config.limitSwitchPolarity);
         motors.drive.setPID(config.drivePID);
         motors.rotation.setPID(config.rotationPID);
         motors.driveMotorTicksPerRotation = config.driveMotorTicksPerRotation;
@@ -148,10 +151,10 @@ public class SwerveModule implements Sendable {
         }
     }
 
-    public void setDesiredState(SwerveModuleState state) {
+    public void setDesiredState(SwerveModuleState state, double rotationOfsetFactor) {
         if (limitedModuleStates)
             desiredState = limiter.limitState(state, getModuleRotation(),
-                    driveMotorEncoderVelocityToPercent(getSpeed()));
+                    driveMotorEncoderVelocityToPercent(getSpeed()), rotationOfsetFactor);
         else
             desiredState = state;
 
@@ -224,7 +227,7 @@ public class SwerveModule implements Sendable {
     }
 
     public SwerveModuleState getDesiredModuleState() {
-        return desiredState; 
+        return desiredState;
     }
 
     @Override
