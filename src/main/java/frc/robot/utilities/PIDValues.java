@@ -19,6 +19,14 @@ public class PIDValues implements Cloneable {
         this.kD = kD;
     }
 
+    public PIDValues(double kP, double kI, double kD, double peakOutputReverse, double peakOutputForward) {
+        this.kP = kP;
+        this.kI = kI;
+        this.kD = kD;
+        this.peakOutputReverse = peakOutputReverse;
+        this.peakOutputForward = peakOutputForward;
+    }
+
     public PIDValues(double kP, double kI, double kD, double kF) {
         this.kP = kP;
         this.kD = kD;

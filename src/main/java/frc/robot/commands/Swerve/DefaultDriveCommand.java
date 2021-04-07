@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Swerve.SwerveDrive;
 import frc.robot.utilities.Controller;
+import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.Vector2d;
 
 public class DefaultDriveCommand extends CommandBase {
@@ -20,10 +21,6 @@ public class DefaultDriveCommand extends CommandBase {
         return result;
     }
 
-    private double map(double x, double in_min, double in_max, double out_min, double out_max) {
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    }
-
     private static class JoystickInput {
         public double x;
         public double y;
@@ -33,10 +30,10 @@ public class DefaultDriveCommand extends CommandBase {
     private Vector2d getXYvectorWithAppliedDeadBandFromJoystick() {
         Vector2d xyVector = new Vector2d(Controller.getInstance().driveJoystick.getLeftStickX(),
                 Controller.getInstance().driveJoystick.getLeftStickY());
-        xyVector = xyVector.normalize();
+        xyVector.normalize();
         double xyVectorLength = Math.hypot(Controller.getInstance().driveJoystick.getLeftStickX(),
                 Controller.getInstance().driveJoystick.getLeftStickY());
-        xyVector = xyVector.mult(map(xyVectorLength, Constants.SwerveDrive.deadBand, 1.0, 0.0, 1.0));
+        xyVector.mult(MathUtilities.map(xyVectorLength, Constants.SwerveDrive.deadBand, 1.0, 0.0, 1.0));
         return xyVector;
     }
 
@@ -59,7 +56,7 @@ public class DefaultDriveCommand extends CommandBase {
         boolean rotaionNotInDeadBand = Math
                 .abs(Controller.getInstance().driveJoystick.getRightStickX()) > Constants.SwerveDrive.deadBand;
         if (rotaionNotInDeadBand)
-            return map(Controller.getInstance().driveJoystick.getRightStickX(), Constants.SwerveDrive.deadBand, 1.0,
+            return MathUtilities.map(Controller.getInstance().driveJoystick.getRightStickX(), Constants.SwerveDrive.deadBand, 1.0,
                     0.0, 1.0);
         return 0.0;
     }
