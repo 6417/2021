@@ -36,6 +36,7 @@ public class SwerveModule implements Sendable {
         public boolean limitModuleStates;
         public boolean centricSwerve;
         public LimitSwitchPolarity limitSwitchPolarity;
+        public double driveAcceleration;
 
         @Override
         public Config clone() {
@@ -64,6 +65,7 @@ public class SwerveModule implements Sendable {
         public double driveMotorTicksPerRotation;
         public double wheelCircumference;
         public double maxVelocity;
+        public double maxDriveAcceleration;
 
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
                 Optional<Boolean> driveSensorInverted, FridolinsMotor rotation,
@@ -88,7 +90,8 @@ public class SwerveModule implements Sendable {
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.driveEncoderType, config.driveMotorInverted,
-                config.driveSensorInverted, config.rotationMotorInitializer.get(), config.rotationEncoderType, config.limitSwitchPolarity);
+                config.driveSensorInverted, config.rotationMotorInitializer.get(), config.rotationEncoderType,
+                config.limitSwitchPolarity);
         motors.drive.setPID(config.drivePID);
         motors.rotation.setPID(config.rotationPID);
         motors.driveMotorTicksPerRotation = config.driveMotorTicksPerRotation;
@@ -99,6 +102,7 @@ public class SwerveModule implements Sendable {
         halSensorPosition = config.halSensorPosition;
         centricSwerve = config.centricSwerve;
         limitedModuleStates = config.limitModuleStates;
+        motors.maxDriveAcceleration = config.driveAcceleration;
     }
 
     public Vector2d getModuleRotation() {
@@ -174,9 +178,20 @@ public class SwerveModule implements Sendable {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
 
+    private double applyMaxAccelerationToDriveMotorVelocity(double desiredVelocity) {
+        if (Math.abs(motors.drive.getEncoderVelocity() - desiredVelocity) > motors.maxDriveAcceleration) {
+            System.out.println(
+                    Math.signum(desiredVelocity - motors.drive.getEncoderVelocity()) * motors.maxDriveAcceleration);
+            return motors.drive.getEncoderVelocity()
+                    + Math.signum(desiredVelocity - motors.drive.getEncoderVelocity()) * motors.maxDriveAcceleration;
+        }
+        return desiredVelocity;
+    }
+
     public void drive(double speedFactor) {
         motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
-        motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond * speedFactor));
+        motors.drive.setVelocity(applyMaxAccelerationToDriveMotorVelocity(
+                meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond * speedFactor)));
     }
 
     public boolean isHalSensorTriggered() {
@@ -234,7 +249,9 @@ public class SwerveModule implements Sendable {
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("Desired state speed", () -> desiredState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Desired state speed encoder velocity units",
-                () -> meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond), null);
+                () -> applyMaxAccelerationToDriveMotorVelocity(
+                        meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond)),
+                null);
         builder.addDoubleProperty("Desired state angle", () -> desiredState.angle.getDegrees(), null);
         builder.addDoubleProperty("Desired state rotation encoder ticks",
                 () -> angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()), null);
