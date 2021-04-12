@@ -64,6 +64,7 @@ public final class Constants {
             public static final int fieledOriented = Joystick.Y_BUTTON_ID;
             public static final int throwerOriented = Joystick.A_BUTTON_ID;
             public static final int pickupOriented = Joystick.B_BUTTON_ID;
+            public static final int slowSpeedMode = Joystick.RT_BUTTON_ID; 
         }
 
         private static void setSwerveDriveConstants() {
@@ -113,6 +114,7 @@ public final class Constants {
 
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
         public static double defaultSpeedFactor = 1.0;
+        public static double slowSpeedFactor = 0.25;
         // setting up commmon configurations for all swerve modules
         static {
             if (swerveTestOn2019Robot)

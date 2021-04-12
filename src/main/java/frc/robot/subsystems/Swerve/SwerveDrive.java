@@ -110,7 +110,7 @@ public class SwerveDrive extends SwerveDriveBase {
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
 
-        forEachModule((module) -> module.drive());
+        forEachModule((module) -> module.drive(speedFactor));
     }
 
     private Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> getModuleRotationVectorMap() {
