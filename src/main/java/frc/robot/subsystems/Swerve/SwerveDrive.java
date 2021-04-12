@@ -22,6 +22,11 @@ import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 import frc.robot.utilities.swerveLimiter.SwerveLimiterBase;
 
 public class SwerveDrive extends SwerveDriveBase {
+    public static enum DriveMode {
+        ThrowerOriented, PickupOriented, FieldOriented;
+    }
+
+    private DriveMode driveMode;
     private static SwerveDriveBase instance = null;
     private SwerveKinematics<Constants.SwerveDrive.MountingLocations> kinematics;
     private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModule> modules = new HashMap<>();
@@ -93,8 +98,9 @@ public class SwerveDrive extends SwerveDriveBase {
         HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
                 .toLabledSwerveModuleStates(requestedMovement);
         states = normalizeStates(states);
-        // Map<Constants.SwerveDrive.MountingLocations, Double> rotationOfsetFactors = SwerveLimiterBase
-        //         .getRotationOfsets(modules, states);
+        // Map<Constants.SwerveDrive.MountingLocations, Double> rotationOfsetFactors =
+        // SwerveLimiterBase
+        // .getRotationOfsets(modules, states);
 
         states.entrySet()
                 .forEach((Entry<Constants.SwerveDrive.MountingLocations, SwerveModuleState> labeledState) -> modules
@@ -195,5 +201,15 @@ public class SwerveDrive extends SwerveDriveBase {
     public void setSpeedFactor(double speedFactor) {
         assert speedFactor > 0.0 : "speedFactor must be grater than zero";
         this.speedFactor = speedFactor;
+    }
+
+    @Override
+    public DriveMode getDriveMode() {
+        return driveMode;
+    }
+
+    @Override
+    public void setDriveMode(DriveMode driveMode) {
+        this.driveMode = driveMode;
     }
 }
