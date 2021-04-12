@@ -54,6 +54,8 @@ public interface FridolinsMotor extends SpeedController{
 
     public void configOpenLoopRamp(double rate);
 
+    public void selectPIDSlot(int slotIdx);
+
     public void setPID(PIDValues pidValues);
 
     public void putDataInCSVFile(String filePath);
