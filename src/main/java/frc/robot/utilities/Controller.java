@@ -3,6 +3,9 @@ package frc.robot.utilities;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
+import frc.robot.commands.Swerve.FieldOriented;
+import frc.robot.commands.Swerve.PickupOriented;
+import frc.robot.commands.Swerve.ThrowerOriented;
 import frc.robot.commands.Swerve.ZeroEncoders;
 
 public class Controller {
@@ -52,6 +55,9 @@ public class Controller {
     public class DriveJoystick extends SuperJoystick {
         // Define Buttons to make Bindings
         JoystickButton zeroEncodersButton;
+        JoystickButton fieldOrientedButton;
+        JoystickButton throwerOrientedButton;
+        JoystickButton pickupOrientedButton;
 
         public DriveJoystick() {
             super();
@@ -62,9 +68,15 @@ public class Controller {
         public void configureButtonBindings() {
             // Initialize the buttons
             zeroEncodersButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.zeroEncoders);
+            fieldOrientedButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.fieledOriented);
+            throwerOrientedButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.throwerOriented);
+            pickupOrientedButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.pickupOriented);
 
             // Configure the binding
             zeroEncodersButton.whenPressed(new ZeroEncoders());
+            fieldOrientedButton.whenPressed(new FieldOriented());
+            throwerOrientedButton.whenPressed(new ThrowerOriented());
+            pickupOrientedButton.whenPressed(new PickupOriented());
         }
     }
 
