@@ -23,7 +23,6 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     private double kD;
     private double kF;
     private boolean isKFEnabled = false;
-    private Optional<Integer> selectedPIDSlot = Optional.empty();
     
     public FridoTalonSRX(int deviceID) {
 
@@ -218,6 +217,6 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
 
     @Override
     public void selectPIDSlot(int slotIdx) {
-        selectedPIDSlot = Optional.of(slotIdx);
+        super.selectProfileSlot(slotIdx, 0);
     }
 }
