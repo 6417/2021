@@ -26,7 +26,7 @@ public class SwerveDrive extends SwerveDriveBase {
         ThrowerOriented, PickupOriented, FieldOriented;
     }
 
-    private DriveMode driveMode;
+    private DriveMode driveMode = DriveMode.ThrowerOriented;
     private static SwerveDriveBase instance = null;
     private SwerveKinematics<Constants.SwerveDrive.MountingLocations> kinematics;
     private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModule> modules = new HashMap<>();

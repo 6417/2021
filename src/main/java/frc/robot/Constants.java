@@ -136,7 +136,7 @@ public final class Constants {
             commonConfigurations.rotationMotorTicksPerRotation = 36.0;
             commonConfigurations.drivePID = new PIDValues(0.00001, 0.0, 0.0, 0.000166);
             commonConfigurations.drivePID.slotIdX = Optional.of(0);
-            commonConfigurations.drivePID.setAcceleration(1.0);
+            commonConfigurations.drivePID.setAcceleration(0.0000001);
             commonConfigurations.rotationPID = new PIDValues(0.3959, 0.0, 0.2);
             commonConfigurations.wheelCircumference = 0.09767 * Math.PI;
             commonConfigurations.limiterInitializer = () -> new SwerveLimiter(limiterConfig);
@@ -146,6 +146,7 @@ public final class Constants {
             commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.CANEncoder;
             commonConfigurations.limitModuleStates = false;
             commonConfigurations.limitSwitchPolarity = LimitSwitchPolarity.kNormallyOpen;
+            commonConfigurations.driveAcceleration = 500;
         }
 
         private static FridolinsMotor motorInitializer(int id, MotorType motorType) {

@@ -10,8 +10,8 @@ public class PIDValues implements Cloneable {
     public double kD;
     public double peakOutputReverse = -1;
     public double peakOutputForward = 1;
-    public Optional<Double> cruiseVelocity;
-    public Optional<Double> acceleration;
+    public Optional<Double> cruiseVelocity = Optional.empty();
+    public Optional<Double> acceleration = Optional.empty();
 
     public PIDValues(double kP, double kI, double kD) {
         this.kP = kP;
