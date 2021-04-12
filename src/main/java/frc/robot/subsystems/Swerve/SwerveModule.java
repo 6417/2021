@@ -174,9 +174,9 @@ public class SwerveModule implements Sendable {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
 
-    public void drive() {
+    public void drive(double speedFactor) {
         motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
-        motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond));
+        motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond * speedFactor));
     }
 
     public boolean isHalSensorTriggered() {
