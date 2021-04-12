@@ -8,16 +8,10 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.PickUpSubsystem;
-import frc.robot.subsystems.Base.PickUpBase;
-import frc.robot.utilities.GroveColorSensor;
-import frc.robot.utilities.GroveColorSensorI2C.Gain;
-import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
+import frc.robot.utilities.LightBarrier;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 
 /**
@@ -51,6 +45,7 @@ public class Robot extends TimedRobot {
      * This runs after the mode specific periodic functions, but before LiveWindow
      * and SmartDashboard integrated updating.
      */
+
     @Override
     public void robotPeriodic() {
         // Runs the Scheduler. This is responsible for polling buttons, adding
@@ -86,25 +81,31 @@ public class Robot extends TimedRobot {
     /**
      * This function is called periodically during autonomous.
      */
+
+    LightBarrier lightBarrier = new LightBarrier(0);
+
     @Override
     public void autonomousPeriodic() {
     }
 
-    PickUpBase testSubsystem = PickUpSubsystem.getInstance();
-
-
-
     @Override
     public void teleopInit() {
-        
     }
 
-    /**
+    /**        
      * This function is called periodically during operator control.
      */
+    
+    FridoCANSparkMax pickUpMotor = new FridoCANSparkMax(12, MotorType.kBrushless);
+    FridoCANSparkMax tunnelMotor = new FridoCANSparkMax(10, MotorType.kBrushless);
+    Joystick joystick = new Joystick(1);
+
+
     @Override
     public void teleopPeriodic() {
-       testSubsystem.test();
+        double input = joystick.getY();
+        tunnelMotor.set(input);
+        pickUpMotor.set(-input);
     }
 
     @Override

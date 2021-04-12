@@ -48,12 +48,29 @@ public final class Constants {
 
     public static class BallPickUp{
         public static boolean isEnabled = true;
-        public static final int pickUpMotor_ID = 0;     // TODO IDs
-        public static final int tunnelMotor_ID = 0;    // TODO IDs
 
+        // MotorIDs
+        public static final int pickUpMotor_ID = 12;   
+        public static final int tunnelMotor_ID = 10;   
+
+        // MotorSuppliers
         public static Supplier <FridolinsMotor> pickUpMotor = () -> new FridoCANSparkMax(pickUpMotor_ID, MotorType.kBrushless);
         public static Supplier <FridolinsMotor> tunnelMotor = () -> new FridoCANSparkMax(tunnelMotor_ID, MotorType.kBrushless);
 
-        // TODO Encoder???
+        
+        // variables to find out the ballcolor
+        public static final int comparativeValueBlueLow = 52;
+        public static final int comparativeValueBlueHigh = 70;
+        public static final int comparativeValueRedLow = 100;
+        public static final int comparativeValueRedTwo = 65;
+
+        public static final double ticksForTunnelMotor = 0; 
+
+        public static final int countsPerRevTunnelMotor = 1; 
+        public static final int countsPerRevPickUpMotor = 1; 
+
+        public static final double pickUpSpeed = 0.7; // TODO optimial speed
+
+        public static final boolean isLightBarrierInverted = false;
     }
 }
