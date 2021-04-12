@@ -1,5 +1,7 @@
 package frc.robot.utilities.fridolinsMotor;
 
+import java.util.Optional;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
@@ -11,7 +13,6 @@ import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
-
     // variables for CSVLogger:
     private CSVLogger logger; 
     private double speed;
@@ -174,7 +175,9 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
             super.config_kI(pidValues.slotIdX.get(), pidValues.kI);
             super.config_kD(pidValues.slotIdX.get(), pidValues.kD);
             super.configPeakOutputForward(pidValues.peakOutputForward);
-            super.configNominalOutputReverse(pidValues.peakOutputReverse);
+            super.configPeakOutputReverse(pidValues.peakOutputReverse);
+            pidValues.cruiseVelocity.ifPresent((cruiseVelocity) -> super.configMotionCruiseVelocity((int) cruiseVelocity.doubleValue()));
+            pidValues.acceleration.ifPresent((acceleration) -> super.configMotionAcceleration((int) acceleration.doubleValue()));
             pidValues.kF.ifPresent((kF) -> super.config_kF(pidValues.slotIdX.get(), kF));
             super.selectProfileSlot(pidValues.slotIdX.get(), 0);
         } else {
@@ -210,5 +213,10 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     @Override
     public double getEncoderVelocity() {
         return super.getSelectedSensorVelocity();
+    }
+
+    @Override
+    public void selectPIDSlot(int slotIdx) {
+        super.selectProfileSlot(slotIdx, 0);
     }
 }

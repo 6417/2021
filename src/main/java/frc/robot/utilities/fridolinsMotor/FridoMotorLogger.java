@@ -175,4 +175,10 @@ public class FridoMotorLogger implements FridolinsMotor {
     public double getEncoderVelocity() {
         return 0;
     }
+
+    @Override
+    public void selectPIDSlot(int slotIdx) {
+        // TODO Auto-generated method stub
+
+    }
 } 
