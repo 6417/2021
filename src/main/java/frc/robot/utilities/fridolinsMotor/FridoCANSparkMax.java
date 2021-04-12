@@ -212,20 +212,22 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         super.setOpenLoopRampRate(rate);
     }
 
-    @Override
-    public void setPID(PIDValues pidValues) {
-        this.pidController = super.getPIDController();
-        if (pidValues.slotIdX.isPresent())
-            setPIDWithSlotIdx(pidValues);
-        else
-            setPIDWithOutSlotIdx(pidValues);
-
+    private void setMotionMagicParametersIfNecessary(PIDValues pidValues) {
         if (pidValues.cruiseVelocity.isPresent() || pidValues.acceleration.isPresent())
             assert pidValues.slotIdX.isPresent() : "To set cruiseVelocity or acceleration slotIdx needs to be set";
         pidValues.cruiseVelocity.ifPresent((cruiseVelocity) -> this.pidController
                 .setSmartMotionMaxVelocity(cruiseVelocity, pidValues.slotIdX.get()));
         pidValues.acceleration.ifPresent(
                 (acceleration) -> this.pidController.setSmartMotionMaxAccel(acceleration, pidValues.slotIdX.get()));
+    }
+
+    @Override
+    public void setPID(PIDValues pidValues) {
+        this.pidController = super.getPIDController();
+        pidValues.slotIdX.ifPresentOrElse((slotIdx) -> setPIDWithSlotIdx(pidValues),
+                () -> setPIDWithOutSlotIdx(pidValues));
+
+        setMotionMagicParametersIfNecessary(pidValues);
         this.kP = pidValues.kP;
         this.kI = pidValues.kI;
         this.kD = pidValues.kD;
