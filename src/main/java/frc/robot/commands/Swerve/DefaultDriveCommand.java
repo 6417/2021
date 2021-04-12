@@ -1,8 +1,10 @@
 package frc.robot.commands.Swerve;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Swerve.SwerveDrive;
 import frc.robot.utilities.Controller;
 import frc.robot.utilities.MathUtilities;
@@ -56,8 +58,8 @@ public class DefaultDriveCommand extends CommandBase {
         boolean rotaionNotInDeadBand = Math
                 .abs(Controller.getInstance().driveJoystick.getRightStickX()) > Constants.SwerveDrive.deadBand;
         if (rotaionNotInDeadBand)
-            return MathUtilities.map(Controller.getInstance().driveJoystick.getRightStickX(), Constants.SwerveDrive.deadBand, 1.0,
-                    0.0, 1.0);
+            return MathUtilities.map(Controller.getInstance().driveJoystick.getRightStickX(),
+                    Constants.SwerveDrive.deadBand, 1.0, 0.0, 1.0);
         return 0.0;
     }
 
@@ -77,13 +79,30 @@ public class DefaultDriveCommand extends CommandBase {
         return new Vector2d(xSpeed, ySpeed);
     }
 
+    private void setChassisSpeeds(Vector2d xyVector, double rotationSpeed) {
+            switch (SwerveDrive.getInstance().getDriveMode()) {
+                case ThrowerOriented:
+                    SwerveDrive.getInstance().drive(ChassisSpeeds.fromFieldRelativeSpeeds(xyVector.x, xyVector.y,
+                            rotationSpeed, new Rotation2d(0.0)));
+                    break;
+                case PickupOriented:
+                    SwerveDrive.getInstance().drive(ChassisSpeeds.fromFieldRelativeSpeeds(xyVector.x, xyVector.y,
+                            rotationSpeed, new Rotation2d(Math.PI)));
+                    break;
+                case FieldOriented:
+                    SwerveDrive.getInstance().drive(ChassisSpeeds.fromFieldRelativeSpeeds(xyVector.x, xyVector.y,
+                            rotationSpeed, new Rotation2d(RobotContainer.getNavx().getAngle())));
+                    break;
+            }
+    }
+
     @Override
     public void execute() {
         if (SwerveDrive.getInstance().areAllModulesZeroed() && joystickNotInDeadBand()) {
             JoystickInput xyr = applyDeadBandToJoystickInput();
             Vector2d xyVector = convertJoystickInputToVector(xyr);
             double rotationSpeed = xyr.r * Constants.SwerveDrive.maxRotationSpeed;
-            SwerveDrive.getInstance().drive(new ChassisSpeeds(xyVector.x, xyVector.y, rotationSpeed));
+            setChassisSpeeds(xyVector, rotationSpeed);
         } else
             SwerveDrive.getInstance().stopAllMotors();
     }
