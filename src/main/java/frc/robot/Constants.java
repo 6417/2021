@@ -133,6 +133,8 @@ public final class Constants {
             commonConfigurations.driveMotorTicksPerRotation = 5800 / 3;
             commonConfigurations.rotationMotorTicksPerRotation = 36.0;
             commonConfigurations.drivePID = new PIDValues(0.00001, 0.0, 0.0, 0.000166);
+            commonConfigurations.drivePID.slotIdX = Optional.of(0);
+            commonConfigurations.drivePID.setAcceleration(1.0);
             commonConfigurations.rotationPID = new PIDValues(0.3959, 0.0, 0.2);
             commonConfigurations.wheelCircumference = 0.09767 * Math.PI;
             commonConfigurations.limiterInitializer = () -> new SwerveLimiter(limiterConfig);
