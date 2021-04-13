@@ -37,6 +37,7 @@ public class SwerveModule implements Sendable {
         public boolean centricSwerve;
         public LimitSwitchPolarity limitSwitchPolarity;
         public double driveAcceleration;
+        public double maxRotationVelocity;
 
         @Override
         public Config clone() {
@@ -159,8 +160,10 @@ public class SwerveModule implements Sendable {
         if (limitedModuleStates)
             desiredState = limiter.limitState(state, getModuleRotation(),
                     driveMotorEncoderVelocityToPercent(getSpeed()), rotationOfsetFactor);
-        else
-            desiredState = state;
+        else {
+            desiredState = limiter.limitState(state, getModuleRotation(), 0.0, 1.0 /* rotationOfsetFactor */);
+            desiredState.speedMetersPerSecond = state.speedMetersPerSecond;
+        }
 
         if (centricSwerve)
             desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
@@ -180,8 +183,6 @@ public class SwerveModule implements Sendable {
 
     private double applyMaxAccelerationToDriveMotorVelocity(double desiredVelocity) {
         if (Math.abs(motors.drive.getEncoderVelocity() - desiredVelocity) > motors.maxDriveAcceleration) {
-            System.out.println(
-                    Math.signum(desiredVelocity - motors.drive.getEncoderVelocity()) * motors.maxDriveAcceleration);
             return motors.drive.getEncoderVelocity()
                     + Math.signum(desiredVelocity - motors.drive.getEncoderVelocity()) * motors.maxDriveAcceleration;
         }

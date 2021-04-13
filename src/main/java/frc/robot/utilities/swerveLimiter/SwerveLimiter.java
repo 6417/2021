@@ -16,7 +16,8 @@ import frc.robot.utilities.Vector2d;
 
 public class SwerveLimiter extends SwerveLimiterBase {
     public static class Config implements Cloneable {
-        public double gauseStrechingFactor;
+        public double gauseXStrechingFactor;
+        public double gauseYOffset;
         public Supplier<Long> clock;
         public long defaultLoopTime;
         public boolean centricSwerve;
@@ -26,7 +27,8 @@ public class SwerveLimiter extends SwerveLimiterBase {
                 return (Config) super.clone();
             } catch (CloneNotSupportedException e) {
                 Config copy = new Config();
-                copy.gauseStrechingFactor = gauseStrechingFactor;
+                copy.gauseXStrechingFactor = gauseXStrechingFactor;
+                copy.gauseYOffset = gauseYOffset;
                 copy.clock = clock;
                 copy.defaultLoopTime = defaultLoopTime;
                 return copy;
@@ -38,12 +40,14 @@ public class SwerveLimiter extends SwerveLimiterBase {
     private Timer loopTimeTimer;
     private long defaultLoopTime;
     private final boolean centricSwerve;
+    private double gauseYOffset;
 
     public SwerveLimiter(Config config) {
-        gauseStrechingFactor = config.gauseStrechingFactor;
+        gauseStrechingFactor = config.gauseXStrechingFactor;
         loopTimeTimer = new Timer(config.clock);
         defaultLoopTime = config.defaultLoopTime;
         centricSwerve = config.centricSwerve;
+        gauseYOffset = config.gauseYOffset;
     }
 
     /**
@@ -51,7 +55,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * and 1 at infinity.
      */
     private double modifiedGauseCurve(double x) {
-        return -Math.exp(-(x * x) * gauseStrechingFactor) + 1;
+        return -Math.exp(-Math.pow(x * gauseStrechingFactor, 2)) + gauseYOffset;
     }
 
     /**
@@ -66,7 +70,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * @return The rotation direction of a module with the provided vectors.
      */
     private static ModuleRotationDirection getRotationDirection(ModuleRotationVectors rotationVectorPair) {
-        if (Math.acos(rotationVectorPair.moduleRotation.dot(rotationVectorPair.desiredRotation)) > 0.0)
+        if (Math.signum(rotationVectorPair.moduleRotation.cross(rotationVectorPair.desiredRotation)) == 1)
             return ModuleRotationDirection.Counterclockwise;
         return ModuleRotationDirection.Clockwise;
     }

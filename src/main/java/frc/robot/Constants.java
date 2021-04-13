@@ -64,7 +64,7 @@ public final class Constants {
             public static final int fieledOriented = Joystick.Y_BUTTON_ID;
             public static final int throwerOriented = Joystick.A_BUTTON_ID;
             public static final int pickupOriented = Joystick.B_BUTTON_ID;
-            public static final int slowSpeedMode = Joystick.RT_BUTTON_ID; 
+            public static final int slowSpeedMode = Joystick.RT_BUTTON_ID;
         }
 
         private static void setSwerveDriveConstants() {
@@ -87,7 +87,8 @@ public final class Constants {
         public static final double deadBand = 0.075;
         public static final double finetuningZeroFactor = 0.1;
         public static double maxSpeedOfDrive; // in meters per second
-        public static final double maxRotationSpeed = 15 *  Math.PI / 16; // at full rotation speed the robot will turn by 180
+        public static final double maxRotationSpeed = 15 * Math.PI / 16; // at full rotation speed the robot will turn
+                                                                         // by 180
         // degrees, in rad per second
         public static final HashMap<MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
 
@@ -108,7 +109,8 @@ public final class Constants {
         static {
             limiterConfig.clock = System::nanoTime;
             limiterConfig.defaultLoopTime = 20000; // in nano seconds
-            limiterConfig.gauseStrechingFactor = -Math.log(Math.PI / 4.59678e8);
+            limiterConfig.gauseXStrechingFactor = Math.sqrt(Math.log(10000 / (Math.PI + 7500)));
+            limiterConfig.gauseYOffset = 1.99;
             limiterConfig.centricSwerve = centricSwerve;
         }
 
@@ -169,7 +171,7 @@ public final class Constants {
             frontRightConfig.driveMotorInitializer = () -> motorInitializer(30, MotorType.kBrushless);
             frontRightConfig.rotationMotorInitializer = () -> motorInitializer(31, MotorType.kBrushless);
             frontRightConfig.driveMotorInverted = false;
-            frontRightConfig.halSensorPosition = 8.785744667 + 9.0;            
+            frontRightConfig.halSensorPosition = 8.785744667 + 9.0;
             swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
 
             SwerveModule.Config backLeftConfig = commonConfigurations.clone();
