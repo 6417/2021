@@ -49,15 +49,16 @@ public class PickUpSubsystem extends PickUpBase {
         tunnelMotor.factoryDefault();
 
         // Encoders
-        pickUpMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder, Constants.BallPickUp.countsPerRevPickUpMotor);
-        tunnelMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder, Constants.BallPickUp.countsPerRevTunnelMotor);
+        pickUpMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder,
+                Constants.BallPickUp.countsPerRevPickUpMotor);
+        tunnelMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder,
+                Constants.BallPickUp.countsPerRevTunnelMotor);
 
-        // light barriers 
+        // light barriers
         lightBarrier = new LightBarrier(0);
         lightBarrier.setInverted(Constants.BallPickUp.isLightBarrierInverted);
 
-
-        colorSensor = new GroveColorSensor(Port.kMXP, IntegrationTime._50MS, Gain.X1); 
+        colorSensor = new GroveColorSensor(Port.kMXP, IntegrationTime._50MS, Gain.X1);
 
         // colorBox = Shuffleboard.getTab("SmartDashboard").add("BallColor",
         // false).withWidget(BuiltInWidgets.kBooleanBox)
@@ -68,12 +69,11 @@ public class PickUpSubsystem extends PickUpBase {
     }
 
     public static PickUpBase getInstance() {
-        if(instance == null){
-            if(Constants.BallPickUp.isEnabled){
+        if (instance == null) {
+            if (Constants.BallPickUp.isEnabled) {
                 instance = new PickUpSubsystem();
                 // instance.setDefaultCommand();
-            }
-            else{
+            } else {
                 instance = new PickUpBase();
             }
         }
@@ -97,12 +97,11 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public void pickUpBall() {
-        if(!lightBarrier.isActiv()){
-            pickUpMotor.set(Constants.BallPickUp.pickUpSpeed); 
-            tunnelMotor.set(-Constants.BallPickUp.pickUpSpeed); 
+        if (!lightBarrier.isActiv()) {
+            pickUpMotor.set(Constants.BallPickUp.pickUpSpeed);
+            tunnelMotor.set(-Constants.BallPickUp.pickUpSpeed);
             System.out.println("speed was set");
-        }
-        else{
+        } else {
             pickUpMotor.stopMotor();
             tunnelMotor.stopMotor();
             isBallintunnel = true;
@@ -115,13 +114,19 @@ public class PickUpSubsystem extends PickUpBase {
     }
 
     @Override
+    public void releaseBall() {
+        pickUpMotor.set(-Constants.BallPickUp.releaseSpeed);
+        tunnelMotor.set(Constants.BallPickUp.releaseSpeed);
+    }
+
+    @Override
     public void stopMotors() {
         pickUpMotor.stopMotor();
         tunnelMotor.stopMotor();
     }
 
     @Override
-    public Color getRGB(){
+    public Color getRGB() {
         return colorSensor.readRGB();
     }
 
@@ -129,11 +134,11 @@ public class PickUpSubsystem extends PickUpBase {
     public BallColor getBallColor() {
         if (currentColor.blue < Constants.BallPickUp.comparativeValueBlueLow
                 && currentColor.red > Constants.BallPickUp.comparativeValueRedLow) { // wenn blau über 52 und rot über
-                                                                                        // 100
+                                                                                     // 100
             return BallColor.yellow;
         } else if (currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh
                 && currentColor.red > Constants.BallPickUp.comparativeValueRedTwo) { // wenn blau über 65 und rot über
-                                                                                        // 70
+                                                                                     // 70
             return BallColor.blue;
         }
         return BallColor.colorNotFound;
