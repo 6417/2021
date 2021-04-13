@@ -147,11 +147,6 @@ public class FridoMotorLogger implements FridolinsMotor {
     }
 
     @Override
-    public void setInverted(boolean isInverted) {
-
-    }
-
-    @Override
     public boolean getInverted() {
         return false;
     }
