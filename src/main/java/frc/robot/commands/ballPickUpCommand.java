@@ -2,8 +2,11 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.PickUpSubsystem;
+import frc.robot.utilities.LatchedBoolean;
 
 public class BallPickUpCommand extends CommandBase {
+
+    LatchedBoolean latchedBoolean;
 
     public BallPickUpCommand() {
        addRequirements(PickUpSubsystem.getInstance()); 
@@ -11,6 +14,7 @@ public class BallPickUpCommand extends CommandBase {
 
     @Override
     public void initialize(){
+        latchedBoolean = new LatchedBoolean(LatchedBoolean.EdgeDetection.FALLING);
     }
 
     @Override
@@ -25,11 +29,6 @@ public class BallPickUpCommand extends CommandBase {
 
     @Override
     public boolean isFinished(){
-        if(PickUpSubsystem.getInstance().getLightBarrier()){
-            return false;
-        }
-        else{
-            return true;
-        }
+        return latchedBoolean.update(PickUpSubsystem.getInstance().getLightBarrier());
     }
 }
