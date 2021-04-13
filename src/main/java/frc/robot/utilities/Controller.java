@@ -119,20 +119,24 @@ public class Controller {
             pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
             pickUpCommand = new BallPickUpCommand();
             pickUpButton.whenPressed(() -> {
-                System.out.println("entered lambda");
                 if (CommandScheduler.getInstance().isScheduled(pickUpCommand)){
                     CommandScheduler.getInstance().cancel(pickUpCommand);
-                    System.out.println("entered if");
                 }
                 else{
                     CommandScheduler.getInstance().schedule(pickUpCommand);
-                    System.out.println("entered else");
                 }
             });
 
             releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
             releaseBallCommand = new ReleaseBallCommand();
-            releaseButton.whenPressed(releaseBallCommand);
+            releaseButton.whenPressed(() -> {
+                if(CommandScheduler.getInstance().isScheduled(loadBallCommand)){
+                    CommandScheduler.getInstance().cancel(loadBallCommand);
+                }
+                else{
+                    CommandScheduler.getInstance().schedule(loadBallCommand);
+                }
+            });
 
             loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
             loadBallCommand = new LoadBallCommand();

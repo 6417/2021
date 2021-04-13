@@ -88,7 +88,7 @@ public final class Constants {
             maxSpeedOfDrive = 0.8531647523;
         }
 
-        public static final boolean enabled = true;
+        public static final boolean enabled = false;
         public static final boolean rotateAllModulesInSameDirection = true;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
