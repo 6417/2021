@@ -57,7 +57,6 @@ public final class Constants {
         public static Supplier<FridolinsMotor> tunnelMotor = () -> new FridoCANSparkMax(tunnelMotor_ID, MotorType.kBrushless);
         public static final boolean tunnelMotorInvertation = true;
 
-        
         // variables to find out the ballcolor
         public static final int comparativeValueBlueLow = 52;
         public static final int comparativeValueBlueHigh = 70;
@@ -69,7 +68,9 @@ public final class Constants {
         public static final int countsPerRevTunnelMotor = 1; 
         public static final int countsPerRevPickUpMotor = 1; 
 
-        public static final double pickUpSpeed = 0.7; // TODO optimial speed
+        public static final double pickUpSpeed = 0.5;   // TODO optimal speed
+        public static final double loadSpeed = 0.5;     // TODO optimal speed
+        public static final double releaseSpeed = 0.3;  // TODO optimal speed 
 
         public static final boolean isLightBarrierInverted = true;
     }

@@ -19,11 +19,15 @@ public class PickUpBase extends SubsystemBase{
     public void pickUpBall(){
     }
 
-    public boolean getLightBarrier(){
-        return false;
+    public void loadBall(){
     }
 
-    public void loadBall(){
+    public void releaseBall(){
+
+    }
+
+    public boolean getLightBarrier(){
+        return false;
     }
 
     public BallColor getBallColor(){
