@@ -25,7 +25,7 @@ import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 public final class Constants {
     public static class Joystick{
-        public static final int DRIVER_ID = 1;
+        public static final int DRIVER_ID = 1; // ids are changed 
         public static final int CONTROL_ID = 2;
         public static final int X_BUTTON_ID = 1;
         public static final int A_BUTTON_ID = 2;
@@ -50,11 +50,12 @@ public final class Constants {
 
         // MotorIDs
         public static final int pickUpMotor_ID = 12;   
-        public static final int tunnelMotor_ID = 10;   
+        public static final int tunnelMotor_ID = 10;  
 
         // MotorSuppliers
-        public static Supplier <FridolinsMotor> pickUpMotor = () -> new FridoCANSparkMax(pickUpMotor_ID, MotorType.kBrushless);
-        public static Supplier <FridolinsMotor> tunnelMotor = () -> new FridoCANSparkMax(tunnelMotor_ID, MotorType.kBrushless);
+        public static Supplier<FridolinsMotor> pickUpMotor = () -> new FridoCANSparkMax(pickUpMotor_ID, MotorType.kBrushless);
+        public static Supplier<FridolinsMotor> tunnelMotor = () -> new FridoCANSparkMax(tunnelMotor_ID, MotorType.kBrushless);
+        public static final boolean tunnelMotorInvertation = true;
 
         
         // variables to find out the ballcolor
@@ -70,6 +71,6 @@ public final class Constants {
 
         public static final double pickUpSpeed = 0.7; // TODO optimial speed
 
-        public static final boolean isLightBarrierInverted = false;
+        public static final boolean isLightBarrierInverted = true;
     }
 }

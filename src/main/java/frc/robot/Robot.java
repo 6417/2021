@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.utilities.Controller;
 import frc.robot.utilities.LightBarrier;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 
@@ -34,6 +35,7 @@ public class Robot extends TimedRobot {
         // and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
+        Controller.getInstance();
     }
 
     /**
@@ -82,8 +84,6 @@ public class Robot extends TimedRobot {
      * This function is called periodically during autonomous.
      */
 
-    LightBarrier lightBarrier = new LightBarrier(0);
-
     @Override
     public void autonomousPeriodic() {
     }
@@ -96,16 +96,10 @@ public class Robot extends TimedRobot {
      * This function is called periodically during operator control.
      */
     
-    FridoCANSparkMax pickUpMotor = new FridoCANSparkMax(12, MotorType.kBrushless);
-    FridoCANSparkMax tunnelMotor = new FridoCANSparkMax(10, MotorType.kBrushless);
-    Joystick joystick = new Joystick(1);
 
 
     @Override
     public void teleopPeriodic() {
-        double input = joystick.getY();
-        tunnelMotor.set(input);
-        pickUpMotor.set(-input);
     }
 
     @Override

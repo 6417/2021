@@ -1,6 +1,6 @@
 package frc.robot.utilities.fridolinsMotor;
 
-import ch.fridolinsrobotik.utilities.CSVLogger;
+import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoMotorLogger implements FridolinsMotor {
@@ -18,6 +18,7 @@ public class FridoMotorLogger implements FridolinsMotor {
         isLoggerActiv = true;
     }
 
+    @Override
     public void set(double speed){
         if(isLoggerActiv){
             logger.put("Speed", speed);
@@ -77,7 +78,7 @@ public class FridoMotorLogger implements FridolinsMotor {
     }
 
     @Override
-    public void setDirection(boolean forward) {
+    public void setInverted(boolean forward) {
     }
 
     @Override
@@ -146,11 +147,6 @@ public class FridoMotorLogger implements FridolinsMotor {
     }
 
     @Override
-    public void setInverted(boolean isInverted) {
-
-    }
-
-    @Override
     public boolean getInverted() {
         return false;
     }
@@ -167,6 +163,17 @@ public class FridoMotorLogger implements FridolinsMotor {
 
     @Override
     public void pidWrite(double output) {
+
+    }
+
+    @Override
+    public double getEncoderVelocity() {
+        return 0;
+    }
+
+    @Override
+    public void selectPIDSlot(int slotIdx) {
+        // TODO Auto-generated method stub
 
     }
 } 

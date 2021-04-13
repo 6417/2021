@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.subsystems.Base.PickUpBase;
@@ -41,19 +42,22 @@ public class PickUpSubsystem extends PickUpBase {
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
         tunnelMotor = Constants.BallPickUp.tunnelMotor.get();
-
-        // Encoders
-        pickUpMotor.configEncoder(FridolinsMotor.FeedbackDevice.QuadEncoder, Constants.BallPickUp.countsPerRevPickUpMotor);
-        tunnelMotor.configEncoder(FridolinsMotor.FeedbackDevice.QuadEncoder, Constants.BallPickUp.countsPerRevTunnelMotor);
-
-        // light barriers 
-        lightBarrier = new LightBarrier(0);
+        // tunnelMotor.setInverted(Constants.BallPickUp.tunnelMotorInvertation);
 
         // factory defaults
         pickUpMotor.factoryDefault();
         tunnelMotor.factoryDefault();
 
-        colorSensor = new GroveColorSensor(Port.kOnboard, IntegrationTime._50MS, Gain.X1); 
+        // Encoders
+        pickUpMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder, Constants.BallPickUp.countsPerRevPickUpMotor);
+        tunnelMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder, Constants.BallPickUp.countsPerRevTunnelMotor);
+
+        // light barriers 
+        lightBarrier = new LightBarrier(0);
+        lightBarrier.setInverted(Constants.BallPickUp.isLightBarrierInverted);
+
+
+        colorSensor = new GroveColorSensor(Port.kMXP, IntegrationTime._50MS, Gain.X1); 
 
         // colorBox = Shuffleboard.getTab("SmartDashboard").add("BallColor",
         // false).withWidget(BuiltInWidgets.kBooleanBox)
@@ -64,12 +68,15 @@ public class PickUpSubsystem extends PickUpBase {
     }
 
     public static PickUpBase getInstance() {
-        if (instance == null && Constants.BallPickUp.isEnabled) {
-            instance = new PickUpSubsystem();
+        if(instance == null){
+            if(Constants.BallPickUp.isEnabled){
+                instance = new PickUpSubsystem();
+                // instance.setDefaultCommand();
+            }
+            else{
+                instance = new PickUpBase();
+            }
         }
-        else if (Constants.BallPickUp.isEnabled)
-            instance = new PickUpBase();
-
         return instance;
     }
 
@@ -84,17 +91,22 @@ public class PickUpSubsystem extends PickUpBase {
         }
     }
 
+    public boolean getLightBarrier() {
+        return lightBarrier.isActiv();
+    }
+
     @Override
     public void pickUpBall() {
-        SmartDashboard.putBoolean("BallInTunnel", lightBarrier.isActiv(Constants.BallPickUp.isLightBarrierInverted));
-        if(!lightBarrier.isActiv(Constants.BallPickUp.isLightBarrierInverted)){
+        if(!lightBarrier.isActiv()){
             pickUpMotor.set(Constants.BallPickUp.pickUpSpeed); 
-            tunnelMotor.set(Constants.BallPickUp.pickUpSpeed); 
+            tunnelMotor.set(-Constants.BallPickUp.pickUpSpeed); 
+            System.out.println("speed was set");
         }
         else{
             pickUpMotor.stopMotor();
             tunnelMotor.stopMotor();
             isBallintunnel = true;
+            return;
         }
     }
 
@@ -125,5 +137,10 @@ public class PickUpSubsystem extends PickUpBase {
             return BallColor.blue;
         }
         return BallColor.colorNotFound;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null);
     }
 }

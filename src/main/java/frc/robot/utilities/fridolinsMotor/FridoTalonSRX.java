@@ -1,16 +1,18 @@
 package frc.robot.utilities.fridolinsMotor;
 
+import java.util.Optional;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import ch.fridolinsrobotik.utilities.CSVLogger;
+
+import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
-
     // variables for CSVLogger:
     private CSVLogger logger; 
     private double speed;
@@ -23,12 +25,11 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     private boolean isKFEnabled = false;
     
     public FridoTalonSRX(int deviceID) {
+
         super(deviceID);
-        if(FridolinsMotor.debugMode)
-            logger = new CSVLogger("/tmp/logFridoTalon_id_" + deviceID + ".csv");
     }
 
-
+    @Override
     public void set(double speed){
         super.set(speed);
         this.speed = speed;
@@ -121,7 +122,7 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     }
 
     @Override
-    public void setDirection(boolean forward) {
+    public void setInverted(boolean forward) {
         super.setInverted(forward);
     }
 
@@ -173,7 +174,12 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
             super.config_kP(pidValues.slotIdX.get(), pidValues.kP);
             super.config_kI(pidValues.slotIdX.get(), pidValues.kI);
             super.config_kD(pidValues.slotIdX.get(), pidValues.kD);
+            super.configPeakOutputForward(pidValues.peakOutputForward);
+            super.configPeakOutputReverse(pidValues.peakOutputReverse);
+            pidValues.cruiseVelocity.ifPresent((cruiseVelocity) -> super.configMotionCruiseVelocity((int) cruiseVelocity.doubleValue()));
+            pidValues.acceleration.ifPresent((acceleration) -> super.configMotionAcceleration((int) acceleration.doubleValue()));
             pidValues.kF.ifPresent((kF) -> super.config_kF(pidValues.slotIdX.get(), kF));
+            super.selectProfileSlot(pidValues.slotIdX.get(), 0);
         } else {
             try {
                 throw new Exception("You have to give a slotID for TalonSRX pidControllers");
@@ -191,20 +197,26 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     }
     
     public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
-        logger.open();
-        if(FridolinsMotor.debugMode){ 
-            logger.put("EncoderTicks", this.getEncoderTicks());
-            logger.put("Speed", speed);
-            logger.put("setValue velocity", velocity);
-            logger.put("setValue position", position);
-            logger.put("PID P", kP);
-            logger.put("PID I", kI);
-            logger.put("PID D", kD);  
-            if(isKFEnabled){
-                logger.put("PID F", kF);
-            }
-            logger.writeToFile();
-            logger.close(); 
-        }     
+        logger = new CSVLogger(filePath);
+        logger.put("EncoderTicks", this.getEncoderTicks());
+        logger.put("Speed", speed);
+        logger.put("setValue velocity", velocity);
+        logger.put("setValue position", position);
+        logger.put("PID P", kP);
+        logger.put("PID I", kI);
+        logger.put("PID D", kD);  
+        if(isKFEnabled){
+            logger.put("PID F", kF);
+        }      
+    }
+
+    @Override
+    public double getEncoderVelocity() {
+        return super.getSelectedSensorVelocity();
+    }
+
+    @Override
+    public void selectPIDSlot(int slotIdx) {
+        super.selectProfileSlot(slotIdx, 0);
     }
 }

@@ -19,6 +19,10 @@ public class PickUpBase extends SubsystemBase{
     public void pickUpBall(){
     }
 
+    public boolean getLightBarrier(){
+        return false;
+    }
+
     public void loadBall(){
     }
 

@@ -1,5 +1,7 @@
 package frc.robot.utilities.fridolinsMotor;
 
+import java.util.Optional;
+
 import com.revrobotics.CANDigitalInput;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
@@ -7,14 +9,13 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.EncoderType;
 
-import ch.fridolinsrobotik.utilities.CSVLogger;
-import frc.robot.Constants;
+import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
 public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
 
     // variables for CSVLogger:
-    private CSVLogger logger; 
+    private CSVLogger logger;
     private double speed;
     private double position;
     private double velocity;
@@ -23,7 +24,8 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     private double kD;
     private double kF;
     private boolean isKFEnabled = false;
-    
+    private Optional<Integer> selectedPIDSlotIdx = Optional.empty();
+
     CANDigitalInput forwardLimitSwitch;
     CANDigitalInput reverseLimitSwitch;
     CANPIDController pidController;
@@ -35,9 +37,17 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
+    public void set(double speed) {
+        super.set(speed);
+        this.speed = speed;
+    }
+
+    @Override
     public void setPosition(double position) {
         if (this.pidController != null) {
-            this.pidController.setReference(position, ControlType.kPosition);
+            selectedPIDSlotIdx.ifPresentOrElse(
+                    (slotIdx) -> pidController.setReference(position, ControlType.kPosition, slotIdx),
+                    () -> pidController.setReference(position, ControlType.kPosition));
         } else {
             try {
                 throw new Exception("PID Controller not initialized");
@@ -51,7 +61,9 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     @Override
     public void setVelocity(double velocity) {
         if (this.pidController != null) {
-            this.pidController.setReference(velocity, ControlType.kVelocity);
+            selectedPIDSlotIdx.ifPresentOrElse(
+                    (slotIdx) -> pidController.setReference(velocity, ControlType.kVelocity, slotIdx),
+                    () -> pidController.setReference(velocity, ControlType.kVelocity));
         } else {
             try {
                 throw new Exception("PID Controller not initialized");
@@ -62,7 +74,8 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         this.velocity = velocity;
     }
 
-    private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(FridolinsMotor.LimitSwitchPolarity polarity) {
+    private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(
+            FridolinsMotor.LimitSwitchPolarity polarity) {
         switch (polarity) {
             case kNormallyOpen:
                 return CANDigitalInput.LimitSwitchPolarity.kNormallyOpen;
@@ -150,8 +163,8 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void setDirection(boolean forward) {
-        this.setDirection(forward);
+    public void setInverted(boolean inverted) {
+        super.setInverted(inverted);
     }
 
     @Override
@@ -185,6 +198,10 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
 
     @Override
     public void configEncoder(FridolinsMotor.FeedbackDevice device, int countsPerRev) {
+        if (device == FeedbackDevice.CANEncoder) {
+            this.encoder = super.getEncoder();
+            return;
+        }
         this.encoder = super.getEncoder(convertFromFridoFeedbackDevice(device), countsPerRev);
         this.encoder.setPositionConversionFactor(countsPerRev);
     }
@@ -199,40 +216,70 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         super.setOpenLoopRampRate(rate);
     }
 
+    private void setMotionMagicParametersIfNecessary(PIDValues pidValues) {
+        if (pidValues.cruiseVelocity.isPresent() || pidValues.acceleration.isPresent())
+            assert pidValues.slotIdX.isPresent() : "To set cruiseVelocity or acceleration slotIdx needs to be set";
+        pidValues.cruiseVelocity.ifPresent((cruiseVelocity) -> this.pidController
+                .setSmartMotionMaxVelocity(cruiseVelocity, pidValues.slotIdX.get()));
+        pidValues.acceleration.ifPresent(
+                (acceleration) -> this.pidController.setSmartMotionMaxAccel(acceleration, pidValues.slotIdX.get()));
+    }
+
     @Override
     public void setPID(PIDValues pidValues) {
         this.pidController = super.getPIDController();
-        this.pidController.setP(pidValues.kP);
-        this.pidController.setI(pidValues.kI);
-        this.pidController.setD(pidValues.kD);
-        pidValues.kF.ifPresent((kF) -> this.pidController.setFF(kF));
+        pidValues.slotIdX.ifPresentOrElse((slotIdx) -> setPIDWithSlotIdx(pidValues),
+                () -> setPIDWithOutSlotIdx(pidValues));
 
+        setMotionMagicParametersIfNecessary(pidValues);
         this.kP = pidValues.kP;
         this.kI = pidValues.kI;
         this.kD = pidValues.kD;
-        if(pidValues.kF.isPresent()){
+        if (pidValues.kF.isPresent()) {
             this.kF = pidValues.kF.get();
             isKFEnabled = true;
         }
     }
-    
-    public void putDataInCSVFile(String filePath){ // writes encoderPosition, speed, PID velocity (Sollwert), PID position (Sollwert)... to a csv file
-        logger.open();
-        if(FridolinsMotor.debugMode){
-            logger = new CSVLogger(filePath); 
-            logger.put("EncoderTicks", this.getEncoderTicks());
-            logger.put("Speed", speed);
-            logger.put("Sollwert velocity", velocity);
-            logger.put("Sollwert position", position);
-            logger.put("PID P", kP);
-            logger.put("PID I", kI);
-            logger.put("PID D", kD);  
-            if(isKFEnabled){
-                logger.put("PID F", kF);
-            }
-            logger.writeToFile();
-            logger.close();
+
+    private void setPIDWithOutSlotIdx(PIDValues pidValues) {
+        this.pidController.setP(pidValues.kP);
+        this.pidController.setI(pidValues.kI);
+        this.pidController.setD(pidValues.kD);
+        pidValues.kF.ifPresent((kF) -> this.pidController.setFF(kF));
+        this.pidController.setOutputRange(pidValues.peakOutputReverse, pidValues.peakOutputForward);
+    }
+
+    private void setPIDWithSlotIdx(PIDValues pidValues) {
+        this.pidController.setP(pidValues.kP, pidValues.slotIdX.get());
+        this.pidController.setI(pidValues.kI, pidValues.slotIdX.get());
+        this.pidController.setD(pidValues.kD, pidValues.slotIdX.get());
+        pidValues.kF.ifPresent((kF) -> this.pidController.setFF(kF, pidValues.slotIdX.get()));
+        this.pidController.setOutputRange(pidValues.peakOutputReverse, pidValues.peakOutputForward,
+                pidValues.slotIdX.get());
+    }
+
+    public void putDataInCSVFile(String filePath) { // writes encoderPosition, speed, PID velocity (Sollwert), PID
+                                                    // position (Sollwert)... to a csv file
+        logger = new CSVLogger(filePath);
+        logger.put("EncoderTicks", this.getEncoderTicks());
+        logger.put("Speed", speed);
+        logger.put("setValue velocity", velocity);
+        logger.put("setValue position", position);
+        logger.put("PID P", kP);
+        logger.put("PID I", kI);
+        logger.put("PID D", kD);
+        if (isKFEnabled) {
+            logger.put("PID F", kF);
         }
-              
+    }
+
+    @Override
+    public double getEncoderVelocity() {
+        return encoder.getVelocity();
+    }
+
+    @Override
+    public void selectPIDSlot(int slotIdx) {
+        selectedPIDSlotIdx = Optional.of(slotIdx);
     }
 }

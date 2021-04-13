@@ -85,10 +85,15 @@ public class Controller {
             pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
             pickUpCommand = new BallPickUpCommand();
             pickUpButton.whenPressed(() -> {
-                if (CommandScheduler.getInstance().isScheduled(pickUpCommand))
+                System.out.println("entered lambda");
+                if (CommandScheduler.getInstance().isScheduled(pickUpCommand)){
                     CommandScheduler.getInstance().cancel(pickUpCommand);
-                else
+                    System.out.println("entered if");
+                }
+                else{
                     CommandScheduler.getInstance().schedule(pickUpCommand);
+                    System.out.println("entered else");
+                }
             });
         }
     }

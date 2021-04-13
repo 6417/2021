@@ -4,13 +4,19 @@ import edu.wpi.first.wpilibj.DigitalInput;
 
 public class LightBarrier {
 
-    private static DigitalInput sensor;
+    private DigitalInput sensor;
+
+    private boolean inverted;
 
     public LightBarrier(int DIOPort){
         sensor = new DigitalInput(DIOPort);        
     }
 
-    public boolean isActiv(boolean inverted){
+    public void setInverted(boolean inverted){
+        this.inverted = inverted;
+    }
+
+    public boolean isActiv(){
         boolean output = sensor.get();
         if(inverted){
             return !output;

@@ -38,19 +38,23 @@ public interface FridolinsMotor extends SpeedController{
 
     public void follow(FridolinsMotor master, DirectionType direction);
 
-    public void setDirection(boolean forward);
+    public void setInverted(boolean inverted);
 
     public void setEncoderDirection(boolean inverted);
 
     public void setEncoderPosition(double position);
 
     public double getEncoderTicks();
+    
+    public double getEncoderVelocity();
 
     public void factoryDefault();
 
     public void configEncoder(FeedbackDevice device, int countsPerRev);
 
     public void configOpenLoopRamp(double rate);
+
+    public void selectPIDSlot(int slotIdx);
 
     public void setPID(PIDValues pidValues);
 
