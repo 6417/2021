@@ -6,15 +6,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.subsystems.Base.PickUpBase;
-import frc.robot.utilities.Controller;
 import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.LightBarrier;
-import frc.robot.utilities.Controller.ControlJoystick;
 import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
-import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
+import frc.robot.utilities.Timer;
 
 public class PickUpSubsystem extends PickUpBase {
 
@@ -31,7 +29,7 @@ public class PickUpSubsystem extends PickUpBase {
 
     private GroveColorSensor colorSensor;
 
-    private NetworkTableEntry colorBox;
+    // private NetworkTableEntry colorBox;
 
     private boolean isBallintunnel;
 
@@ -111,6 +109,7 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public void loadBall() {
+
     }
 
     @Override

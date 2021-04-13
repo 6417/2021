@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
 import frc.robot.commands.BallPickUpCommand;
+import frc.robot.commands.LoadBallCommand;
 import frc.robot.commands.ReleaseBallCommand;
 
 public class Controller {
@@ -76,6 +77,9 @@ public class Controller {
         JoystickButton releaseButton;   //LtButton
         ReleaseBallCommand releaseBallCommand;
 
+        JoystickButton loadButton;
+        LoadBallCommand loadBallCommand;
+
         public ControlJoystick() {
             super();
             super.controller = new Joystick(Constants.Joystick.CONTROL_ID);
@@ -103,6 +107,10 @@ public class Controller {
             releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
             releaseBallCommand = new ReleaseBallCommand();
             releaseButton.whenPressed(releaseBallCommand);
+
+            loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
+            loadBallCommand = new LoadBallCommand();
+            loadButton.whenPressed(loadBallCommand);
         }
     }
 }
