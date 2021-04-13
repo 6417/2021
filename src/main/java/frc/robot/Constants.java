@@ -50,6 +50,8 @@ public final class Constants {
         public static final int RIGHT_JOYSTICK_BUTTON_ID = 12;
     }
 
+    public static final int zeroNavxButtonID = Joystick.BACK_BUTTON_ID;
+
     public static final class Vision {
         public static final boolean IS_ENABLED = false;
     }
@@ -60,7 +62,7 @@ public final class Constants {
         }
 
         public static final class ButtounIds {
-            public static final int zeroEncoders = Joystick.X_BUTTON_ID;
+            public static final int zeroEncoders = Joystick.START_BUTTON_ID;
             public static final int fieledOriented = Joystick.Y_BUTTON_ID;
             public static final int throwerOriented = Joystick.A_BUTTON_ID;
             public static final int pickupOriented = Joystick.B_BUTTON_ID;
@@ -69,6 +71,7 @@ public final class Constants {
 
         private static void setSwerveDriveConstants() {
             zeroingSpeed = 0.1;
+            maxFineTuneOffsetForZeroEncodersCommand = 1.0;
             maxSpeedOfDrive = 0.293 * Math.PI; // calculated needs to measured
         }
 
@@ -86,6 +89,7 @@ public final class Constants {
         public static double zeroingSpeed;
         public static final double deadBand = 0.075;
         public static final double finetuningZeroFactor = 0.1;
+        public static double maxFineTuneOffsetForZeroEncodersCommand;
         public static double maxSpeedOfDrive; // in meters per second
         public static final double maxRotationSpeed = 15 * Math.PI / 16; // at full rotation speed the robot will turn
                                                                          // by 180

@@ -9,4 +9,9 @@ public class FieldOriented extends CommandBase{
     public void initialize() {
         SwerveDrive.getInstance().setDriveMode(DriveMode.FieldOriented);
     }
+
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
 }

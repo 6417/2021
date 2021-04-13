@@ -7,8 +7,6 @@
 
 package frc.robot;
 
-import com.kauailabs.navx.frc.AHRS;
-
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -23,11 +21,4 @@ public class RobotContainer {
   public RobotContainer() {
   }
 
-  private static AHRS navx;
-
-  public static AHRS getNavx() {
-    if (navx == null)
-      navx = new AHRS();
-    return navx;
-  }
 }

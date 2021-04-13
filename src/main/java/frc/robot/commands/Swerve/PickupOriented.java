@@ -9,4 +9,9 @@ public class PickupOriented extends CommandBase{
     public void initialize() {
         SwerveDrive.getInstance().setDriveMode(DriveMode.PickupOriented);
     }
+
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
 }

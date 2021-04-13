@@ -13,4 +13,9 @@ public class SetSpeedFactor extends CommandBase {
     public void initialize() {
         SwerveDrive.getInstance().setSpeedFactor(speedFactor);
     }
+
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
 }

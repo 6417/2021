@@ -9,4 +9,9 @@ public class ThrowerOriented extends CommandBase{
     public void initialize() {
         SwerveDrive.getInstance().setDriveMode(DriveMode.ThrowerOriented);
     }
+
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
 }

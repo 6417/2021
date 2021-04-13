@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
+import frc.robot.Robot;
 import frc.robot.subsystems.Swerve.SwerveDrive;
 import frc.robot.utilities.Controller;
 import frc.robot.utilities.MathUtilities;
@@ -91,7 +91,7 @@ public class DefaultDriveCommand extends CommandBase {
                     break;
                 case FieldOriented:
                     SwerveDrive.getInstance().drive(ChassisSpeeds.fromFieldRelativeSpeeds(xyVector.x, xyVector.y,
-                            rotationSpeed, new Rotation2d(RobotContainer.getNavx().getAngle())));
+                            rotationSpeed, new Rotation2d(Robot.getNavx().getAngle())));
                     break;
             }
     }
