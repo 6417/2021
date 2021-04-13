@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
-import frc.robot.utilities.fridolinsMotor.FridoMotorLogger;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 /**

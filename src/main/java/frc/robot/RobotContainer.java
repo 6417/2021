@@ -20,13 +20,8 @@ public class RobotContainer {
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
-  private final JoystickButton pickUpButton = new JoystickButton(Controller.getInstance().controlJoystick, 2)
+  // private final JoystickButton pickUpButton = new JoystickButton(Controller.getInstance().controlJoystick, 2);
 
   public RobotContainer() {
-  }
-
-
-  private void configureButtonBindings(){
-     
   }
 }

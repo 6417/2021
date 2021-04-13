@@ -64,9 +64,9 @@ public class PickUpSubsystem extends PickUpBase {
     }
 
     public static PickUpBase getInstance() {
-        if (instance == null && Constants.BallPickUp.isEnabled) 
+        if (instance == null && Constants.BallPickUp.isEnabled) {
             instance = new PickUpSubsystem();
-
+        }
         else if (Constants.BallPickUp.isEnabled)
             instance = new PickUpBase();
 

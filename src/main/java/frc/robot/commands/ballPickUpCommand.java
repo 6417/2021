@@ -2,15 +2,11 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.PickUpSubsystem;
-import frc.robot.subsystems.Base.PickUpBase;
 
-public class ballPickUpCommand extends CommandBase{
-    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private final PickUpBase mPickUpSubsystem;
+public class BallPickUpCommand extends CommandBase {
 
-    public ballPickUpCommand(){
-       mPickUpSubsystem = PickUpSubsystem.getInstance();
-       addRequirements(mPickUpSubsystem); 
+    public BallPickUpCommand() {
+       addRequirements(PickUpSubsystem.getInstance()); 
     }
 
     @Override
@@ -19,12 +15,12 @@ public class ballPickUpCommand extends CommandBase{
 
     @Override
     public void execute(){
-        mPickUpSubsystem.pickUpBall();
+        PickUpSubsystem.getInstance().pickUpBall();
     }
 
     @Override
     public void end(boolean interupted){
-        mPickUpSubsystem.stopMotors();
+        PickUpSubsystem.getInstance().stopMotors();
     }
 
     @Override
