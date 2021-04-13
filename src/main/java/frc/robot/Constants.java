@@ -18,6 +18,13 @@ import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
+import java.util.function.Supplier;
+
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean constants. This class should not be used for any other
@@ -28,6 +35,7 @@ import frc.robot.utilities.swerveLimiter.SwerveLimiter;
  * It is advised to statically import this class (or one of its inner classes)
  * wherever the constants are needed, to reduce verbosity.
  */
+
 public final class Constants {
     public static final class Joystick {
         public static final int DRIVER_ID = 1;
@@ -180,5 +188,35 @@ public final class Constants {
                 backRightConfig.halSensorPosition = 196608.0;
                 swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
         }
+    }
+
+    public static class BallPickUp{
+        public static boolean isEnabled = true;
+
+        // MotorIDs
+        public static final int pickUpMotor_ID = 12;   
+        public static final int tunnelMotor_ID = 10;  
+
+        // MotorSuppliers
+        public static Supplier<FridolinsMotor> pickUpMotor = () -> new FridoCANSparkMax(pickUpMotor_ID, MotorType.kBrushless);
+        public static Supplier<FridolinsMotor> tunnelMotor = () -> new FridoCANSparkMax(tunnelMotor_ID, MotorType.kBrushless);
+        public static final boolean tunnelMotorInvertation = true;
+
+        // variables to find out the ballcolor
+        public static final int comparativeValueBlueLow = 52;
+        public static final int comparativeValueBlueHigh = 70;
+        public static final int comparativeValueRedLow = 100;
+        public static final int comparativeValueRedTwo = 65;
+
+        public static final double ticksForTunnelMotor = 0; 
+
+        public static final int countsPerRevTunnelMotor = 1; 
+        public static final int countsPerRevPickUpMotor = 1; 
+
+        public static final double pickUpSpeed = 0.5;   // TODO optimal speed
+        public static final double loadSpeed = 0.5;     // TODO optimal speed
+        public static final double releaseSpeed = 0.3;  // TODO optimal speed 
+
+        public static final boolean isLightBarrierInverted = true;
     }
 }
