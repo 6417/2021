@@ -122,7 +122,7 @@ public class FridoTalonSRX extends WPI_TalonSRX implements FridolinsMotor {
     }
 
     @Override
-    public void setDirection(boolean forward) {
+    public void setInverted(boolean forward) {
         super.setInverted(forward);
     }
 

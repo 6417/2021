@@ -163,8 +163,8 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void setDirection(boolean forward) {
-        this.setDirection(forward);
+    public void setInverted(boolean forward) {
+        this.setInverted(forward);
     }
 
     @Override

@@ -78,7 +78,7 @@ public class FridoMotorLogger implements FridolinsMotor {
     }
 
     @Override
-    public void setDirection(boolean forward) {
+    public void setInverted(boolean forward) {
     }
 
     @Override

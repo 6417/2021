@@ -72,7 +72,7 @@ public class SwerveModule implements Sendable {
             this.drive.configEncoder(driveEncoderType, (int) driveMotorTicksPerRotation);
             this.rotation.configEncoder(rotationEncoderType, (int) rotationMotorTicksPerRotation);
             this.drive.setEncoderDirection(driveSensorInverted);
-            this.drive.setDirection(driveMotorInverted);
+            this.drive.setInverted(driveMotorInverted);
         }
     }
 

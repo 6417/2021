@@ -38,7 +38,7 @@ public interface FridolinsMotor extends SpeedController{
 
     public void follow(FridolinsMotor master, DirectionType direction);
 
-    public void setDirection(boolean forward);
+    public void setInverted(boolean forward);
 
     public void setEncoderDirection(boolean inverted);
 
