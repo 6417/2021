@@ -34,6 +34,13 @@ public class PIDValues implements Cloneable {
         this.peakOutputReverse = peakOutputReverse;
     }
 
+    public PIDValues(double kP, double kI, double kD, double peakOutputReverse, double peakOutputForward) {
+        this.kP = kP;
+        this.kD = kD;
+        this.kI = kI;
+        this.peakOutputReverse = peakOutputReverse;
+    }
+
     /**
      * @param cruiseVelocity the cruiseVelocity to set
      */
