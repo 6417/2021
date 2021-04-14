@@ -79,6 +79,7 @@ public class FridoMotorLogger implements FridolinsMotor {
 
     @Override
     public void setInverted(boolean forward) {
+        
     }
 
     @Override
@@ -144,11 +145,6 @@ public class FridoMotorLogger implements FridolinsMotor {
     @Override
     public double get() {
         return 0;
-    }
-
-    @Override
-    public void setInverted(boolean isInverted) {
-
     }
 
     @Override

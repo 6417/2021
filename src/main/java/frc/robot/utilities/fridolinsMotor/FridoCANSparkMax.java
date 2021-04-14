@@ -163,8 +163,8 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
-    public void setInverted(boolean forward) {
-        this.setInverted(forward);
+    public void setInverted(boolean inverted) {
+        super.setInverted(inverted);
     }
 
     @Override
@@ -198,6 +198,10 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
 
     @Override
     public void configEncoder(FridolinsMotor.FeedbackDevice device, int countsPerRev) {
+        if (device == FeedbackDevice.CANEncoder) {
+            this.encoder = super.getEncoder();
+            return;
+        }
         this.encoder = super.getEncoder(convertFromFridoFeedbackDevice(device), countsPerRev);
         this.encoder.setPositionConversionFactor(countsPerRev);
     }

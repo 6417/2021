@@ -9,22 +9,26 @@ import java.util.stream.Collectors;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpiutil.math.MathUtil;
+import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.Pair;
 import frc.robot.utilities.Timer;
 import frc.robot.utilities.Vector2d;
 
 public class SwerveLimiter extends SwerveLimiterBase {
     public static class Config implements Cloneable {
-        public double gauseStrechingFactor;
+        public double gauseXStrechingFactor;
+        public double gauseYOffset;
         public Supplier<Long> clock;
         public long defaultLoopTime;
+        public boolean centricSwerve;
 
         public Config clone() {
             try {
                 return (Config) super.clone();
             } catch (CloneNotSupportedException e) {
                 Config copy = new Config();
-                copy.gauseStrechingFactor = gauseStrechingFactor;
+                copy.gauseXStrechingFactor = gauseXStrechingFactor;
+                copy.gauseYOffset = gauseYOffset;
                 copy.clock = clock;
                 copy.defaultLoopTime = defaultLoopTime;
                 return copy;
@@ -35,11 +39,15 @@ public class SwerveLimiter extends SwerveLimiterBase {
     private double gauseStrechingFactor;
     private Timer loopTimeTimer;
     private long defaultLoopTime;
+    private final boolean centricSwerve;
+    private double gauseYOffset;
 
     public SwerveLimiter(Config config) {
-        gauseStrechingFactor = config.gauseStrechingFactor;
+        gauseStrechingFactor = config.gauseXStrechingFactor;
         loopTimeTimer = new Timer(config.clock);
         defaultLoopTime = config.defaultLoopTime;
+        centricSwerve = config.centricSwerve;
+        gauseYOffset = config.gauseYOffset;
     }
 
     /**
@@ -47,7 +55,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * and 1 at infinity.
      */
     private double modifiedGauseCurve(double x) {
-        return -Math.exp(-(x * x) * gauseStrechingFactor) + 1;
+        return -Math.exp(-Math.pow(x * gauseStrechingFactor, 2)) + gauseYOffset;
     }
 
     /**
@@ -62,7 +70,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * @return The rotation direction of a module with the provided vectors.
      */
     private static ModuleRotationDirection getRotationDirection(ModuleRotationVectors rotationVectorPair) {
-        if (Math.acos(rotationVectorPair.moduleRotation.dot(rotationVectorPair.desiredRotation)) > 0.0)
+        if (Math.signum(rotationVectorPair.moduleRotation.cross(rotationVectorPair.desiredRotation)) == 1)
             return ModuleRotationDirection.Counterclockwise;
         return ModuleRotationDirection.Clockwise;
     }
@@ -154,8 +162,11 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private double getLimitedDotProduct(double speed) {
         double resultOfModifiedGauseCurve = modifiedGauseCurve(speed);
-        return MathUtil.clamp(resultOfModifiedGauseCurve / (getLoopTime() / defaultLoopTime), 0.0,
-                resultOfModifiedGauseCurve);
+        if (centricSwerve)
+            return MathUtil.clamp(resultOfModifiedGauseCurve / (getLoopTime() / defaultLoopTime), 0.0,
+                    resultOfModifiedGauseCurve);
+        return MathUtilities.map(MathUtil.clamp(resultOfModifiedGauseCurve / (getLoopTime() / defaultLoopTime), 0.0,
+                resultOfModifiedGauseCurve), 0.0, 1.0, -1.0, 1.0);
     }
 
     /**
@@ -165,8 +176,12 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private Vector2d getLimitedVectorCloserToModuleRotation(Pair<Vector2d, Vector2d> solutions, Vector2d moduleRotation,
             Vector2d actualTargetVector) {
-        if (solutions.first.dot(actualTargetVector) > solutions.second.dot(actualTargetVector)
-                ^ moduleRotation.dot(actualTargetVector) < 0.0)
+        if (centricSwerve) {
+            if (solutions.first.dot(actualTargetVector) > solutions.second.dot(actualTargetVector)
+                    ^ moduleRotation.dot(actualTargetVector) < 0.0)
+                return solutions.first;
+            return solutions.second;
+        } else if (solutions.first.dot(actualTargetVector) > solutions.second.dot(actualTargetVector))
             return solutions.first;
         return solutions.second;
     }
@@ -213,17 +228,21 @@ public class SwerveLimiter extends SwerveLimiterBase {
      *                              vector.
      * @param moduleSpeed           The current cruising velocity of the module in
      *                              percent.
+     * @param rotatoinOfsetFactor   Factor to multiply the limited dotproduct, use
+     *                              the getRotationOfsetFunction to compute it.
+     * 
      * @return A limited swerve module state based on the velocity.
      */
     @Override
     public SwerveModuleState limitState(SwerveModuleState desiredState, Vector2d currentModuleRotation,
-            double moduleSpeed) {
+            double moduleSpeed, double rotatoinOfsetFactor) {
         Vector2d moduleRotation = currentModuleRotation.clone();
         Vector2d targetVector = Vector2d.fromRad(desiredState.angle.getRadians());
 
-        rotateModuleRotationIfNecessary(moduleRotation, targetVector);
+        if (centricSwerve)
+            rotateModuleRotationIfNecessary(moduleRotation, targetVector);
 
-        double limitedDotProduct = getLimitedDotProduct(Math.abs(moduleSpeed));
+        double limitedDotProduct = getLimitedDotProduct(Math.abs(moduleSpeed)) * rotatoinOfsetFactor;
         Pair<Vector2d, Vector2d> limitedTargetVectors = moduleRotation.normalize().inverseDot(limitedDotProduct);
 
         return vectorToSwerveModuleState(

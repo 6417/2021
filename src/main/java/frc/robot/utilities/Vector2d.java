@@ -53,45 +53,51 @@ public class Vector2d extends edu.wpi.first.wpilibj.drive.Vector2d implements Cl
     }
 
     /**
-     * @return A new vector wich has the same tirection as this one but with
+     * @return This vector wich has the same tirection as this one but with
      *         magnitude 1.
      * @throws ArithmeticException If the magnitude of the the vector is 0;
      */
     public Vector2d normalize() {
         if (magnitude() == 0)
             throw new ArithmeticException("The magnitude of the vector mustn't be 0 to normalize it.");
-        return new Vector2d(x / magnitude(), y / magnitude());
+        x /= magnitude();
+        y /= magnitude();
+        return this;
     }
 
     /**
-     * @return A new vector wich is the sum of this vecotr and "vec".
+     * @return This vector wich is the sum of this vecotr and "vec".
      * @param vec The vector to be added.
      */
     public Vector2d add(Vector2d vec) {
-        return new Vector2d(x + vec.x, y + vec.y);
+        x += vec.x;
+        y += vec.y;
+        return this;
     }
 
     /**
-     * @return A new vector which is "vec" subtracted from this vector.
+     * @return This vector which is "vec" subtracted from this vector.
      * @param vec The vector to be subtracted.
      */
     public Vector2d sub(Vector2d vec) {
-        return new Vector2d(x - vec.x, y - vec.y);
+        x -= vec.x;
+        y -= vec.y;
+        return this;
     }
 
     /**
-     * @return A new vector wich has the x and the y of this vector multiplied by
+     * @return This vector wich has the x and the y of this vector multiplied by
      *         "scalar".
      * @param scalar The factor to be multiplied by.
      */
     public Vector2d mult(double scalar) {
         x *= scalar;
         y *= scalar;
-        return new Vector2d(x * scalar, y * scalar);
+        return this;
     }
 
     /**
-     * @return A new vector wich is this vector divided by "scalar".
+     * @return This vector wich is this vector divided by "scalar".
      * @param scalar The divisor.
      * @throws ArithmeticException If scalar is 0.
      */

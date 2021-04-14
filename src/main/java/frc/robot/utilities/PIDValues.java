@@ -10,13 +10,21 @@ public class PIDValues implements Cloneable {
     public double kD;
     public double peakOutputReverse = -1;
     public double peakOutputForward = 1;
-    public Optional<Double> cruiseVelocity;
-    public Optional<Double> acceleration;
+    public Optional<Double> cruiseVelocity = Optional.empty();
+    public Optional<Double> acceleration = Optional.empty();
 
     public PIDValues(double kP, double kI, double kD) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
+    }
+
+    public PIDValues(double kP, double kI, double kD, double peakOutputReverse, double peakOutputForward) {
+        this.kP = kP;
+        this.kI = kI;
+        this.kD = kD;
+        this.peakOutputReverse = peakOutputReverse;
+        this.peakOutputForward = peakOutputForward;
     }
 
     public PIDValues(double kP, double kI, double kD, double kF) {
@@ -31,13 +39,6 @@ public class PIDValues implements Cloneable {
         this.kD = kD;
         this.kI = kI;
         this.kF = Optional.of(kF);
-        this.peakOutputReverse = peakOutputReverse;
-    }
-
-    public PIDValues(double kP, double kI, double kD, double peakOutputReverse, double peakOutputForward) {
-        this.kP = kP;
-        this.kD = kD;
-        this.kI = kI;
         this.peakOutputReverse = peakOutputReverse;
     }
 

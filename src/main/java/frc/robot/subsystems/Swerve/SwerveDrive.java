@@ -12,14 +12,21 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.Swerve.DefaultDriveCommand;
 import frc.robot.subsystems.Base.SwerveDriveBase;
 import frc.robot.utilities.SwerveKinematics;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
+import frc.robot.utilities.swerveLimiter.SwerveLimiterBase;
 
 public class SwerveDrive extends SwerveDriveBase {
+    public static enum DriveMode {
+        ThrowerOriented, PickupOriented, FieldOriented;
+    }
+
+    private DriveMode driveMode = DriveMode.ThrowerOriented;
     private static SwerveDriveBase instance = null;
     private SwerveKinematics<Constants.SwerveDrive.MountingLocations> kinematics;
     private HashMap<Constants.SwerveDrive.MountingLocations, SwerveModule> modules = new HashMap<>();
@@ -37,6 +44,8 @@ public class SwerveDrive extends SwerveDriveBase {
     private void setUpSwerveModules() {
         for (var location : Constants.SwerveDrive.MountingLocations.values())
             modules.put(location, new SwerveModule(Constants.SwerveDrive.swerveModuleConfigs.get(location)));
+        forEachModuleEntry((moduleEntry) -> SendableRegistry.addLW(moduleEntry.getValue(),
+                "SwerveModule " + moduleEntry.getKey().toString()));
     }
 
     private SwerveDrive() {
@@ -89,14 +98,19 @@ public class SwerveDrive extends SwerveDriveBase {
         HashMap<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
                 .toLabledSwerveModuleStates(requestedMovement);
         states = normalizeStates(states);
+        // Map<Constants.SwerveDrive.MountingLocations, Double> rotationOfsetFactors =
+        // SwerveLimiterBase
+        // .getRotationOfsets(modules, states);
+
         states.entrySet()
                 .forEach((Entry<Constants.SwerveDrive.MountingLocations, SwerveModuleState> labeledState) -> modules
-                        .get(labeledState.getKey()).setDesiredState(labeledState.getValue()));
+                        .get(labeledState.getKey()).setDesiredState(labeledState.getValue(),
+                                1.0 /* rotationOfsetFactors.get(labeledState.getKey()) */));
 
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
 
-        forEachModule((module) -> module.drive());
+        forEachModule((module) -> module.drive(speedFactor));
     }
 
     private Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> getModuleRotationVectorMap() {
@@ -187,5 +201,15 @@ public class SwerveDrive extends SwerveDriveBase {
     public void setSpeedFactor(double speedFactor) {
         assert speedFactor > 0.0 : "speedFactor must be grater than zero";
         this.speedFactor = speedFactor;
+    }
+
+    @Override
+    public DriveMode getDriveMode() {
+        return driveMode;
+    }
+
+    @Override
+    public void setDriveMode(DriveMode driveMode) {
+        this.driveMode = driveMode;
     }
 }

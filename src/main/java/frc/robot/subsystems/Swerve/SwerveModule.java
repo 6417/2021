@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Swerve;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.Sendable;
@@ -29,11 +30,14 @@ public class SwerveModule implements Sendable {
         public double maxVelocity; // in drive motor encoder velocity units
         public FridolinsMotor.FeedbackDevice driveEncoderType;
         public FridolinsMotor.FeedbackDevice rotationEncoderType;
-        public boolean driveSensorInverted;
+        public Optional<Boolean> driveSensorInverted = Optional.empty();
         public boolean driveMotorInverted;
         public double halSensorPosition;
         public boolean limitModuleStates;
         public boolean centricSwerve;
+        public LimitSwitchPolarity limitSwitchPolarity;
+        public double driveAcceleration;
+        public double maxRotationVelocity;
 
         @Override
         public Config clone() {
@@ -62,17 +66,19 @@ public class SwerveModule implements Sendable {
         public double driveMotorTicksPerRotation;
         public double wheelCircumference;
         public double maxVelocity;
+        public double maxDriveAcceleration;
 
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
-                boolean driveSensorInverted, FridolinsMotor rotation,
-                FridolinsMotor.FeedbackDevice rotationEncoderType) {
+                Optional<Boolean> driveSensorInverted, FridolinsMotor rotation,
+                FridolinsMotor.FeedbackDevice rotationEncoderType, LimitSwitchPolarity limitSwitchPolarity) {
             // DO NOT MAKE FACTORY DEFAULTS, for some reason it breaks every thing
             this.drive = drive;
             this.rotation = rotation;
             this.drive.configEncoder(driveEncoderType, (int) driveMotorTicksPerRotation);
             this.rotation.configEncoder(rotationEncoderType, (int) rotationMotorTicksPerRotation);
-            this.drive.setEncoderDirection(driveSensorInverted);
+            driveSensorInverted.ifPresent(this.drive::setEncoderDirection);
             this.drive.setInverted(driveMotorInverted);
+            this.rotation.enableForwardLimitSwitch(limitSwitchPolarity, true);
         }
     }
 
@@ -85,7 +91,8 @@ public class SwerveModule implements Sendable {
 
     public SwerveModule(Config config) {
         motors = new Motors(config.driveMotorInitializer.get(), config.driveEncoderType, config.driveMotorInverted,
-                config.driveSensorInverted, config.rotationMotorInitializer.get(), config.rotationEncoderType);
+                config.driveSensorInverted, config.rotationMotorInitializer.get(), config.rotationEncoderType,
+                config.limitSwitchPolarity);
         motors.drive.setPID(config.drivePID);
         motors.rotation.setPID(config.rotationPID);
         motors.driveMotorTicksPerRotation = config.driveMotorTicksPerRotation;
@@ -96,6 +103,7 @@ public class SwerveModule implements Sendable {
         halSensorPosition = config.halSensorPosition;
         centricSwerve = config.centricSwerve;
         limitedModuleStates = config.limitModuleStates;
+        motors.maxDriveAcceleration = config.driveAcceleration;
     }
 
     public Vector2d getModuleRotation() {
@@ -148,12 +156,14 @@ public class SwerveModule implements Sendable {
         }
     }
 
-    public void setDesiredState(SwerveModuleState state) {
+    public void setDesiredState(SwerveModuleState state, double rotationOfsetFactor) {
         if (limitedModuleStates)
             desiredState = limiter.limitState(state, getModuleRotation(),
-                    driveMotorEncoderVelocityToPercent(getSpeed()));
-        else
-            desiredState = state;
+                    driveMotorEncoderVelocityToPercent(getSpeed()), rotationOfsetFactor);
+        else {
+            desiredState = limiter.limitState(state, getModuleRotation(), 0.0, 1.0 /* rotationOfsetFactor */);
+            desiredState.speedMetersPerSecond = state.speedMetersPerSecond;
+        }
 
         if (centricSwerve)
             desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
@@ -171,9 +181,18 @@ public class SwerveModule implements Sendable {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
 
-    public void drive() {
+    private double applyMaxAccelerationToDriveMotorVelocity(double desiredVelocity) {
+        if (Math.abs(motors.drive.getEncoderVelocity() - desiredVelocity) > motors.maxDriveAcceleration) {
+            return motors.drive.getEncoderVelocity()
+                    + Math.signum(desiredVelocity - motors.drive.getEncoderVelocity()) * motors.maxDriveAcceleration;
+        }
+        return desiredVelocity;
+    }
+
+    public void drive(double speedFactor) {
         motors.rotation.setPosition(angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()));
-        motors.drive.setVelocity(meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond));
+        motors.drive.setVelocity(applyMaxAccelerationToDriveMotorVelocity(
+                meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond * speedFactor)));
     }
 
     public boolean isHalSensorTriggered() {
@@ -223,11 +242,17 @@ public class SwerveModule implements Sendable {
         isEncoderZeroed = false;
     }
 
+    public SwerveModuleState getDesiredModuleState() {
+        return desiredState;
+    }
+
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("Desired state speed", () -> desiredState.speedMetersPerSecond, null);
         builder.addDoubleProperty("Desired state speed encoder velocity units",
-                () -> meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond), null);
+                () -> applyMaxAccelerationToDriveMotorVelocity(
+                        meterPerSecondToDriveMotorEncoderVelocityUnits(desiredState.speedMetersPerSecond)),
+                null);
         builder.addDoubleProperty("Desired state angle", () -> desiredState.angle.getDegrees(), null);
         builder.addDoubleProperty("Desired state rotation encoder ticks",
                 () -> angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()), null);

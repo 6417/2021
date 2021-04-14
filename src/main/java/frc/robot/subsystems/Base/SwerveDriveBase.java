@@ -8,8 +8,17 @@ import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Swerve.SwerveModule;
+import frc.robot.subsystems.Swerve.SwerveDrive.DriveMode;
 
 public class SwerveDriveBase extends SubsystemBase {
+    public DriveMode getDriveMode() {
+        return DriveMode.ThrowerOriented;
+    }
+
+    public void setDriveMode(DriveMode driveMode) {
+        
+    }
+
     public void drive(ChassisSpeeds requesteSpeeds) {
 
     }
