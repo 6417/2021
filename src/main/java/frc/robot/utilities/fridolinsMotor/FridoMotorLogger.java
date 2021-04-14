@@ -78,11 +78,6 @@ public class FridoMotorLogger implements FridolinsMotor {
     }
 
     @Override
-    public void setInverted(boolean forward) {
-        
-    }
-
-    @Override
     public void setEncoderDirection(boolean inverted) {
     }
 
@@ -174,6 +169,12 @@ public class FridoMotorLogger implements FridolinsMotor {
 
     @Override
     public void selectPIDSlot(int slotIdx) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void setInverted(boolean inverted) {
         // TODO Auto-generated method stub
 
     }
