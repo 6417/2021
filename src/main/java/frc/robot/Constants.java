@@ -163,7 +163,7 @@ public final class Constants {
 
         private static void addModuleSpecificConfigurarions() {
             SwerveModule.Config frontLeftConfig = commonConfigurations.clone();
-            frontLeftConfig.mountingPoint = new Translation2d(0.2725, 0.139);
+            frontLeftConfig.mountingPoint = new Translation2d(0.139, 0.2725);
             frontLeftConfig.driveMotorInitializer = () -> motorInitializer(32, MotorType.kBrushless);
             frontLeftConfig.rotationMotorInitializer = () -> motorInitializer(33, MotorType.kBrushless);
             frontLeftConfig.driveMotorInverted = false;
@@ -171,7 +171,7 @@ public final class Constants {
             swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
 
             SwerveModule.Config frontRightConfig = commonConfigurations.clone();
-            frontRightConfig.mountingPoint = new Translation2d(-0.2725, 0.139);
+            frontRightConfig.mountingPoint = new Translation2d(-0.139, 0.2725);
             frontRightConfig.driveMotorInitializer = () -> motorInitializer(30, MotorType.kBrushless);
             frontRightConfig.rotationMotorInitializer = () -> motorInitializer(31, MotorType.kBrushless);
             frontRightConfig.driveMotorInverted = false;
@@ -179,7 +179,7 @@ public final class Constants {
             swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
 
             SwerveModule.Config backLeftConfig = commonConfigurations.clone();
-            backLeftConfig.mountingPoint = new Translation2d(0.2725, -0.139);
+            backLeftConfig.mountingPoint = new Translation2d(0.139, -0.2725);
             backLeftConfig.driveMotorInitializer = () -> motorInitializer(36, MotorType.kBrushless);
             backLeftConfig.rotationMotorInitializer = () -> motorInitializer(37, MotorType.kBrushless);
             backLeftConfig.driveMotorInverted = false;
@@ -187,7 +187,7 @@ public final class Constants {
             swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
 
             SwerveModule.Config backRightConfig = commonConfigurations.clone();
-            backRightConfig.mountingPoint = new Translation2d(-0.2725, -0.139);
+            backRightConfig.mountingPoint = new Translation2d(-0.139, -0.2725);
             backRightConfig.driveMotorInitializer = () -> motorInitializer(34, MotorType.kBrushless);
             backRightConfig.rotationMotorInitializer = () -> motorInitializer(35, MotorType.kBrushless);
             backRightConfig.driveMotorInverted = false;
