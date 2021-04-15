@@ -12,14 +12,8 @@ public class BreakCommand extends CommandBase {
     }
 
     @Override
-    public void initialize() {
-        SwerveDrive.getInstance().activateBreak();
-        SwerveDrive.getInstance().stopAllMotors();
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        SwerveDrive.getInstance().deactivateBreak();
+    public void execute() {
+        SwerveDrive.getInstance().forEachModule((module) -> module.setDriveMotorSpeed(0.0));
     }
 
     @Override

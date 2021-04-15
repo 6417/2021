@@ -161,7 +161,8 @@ public final class Constants {
             commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.CANEncoder;
             commonConfigurations.limitModuleStates = false;
             commonConfigurations.limitSwitchPolarity = LimitSwitchPolarity.kNormallyOpen;
-            commonConfigurations.driveAcceleration = 500;
+            commonConfigurations.driveAccelerationForward = 2000;
+            commonConfigurations.driveAccelerationSideWays = 500;
         }
 
         private static FridolinsMotor motorInitializer(int id, MotorType motorType) {

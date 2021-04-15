@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
 import frc.robot.commands.ZeroNavx;
@@ -63,6 +64,15 @@ public class Controller {
         }
     }
 
+    private Runnable runCommandAndCancelWhenPressedAgain(CommandBase command) {
+        return () -> {
+            if (CommandScheduler.getInstance().isScheduled(command))
+                CommandScheduler.getInstance().cancel(command);
+            else
+                CommandScheduler.getInstance().schedule(command);
+        };
+    }
+
     public class DriveJoystick extends SuperJoystick {
         // Define Buttons to make Bindings
         JoystickButton zeroEncodersButton;
@@ -89,7 +99,7 @@ public class Controller {
             breakButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.breakButton);
 
             // Configure the binding
-            zeroEncodersButton.whenPressed(new ZeroEncoders());
+            zeroEncodersButton.whenPressed(runCommandAndCancelWhenPressedAgain(new ZeroEncoders()));
             fieldOrientedButton.whenPressed(new FieldOriented());
             throwerOrientedButton.whenPressed(new ThrowerOriented());
             pickupOrientedButton.whenPressed(new PickupOriented());
@@ -102,14 +112,9 @@ public class Controller {
 
     public class ControlJoystick extends SuperJoystick {
         // Define Buttons to make Bindings
-        JoystickButton pickUpButton;    // RbButton
-        BallPickUpCommand pickUpCommand;
-
-        JoystickButton releaseButton;   //LtButton
-        ReleaseBallCommand releaseBallCommand;
-
+        JoystickButton pickUpButton; // RbButton
+        JoystickButton releaseButton; // LtButton
         JoystickButton loadButton;
-        LoadBallCommand loadBallCommand;
 
         public ControlJoystick() {
             super(Constants.Joystick.CONTROL_ID);
@@ -118,29 +123,14 @@ public class Controller {
 
         public void configureButtonBindings() {
             // Initialize the buttons
+            pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
+            releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
+            loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
 
             // Configure the bindings
-            pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
-            pickUpCommand = new BallPickUpCommand();
-            pickUpButton.whenPressed(() -> {
-                System.out.println("entered lambda");
-                if (CommandScheduler.getInstance().isScheduled(pickUpCommand)){
-                    CommandScheduler.getInstance().cancel(pickUpCommand);
-                    System.out.println("entered if");
-                }
-                else{
-                    CommandScheduler.getInstance().schedule(pickUpCommand);
-                    System.out.println("entered else");
-                }
-            });
-
-            releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
-            releaseBallCommand = new ReleaseBallCommand();
-            releaseButton.whenPressed(releaseBallCommand);
-
-            loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
-            loadBallCommand = new LoadBallCommand();
-            loadButton.whenPressed(loadBallCommand);
+            pickUpButton.whenPressed(runCommandAndCancelWhenPressedAgain(new BallPickUpCommand()));
+            releaseButton.whenPressed(new ReleaseBallCommand());
+            loadButton.whenPressed(new LoadBallCommand());
         }
     }
 }

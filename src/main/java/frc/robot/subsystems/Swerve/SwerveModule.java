@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
@@ -37,7 +38,8 @@ public class SwerveModule implements Sendable {
         public boolean limitModuleStates;
         public boolean centricSwerve;
         public LimitSwitchPolarity limitSwitchPolarity;
-        public double driveAcceleration;
+        public double driveAccelerationForward;
+        public double driveAccelerationSideWays;
         public double maxRotationVelocity;
 
         @Override
@@ -67,7 +69,8 @@ public class SwerveModule implements Sendable {
         public double driveMotorTicksPerRotation;
         public double wheelCircumference;
         public double maxVelocity;
-        public double maxDriveAcceleration;
+        public double maxDriveAccelerationFroward;
+        public double maxDriveAccelerationSideWays;
 
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
                 Optional<Boolean> driveSensorInverted, FridolinsMotor rotation,
@@ -80,6 +83,8 @@ public class SwerveModule implements Sendable {
             driveSensorInverted.ifPresent(this.drive::setEncoderDirection);
             this.drive.setInverted(driveMotorInverted);
             this.rotation.enableForwardLimitSwitch(limitSwitchPolarity, true);
+            this.drive.setIdleMode(IdleModeType.kCoast);
+            this.rotation.setIdleMode(IdleModeType.kBrake);
         }
     }
 
@@ -104,7 +109,8 @@ public class SwerveModule implements Sendable {
         halSensorPosition = config.halSensorPosition;
         centricSwerve = config.centricSwerve;
         limitedModuleStates = config.limitModuleStates;
-        motors.maxDriveAcceleration = config.driveAcceleration;
+        motors.maxDriveAccelerationFroward = config.driveAccelerationForward;
+        motors.maxDriveAccelerationSideWays = config.driveAccelerationSideWays;
     }
 
     public Vector2d getModuleRotation() {
@@ -190,10 +196,14 @@ public class SwerveModule implements Sendable {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
 
+    private double getMaxDriveAccelerationBasedOnCurrentRotation() {
+        return MathUtilities.map(Math.abs(new Vector2d(0.0, 1.0).dot(getModuleRotation())), 0.0, 1.0, motors.maxDriveAccelerationSideWays, motors.maxDriveAccelerationFroward);
+    }
+
     private double applyMaxAccelerationToDriveMotorVelocity(double desiredVelocity) {
-        if (Math.abs(motors.drive.getEncoderVelocity() - desiredVelocity) > motors.maxDriveAcceleration) {
+        if (Math.abs(motors.drive.getEncoderVelocity() - desiredVelocity) > getMaxDriveAccelerationBasedOnCurrentRotation()) {
             return motors.drive.getEncoderVelocity()
-                    + Math.signum(desiredVelocity - motors.drive.getEncoderVelocity()) * motors.maxDriveAcceleration;
+                    + Math.signum(desiredVelocity - motors.drive.getEncoderVelocity()) * getMaxDriveAccelerationBasedOnCurrentRotation();
         }
         return desiredVelocity;
     }
@@ -210,7 +220,7 @@ public class SwerveModule implements Sendable {
     }
 
     public void setDriveMotorSpeed(double velocity) {
-        motors.drive.setVelocity(velocity);
+        motors.drive.setVelocity(applyMaxAccelerationToDriveMotorVelocity(velocity));
     }
 
     public void rotateModule(double speed) {
