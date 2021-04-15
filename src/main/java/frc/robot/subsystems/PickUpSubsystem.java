@@ -126,7 +126,7 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public Color getRGB() {
-        return colorSensor.readRGB();
+        return currentColor;
     }
 
     @Override
