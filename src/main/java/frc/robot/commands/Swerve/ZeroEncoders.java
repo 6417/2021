@@ -1,4 +1,4 @@
-package frc.robot.commands.Swerve;
+package frc.robot.commands.swerve;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
-import frc.robot.subsystems.Swerve.SwerveDrive;
-import frc.robot.subsystems.Swerve.SwerveModule;
+import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.subsystems.swerve.SwerveModule;
 
 public class ZeroEncoders extends ParallelCommandGroup {
     public ZeroEncoders() {

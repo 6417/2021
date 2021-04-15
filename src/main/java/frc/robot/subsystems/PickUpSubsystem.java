@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
-import frc.robot.subsystems.Base.PickUpBase;
+import frc.robot.subsystems.base.PickUpBase;
 import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.LightBarrier;
 import frc.robot.utilities.GroveColorSensor.Color;

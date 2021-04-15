@@ -1,11 +1,11 @@
-package frc.robot.commands.Swerve;
+package frc.robot.commands.swerve;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.subsystems.Swerve.SwerveDrive;
+import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.utilities.Controller;
 import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.Vector2d;

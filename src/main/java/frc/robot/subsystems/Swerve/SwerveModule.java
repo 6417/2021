@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Swerve;
+package frc.robot.subsystems.swerve;
 
 import java.util.Optional;
 import java.util.function.Supplier;

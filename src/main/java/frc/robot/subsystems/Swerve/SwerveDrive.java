@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Swerve;
+package frc.robot.subsystems.swerve;
 
 import java.util.AbstractMap;
 import java.util.Comparator;
@@ -15,8 +15,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
-import frc.robot.commands.Swerve.DefaultDriveCommand;
-import frc.robot.subsystems.Base.SwerveDriveBase;
+import frc.robot.commands.swerve.DefaultDriveCommand;
+import frc.robot.subsystems.base.SwerveDriveBase;
 import frc.robot.utilities.SwerveKinematics;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 import frc.robot.utilities.swerveLimiter.SwerveLimiterBase;

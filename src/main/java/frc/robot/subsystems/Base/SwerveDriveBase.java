@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Base;
+package frc.robot.subsystems.base;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,8 +7,8 @@ import java.util.function.Consumer;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.Swerve.SwerveModule;
-import frc.robot.subsystems.Swerve.SwerveDrive.DriveMode;
+import frc.robot.subsystems.swerve.SwerveModule;
+import frc.robot.subsystems.swerve.SwerveDrive.DriveMode;
 
 public class SwerveDriveBase extends SubsystemBase {
     public DriveMode getDriveMode() {

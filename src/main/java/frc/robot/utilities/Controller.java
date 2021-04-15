@@ -6,14 +6,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
 import frc.robot.commands.ZeroNavx;
-import frc.robot.commands.BallPickUp.BallPickUpCommand;
-import frc.robot.commands.BallPickUp.LoadBallCommand;
-import frc.robot.commands.BallPickUp.ReleaseBallCommand;
-import frc.robot.commands.Swerve.FieldOriented;
-import frc.robot.commands.Swerve.PickupOriented;
-import frc.robot.commands.Swerve.SetSpeedFactor;
-import frc.robot.commands.Swerve.ThrowerOriented;
-import frc.robot.commands.Swerve.ZeroEncoders;
+import frc.robot.commands.ballPickUp.BallPickUpCommand;
+import frc.robot.commands.ballPickUp.LoadBallCommand;
+import frc.robot.commands.ballPickUp.ReleaseBallCommand;
+import frc.robot.commands.swerve.FieldOriented;
+import frc.robot.commands.swerve.PickupOriented;
+import frc.robot.commands.swerve.SetSpeedFactor;
+import frc.robot.commands.swerve.ThrowerOriented;
+import frc.robot.commands.swerve.ZeroEncoders;
 
 public class Controller {
     private static Controller instance;

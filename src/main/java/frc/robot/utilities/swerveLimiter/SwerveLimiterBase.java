@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpiutil.math.MathUtil;
-import frc.robot.subsystems.Swerve.SwerveModule;
+import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.Vector2d;
 

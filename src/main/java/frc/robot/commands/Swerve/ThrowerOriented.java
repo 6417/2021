@@ -1,8 +1,8 @@
-package frc.robot.commands.Swerve;
+package frc.robot.commands.swerve;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Swerve.SwerveDrive;
-import frc.robot.subsystems.Swerve.SwerveDrive.DriveMode;
+import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.subsystems.swerve.SwerveDrive.DriveMode;
 
 public class ThrowerOriented extends CommandBase{
     @Override
