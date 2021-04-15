@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.swerve.SwerveDrive;
-import frc.robot.utilities.Controller;
+import frc.robot.Controller;
 import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.Vector2d;
 

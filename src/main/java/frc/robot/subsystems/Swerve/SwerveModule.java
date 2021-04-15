@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
@@ -177,6 +178,14 @@ public class SwerveModule implements Sendable {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, true);
     }
 
+    public void activateBreak() {
+        motors.drive.setIdleMode(IdleModeType.kBrake);
+    }
+
+    public void deactivateBreak() {
+        motors.drive.setIdleMode(IdleModeType.kCoast);
+    }
+
     public void disableLimitSwitch() {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
@@ -198,6 +207,10 @@ public class SwerveModule implements Sendable {
     public boolean isHalSensorTriggered() {
         return motors.rotation.isForwardLimitSwitchActive(); // TODO: check to which limit switch the hal sensor is
                                                              // connected to
+    }
+
+    public void setDriveMotorSpeed(double velocity) {
+        motors.drive.setVelocity(velocity);
     }
 
     public void rotateModule(double speed) {

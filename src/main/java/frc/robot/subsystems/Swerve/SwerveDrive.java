@@ -212,4 +212,14 @@ public class SwerveDrive extends SwerveDriveBase {
     public void setDriveMode(DriveMode driveMode) {
         this.driveMode = driveMode;
     }
+
+    @Override
+	public void activateBreak() {
+        forEachModule((module) -> module.activateBreak()); 
+	}
+
+    @Override
+	public void deactivateBreak() {
+        forEachModule((module) -> module.deactivateBreak()); 
+	}
 }
