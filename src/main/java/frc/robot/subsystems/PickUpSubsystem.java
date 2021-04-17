@@ -13,6 +13,7 @@ import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.Timer;
+import frc.robot.utilities.LatchedBoolean;
 
 public class PickUpSubsystem extends PickUpBase {
 
@@ -36,6 +37,8 @@ public class PickUpSubsystem extends PickUpBase {
     private Thread updateBallColorThread; // we use this thread to update the ballcolor (there msut be a delay)
 
     private LightBarrier lightBarrier;
+    
+    private LatchedBoolean latchedBoolean;
 
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
@@ -56,16 +59,15 @@ public class PickUpSubsystem extends PickUpBase {
         lightBarrier = new LightBarrier(0);
         lightBarrier.setInverted(Constants.BallPickUp.isLightBarrierInverted);
 
+        // color sensor and colorthread to update Ballcolor
         colorSensor = new GroveColorSensor(Port.kMXP, IntegrationTime._50MS, Gain.X1);
-
-        // colorBox = Shuffleboard.getTab("SmartDashboard").add("BallColor",
-        // false).withWidget(BuiltInWidgets.kBooleanBox)
-        // .withProperties(Map.of("Color when false", "#b3e6e6")).getEntry();
 
         updateBallColorThread = new Thread(this::updateBallColorLoop);
         updateBallColorThread.start();
-    }
 
+        latchedBoolean = new LatchedBoolean(false ,LatchedBoolean.EdgeDetection.RISING);
+    }
+   
     public static PickUpBase getInstance() {
         if (instance == null) {
             if (Constants.BallPickUp.isEnabled) {
@@ -108,8 +110,19 @@ public class PickUpSubsystem extends PickUpBase {
     }
 
     @Override
-    public void loadBall() {
+    public void pickUpBallLatchedBoolean(){
+        if(latchedBoolean.update(lightBarrier.isActiv())){
+            pickUpMotor.set(Constants.BallPickUp.pickUpSpeed);
+            tunnelMotor.set(-Constants.BallPickUp.pickUpSpeed);
+        } else {
+            stopMotors();
+            isBallintunnel = true;
+            return;
+        }
+    }
 
+    @Override
+    public void loadBall() {
     }
 
     @Override

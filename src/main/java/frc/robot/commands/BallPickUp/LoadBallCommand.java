@@ -30,6 +30,7 @@ public class LoadBallCommand extends CommandBase{
     @Override
     public boolean isFinished(){
         if(timer.getPastTime().get() < 1000){
+            System.out.println(timer.getPastTime().get());
             return false;
         }
         else{

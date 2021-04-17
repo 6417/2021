@@ -19,11 +19,13 @@ public class PickUpBase extends SubsystemBase{
     public void pickUpBall(){
     }
 
+    public void pickUpBallLatchedBoolean(){
+    }
+
     public void loadBall(){
     }
 
     public void releaseBall(){
-
     }
 
     public boolean getLightBarrier(){
