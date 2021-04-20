@@ -97,28 +97,8 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public void pickUpBall() {
-        if (!lightBarrier.isActiv()) {
-            pickUpMotor.set(Constants.BallPickUp.pickUpSpeed);
-            tunnelMotor.set(-Constants.BallPickUp.pickUpSpeed);
-            System.out.println("speed was set");
-        } else {
-            pickUpMotor.stopMotor();
-            tunnelMotor.stopMotor();
-            isBallintunnel = true;
-            return;
-        }
-    }
-
-    @Override
-    public void pickUpBallLatchedBoolean(){
-        if(latchedBoolean.update(lightBarrier.isActiv())){
-            pickUpMotor.set(Constants.BallPickUp.pickUpSpeed);
-            tunnelMotor.set(-Constants.BallPickUp.pickUpSpeed);
-        } else {
-            stopMotors();
-            isBallintunnel = true;
-            return;
-        }
+        pickUpMotor.set(Constants.BallPickUp.pickUpSpeed);
+        tunnelMotor.set(-Constants.BallPickUp.tunnelMotorPickUpSpeed);
     }
 
     @Override
