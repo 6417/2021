@@ -20,6 +20,7 @@ public class ReleaseBallCommand extends CommandBase{
 
     @Override
     public void end(boolean interupted){
+        PickUpSubsystem.getInstance().stopMotors();
     }
 
     @Override

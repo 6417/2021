@@ -2,7 +2,6 @@ package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
 import frc.robot.commands.ZeroNavx;
@@ -105,7 +104,6 @@ public class Controller {
         ReleaseBallCommand releaseBallCommand;
 
         JoystickButton loadButton;
-        LoadBallCommand loadBallCommand;
 
         public ControlJoystick() {
             super(Constants.Joystick.CONTROL_ID);
@@ -130,17 +128,16 @@ public class Controller {
             releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
             releaseBallCommand = new ReleaseBallCommand();
             releaseButton.whenPressed(() -> {
-                if(CommandScheduler.getInstance().isScheduled(loadBallCommand)){
-                    CommandScheduler.getInstance().cancel(loadBallCommand);
+                if(CommandScheduler.getInstance().isScheduled(releaseBallCommand)){
+                    CommandScheduler.getInstance().cancel(releaseBallCommand);
                 }
                 else{
-                    CommandScheduler.getInstance().schedule(loadBallCommand);
+                    CommandScheduler.getInstance().schedule(releaseBallCommand);
                 }
             });
 
             loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
-            loadBallCommand = new LoadBallCommand();
-            loadButton.whenPressed(loadBallCommand);
+            loadButton.whenPressed(new LoadBallCommand());
         }
     }
 }
