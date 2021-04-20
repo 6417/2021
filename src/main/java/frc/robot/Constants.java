@@ -281,9 +281,10 @@ public final class Constants {
         public static final int countsPerRevTunnelMotor = 1; 
         public static final int countsPerRevPickUpMotor = 1; 
 
-        public static final double pickUpSpeed = 0.5;   // TODO optimal speed
-        public static final double loadSpeed = 0.5;     // TODO optimal speed
-        public static final double releaseSpeed = 0.3;  // TODO optimal speed 
+        public static final double pickUpSpeed = 1;   // TODO optimal speed
+        public static final double tunnelMotorPickUpSpeed = 0.4; // TODO
+        public static final double loadSpeed = 1;     // TODO optimal speed
+        public static final double releaseSpeed = 1;  // TODO optimal speed 
 
         public static final boolean isLightBarrierInverted = true;
     }
