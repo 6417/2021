@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -20,16 +21,16 @@ public abstract class SwerveLimiterBase {
     /**
      * Function for {@link #RotationDirectionCorectorGetter}, which does nothing.
      */
-    public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotaionDirectionCorrections(
+    public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> getModuleRotaionDirectionCorrections(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, boolean isRobotRotating) {
         return rotationVectorPairs.entrySet().stream()
-                .map((rotatoinVectorPairEntry) -> new AbstractMap.SimpleEntry<MountingLocation, Boolean>(
-                        rotatoinVectorPairEntry.getKey(), false))
+                .map((rotatoinVectorPairEntry) -> new AbstractMap.SimpleEntry<MountingLocation, Optional<Boolean>>(
+                        rotatoinVectorPairEntry.getKey(), Optional.empty()))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     public static interface RotationDirectionCorrectorGetter<MountingLocation extends Enum<MountingLocation>> {
-        public Map<MountingLocation, Boolean> getModuleRotationDirectionCorrections(
+        public Map<MountingLocation, Optional<Boolean>> getModuleRotationDirectionCorrections(
                 Map<MountingLocation, ModuleRotationVectors> rotationDirections, boolean isRobotRotating);
     }
 
@@ -54,7 +55,7 @@ public abstract class SwerveLimiterBase {
     }
 
     public static enum ModuleRotationDirection {
-        Clockwise, Counterclockwise
+        Clockwise, Counterclockwise, None
     }
 
     public static class ModuleRotationVectors {

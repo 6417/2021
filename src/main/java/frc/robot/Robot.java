@@ -11,8 +11,11 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.utilities.VisionService;
 import frc.robot.Controller;
 
 /**
@@ -23,8 +26,6 @@ import frc.robot.Controller;
  * project.
  */
 public class Robot extends TimedRobot {
-    private RobotContainer m_robotContainer;
-
     private static AHRS navx;
 
     public static AHRS getNavx() {
@@ -47,6 +48,14 @@ public class Robot extends TimedRobot {
         getNavx().calibrate();
         while(getNavx().isCalibrating());
         getNavx().reset();
+        VisionService.getInstance();
+        PowerDistributionPanel pdp = new PowerDistributionPanel(62); // to display amps on shuffleboard
+        SmartDashboard.putData(new CommandBase() {
+            @Override
+            public void initialize() {
+                VisionService.getInstance().setConnectionStatus();
+            }
+        });
     }
 
     /**
@@ -102,7 +111,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        VisionService.getInstance().setConnectionStatus();
     }
 
     /**        

@@ -16,6 +16,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
+import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
@@ -61,7 +62,7 @@ public final class Constants {
     public static final int zeroNavxButtonID = Joystick.BACK_BUTTON_ID;
 
     public static final class Vision {
-        public static final boolean IS_ENABLED = false;
+        public static final boolean IS_ENABLED = true;
     }
 
     public static final class SwerveDrive {
@@ -90,7 +91,7 @@ public final class Constants {
         }
 
         public static final boolean enabled = true;
-        public static final boolean rotateAllModulesInSameDirection = true;
+        public static final boolean rotateAllModulesInSameDirection = false;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
         private static final boolean swerveTestOn2019Robot = false;
@@ -128,8 +129,9 @@ public final class Constants {
         }
 
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
-        public static double defaultSpeedFactor = 1.0;
+        public static double defaultSpeedFactor = 0.75;
         public static double slowSpeedFactor = 0.25;
+
         // setting up commmon configurations for all swerve modules
         static {
             if (swerveTestOn2019Robot)
@@ -163,6 +165,8 @@ public final class Constants {
             commonConfigurations.limitSwitchPolarity = LimitSwitchPolarity.kNormallyOpen;
             commonConfigurations.driveAccelerationForward = 2000;
             commonConfigurations.driveAccelerationSideWays = 500;
+            commonConfigurations.problemDirectionsWhileBreaking = new Vector2d[]{new Vector2d(-1/Math.sqrt(2), -1/Math.sqrt(2)), new Vector2d(-1/Math.sqrt(2), 1/Math.sqrt(2))};
+            commonConfigurations.problemDirectionsBreakModeGauseStrechingFactor = 1.0;
         }
 
         private static FridolinsMotor motorInitializer(int id, MotorType motorType) {

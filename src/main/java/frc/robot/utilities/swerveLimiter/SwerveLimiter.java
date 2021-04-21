@@ -2,12 +2,15 @@ package frc.robot.utilities.swerveLimiter;
 
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.Pair;
@@ -70,23 +73,22 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * @return The rotation direction of a module with the provided vectors.
      */
     private static ModuleRotationDirection getRotationDirection(ModuleRotationVectors rotationVectorPair) {
-        if (Math.signum(rotationVectorPair.moduleRotation.cross(rotationVectorPair.desiredRotation)) == 1)
+        if (rotationVectorPair.moduleRotation.dot(rotationVectorPair.desiredRotation) > rotatoinDirectionInversionTolerance)
+            return ModuleRotationDirection.None;
+        if (Math.signum(rotationVectorPair.moduleRotation.cross(rotationVectorPair.desiredRotation)) < 0.0)
             return ModuleRotationDirection.Counterclockwise;
         return ModuleRotationDirection.Clockwise;
     }
 
     /**
      * @param rotationVectorPairs The map to be checked.
-     * @param element             The element of which the count shall be returned.
+     * @param direction           The element of which the count shall be returned.
      * @return The number of elements equal to {@link #element}.
      */
-    private static <MountingLocation extends Enum<MountingLocation>> int getNumberOfElementsInMap(
-            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, ModuleRotationDirection element) {
-        int count = 0;
-        for (var rotationVectorPair : rotationVectorPairs.values())
-            if (getRotationDirection(rotationVectorPair) == element)
-                count++;
-        return count;
+    private static <MountingLocation extends Enum<MountingLocation>> int getNumberOfRotationDirectionsInMap(
+            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, ModuleRotationDirection direction) {
+        return (int) rotationVectorPairs.values().stream().map(SwerveLimiter::getRotationDirection)
+                .filter((rotationDirection) -> direction == rotationDirection).count();
     }
 
     /**
@@ -95,26 +97,37 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private static <MountingLocation extends Enum<MountingLocation>> ModuleRotationDirection getCommonRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
-        int counterclockwiseCount = getNumberOfElementsInMap(rotationVectorPairs,
+        int counterclockwiseCount = getNumberOfRotationDirectionsInMap(rotationVectorPairs,
                 ModuleRotationDirection.Counterclockwise);
-        int clockwiseCount = getNumberOfElementsInMap(rotationVectorPairs, ModuleRotationDirection.Clockwise);
+        int clockwiseCount = getNumberOfRotationDirectionsInMap(rotationVectorPairs, ModuleRotationDirection.Clockwise);
+        SmartDashboard.putNumber("clockwiseCount", clockwiseCount);
+        SmartDashboard.putNumber("counterClockwiseCount", counterclockwiseCount);
         if (counterclockwiseCount < clockwiseCount)
             return ModuleRotationDirection.Clockwise;
         return ModuleRotationDirection.Counterclockwise;
     }
+
+    public static double rotatoinDirectionInversionTolerance = 1.0;
 
     /**
      * @return A map of booleans, true means the rotation direction of the module at
      *         the mounting location of the key should be inverted. Calculated with
      *         out robot rotation.
      */
-    private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithOutRobotRotation(
+    private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> getModuleRotationDirectionCorrectionsWithOutRobotRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
         ModuleRotationDirection commonRotation = getCommonRotation(rotationVectorPairs);
-        return rotationVectorPairs.entrySet().stream()
-                .map((rotationVectorEntry) -> new AbstractMap.SimpleEntry<>(rotationVectorEntry.getKey(),
-                        getRotationDirection(rotationVectorEntry.getValue()) == commonRotation))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        return rotationVectorPairs.entrySet().stream().map(
+                new Function<Entry<MountingLocation, ModuleRotationVectors>, Entry<MountingLocation, Optional<Boolean>>>() {
+                    public Entry<MountingLocation, Optional<Boolean>> apply(
+                            Entry<MountingLocation, ModuleRotationVectors> rotationVectorPair) {
+                        if (rotationVectorPair.getValue().moduleRotation
+                                .dot(rotationVectorPair.getValue().desiredRotation) > rotatoinDirectionInversionTolerance)
+                            return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(), Optional.empty());
+                        return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(),
+                                Optional.of(getRotationDirection(rotationVectorPair.getValue()) != commonRotation));
+                    }
+                }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     /**
@@ -127,8 +140,9 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * @return A map of booleans, true means the rotation direction of the module at
      *         the mounting location of the key should be inverted.
      */
-    public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotaionDirectionCorrections(
+    public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> getModuleRotaionDirectionCorrections(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, boolean isRobotRotating) {
+        SmartDashboard.putBoolean("isRobotRotating", isRobotRotating);
         if (isRobotRotating)
             return getModuleRotationDirectionCorrectionsWithRobotRotation(rotationVectorPairs);
         else
@@ -140,13 +154,20 @@ public class SwerveLimiter extends SwerveLimiterBase {
      *         the mounting location of the key should be inverted. Calculated with
      *         out robot rotation.
      */
-    private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Boolean> getModuleRotationDirectionCorrectionsWithRobotRotation(
+    private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> getModuleRotationDirectionCorrectionsWithRobotRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
-        return rotationVectorPairs.entrySet().stream()
-                .map((rotationVectorPair) -> new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(),
-                        rotationVectorPair.getValue().moduleRotation
-                                .dot(rotationVectorPair.getValue().desiredRotation) < 0.0))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        return rotationVectorPairs.entrySet().stream().map(
+                new Function<Entry<MountingLocation, ModuleRotationVectors>, Entry<MountingLocation, Optional<Boolean>>>() {
+                    public Entry<MountingLocation, Optional<Boolean>> apply(
+                            Entry<MountingLocation, ModuleRotationVectors> rotationVectorPair) {
+                        if (rotationVectorPair.getValue().moduleRotation
+                                .dot(rotationVectorPair.getValue().desiredRotation) > rotatoinDirectionInversionTolerance)
+                            return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(), Optional.empty());
+                        return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(),
+                                Optional.of(rotationVectorPair.getValue().moduleRotation
+                                        .dot(rotationVectorPair.getValue().desiredRotation) < 0.0));
+                    }
+                }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     /**

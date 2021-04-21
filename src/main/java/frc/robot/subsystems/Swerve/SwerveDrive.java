@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -11,8 +12,10 @@ import java.util.stream.Collectors;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
 import frc.robot.commands.swerve.DefaultDriveCommand;
@@ -108,7 +111,7 @@ public class SwerveDrive extends SwerveDriveBase {
                                 1.0 /* rotationOfsetFactors.get(labeledState.getKey()) */));
 
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
-            correctRotationDirections(requestedMovement.omegaRadiansPerSecond == 0.0);
+            correctRotationDirections(Math.abs(requestedMovement.omegaRadiansPerSecond) > 0.01);
 
         forEachModule((module) -> module.drive(speedFactor));
     }
@@ -126,9 +129,13 @@ public class SwerveDrive extends SwerveDriveBase {
 
     private void correctRotationDirections(boolean isRobotRotating) {
         Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> moduleRotatoinVectors = getModuleRotationVectorMap();
-        Map<Constants.SwerveDrive.MountingLocations, Boolean> corrections = directionCorectorGetter
-                .getModuleRotationDirectionCorrections(moduleRotatoinVectors, isRobotRotating);
-        corrections.entrySet().stream().filter((correctionEntry) -> correctionEntry.getValue())
+        Map<Constants.SwerveDrive.MountingLocations, Optional<Boolean>> corrections = SwerveLimiter
+                .getModuleRotaionDirectionCorrections(moduleRotatoinVectors, isRobotRotating);
+        corrections.entrySet().stream()
+                .filter((correctionEntry) -> correctionEntry.getValue().isPresent())
+                .map((correctionEntry) -> new AbstractMap.SimpleEntry<>(correctionEntry.getKey(),
+                        correctionEntry.getValue().get()))
+                .filter((correctionEntry) -> correctionEntry.getValue())
                 .forEach((correctionEntry) -> modules.get(correctionEntry.getKey()).invertRotationDirection());
     }
 
@@ -214,12 +221,12 @@ public class SwerveDrive extends SwerveDriveBase {
     }
 
     @Override
-	public void activateBreak() {
-        forEachModule((module) -> module.activateBreak()); 
-	}
+    public void activateBreak() {
+        forEachModule((module) -> module.activateBreak());
+    }
 
     @Override
-	public void deactivateBreak() {
-        forEachModule((module) -> module.deactivateBreak()); 
-	}
+    public void deactivateBreak() {
+        forEachModule((module) -> module.deactivateBreak());
+    }
 }

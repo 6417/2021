@@ -1,12 +1,13 @@
 package frc.robot;
 
+import static frc.robot.Robot.getNavx;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
-import frc.robot.commands.ZeroNavx;
 import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
@@ -105,7 +106,7 @@ public class Controller {
             pickupOrientedButton.whenPressed(new PickupOriented());
             slowSpeedFactorButton.whenPressed(new SetSpeedFactor(Constants.SwerveDrive.slowSpeedFactor));
             slowSpeedFactorButton.whenReleased(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
-            zeroNavxButton.whenPressed(new ZeroNavx());
+            zeroNavxButton.whenPressed(getNavx()::reset);
             breakButton.whileHeld(new BreakCommand());
         }
     }
