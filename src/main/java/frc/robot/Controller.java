@@ -2,6 +2,8 @@ package frc.robot;
 
 import static frc.robot.Robot.getNavx;
 
+import java.util.Optional;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,8 +23,8 @@ import frc.robot.commands.swerve.ZeroEncoders;
 public class Controller {
     private static Controller instance;
 
-    public DriveJoystick driveJoystick;
-    public ControlJoystick controlJoystick;
+    public SuperJoystick driveJoystick;
+    public SuperJoystick controlJoystick;
 
     private Controller() {
         driveJoystick = new DriveJoystick();
@@ -38,30 +40,33 @@ public class Controller {
 
     // Class for basic Joystick functionality
     public class SuperJoystick {
-        Joystick controller;
+        Optional<Joystick> controller;
 
         public SuperJoystick(int joystickId) {
-            controller = new Joystick(joystickId);
+            if (new Joystick(joystickId).isConnected())
+                controller = Optional.of(new Joystick(joystickId));
+            else
+                controller = Optional.empty();
         }
 
         public double getLeftStickY() {
-            return controller.getY();
+            return controller.map((joystick) -> joystick.getY()).orElse(0.0);
         }
 
         public double getLeftStickX() {
-            return controller.getX();
+            return controller.map((joystick) -> joystick.getX()).orElse(0.0);
         }
 
         public double getRightStickY() {
-            return controller.getThrottle();
+            return controller.map((joystick) -> joystick.getThrottle()).orElse(0.0);
         }
 
         public double getRightStickX() {
-            return controller.getTwist();
+            return controller.map((joystick) -> joystick.getTwist()).orElse(0.0);
         }
 
         public double getDpad() {
-            return controller.getPOV();
+            return controller.map((joystick) -> joystick.getPOV()).orElse(0);
         }
     }
 
@@ -84,20 +89,23 @@ public class Controller {
         JoystickButton zeroNavxButton;
         JoystickButton breakButton;
 
-        public DriveJoystick() {
+        private DriveJoystick() {
             super(Constants.Joystick.DRIVER_ID);
-            configureButtonBindings();
+            controller.ifPresent((ignored) -> this.configureButtonBindings());
         }
 
-        public void configureButtonBindings() {
+        private void configureButtonBindings() {
             // Initialize the buttons
-            zeroEncodersButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.zeroEncoders);
-            fieldOrientedButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.fieledOriented);
-            throwerOrientedButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.throwerOriented);
-            pickupOrientedButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.pickupOriented);
-            slowSpeedFactorButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.slowSpeedMode);
-            zeroNavxButton = new JoystickButton(controller, Constants.zeroNavxButtonID);
-            breakButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.breakButton);
+            zeroEncodersButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.zeroEncoders);
+            fieldOrientedButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.fieledOriented);
+            throwerOrientedButton = new JoystickButton(controller.get(),
+                    Constants.SwerveDrive.ButtounIds.throwerOriented);
+            pickupOrientedButton = new JoystickButton(controller.get(),
+                    Constants.SwerveDrive.ButtounIds.pickupOriented);
+            slowSpeedFactorButton = new JoystickButton(controller.get(),
+                    Constants.SwerveDrive.ButtounIds.slowSpeedMode);
+            zeroNavxButton = new JoystickButton(controller.get(), Constants.zeroNavxButtonID);
+            breakButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.breakButton);
 
             // Configure the binding
             zeroEncodersButton.whenPressed(runCommandAndCancelWhenPressedAgain(new ZeroEncoders()));
@@ -117,16 +125,16 @@ public class Controller {
         JoystickButton releaseButton; // LtButton
         JoystickButton loadButton;
 
-        public ControlJoystick() {
+        private ControlJoystick() {
             super(Constants.Joystick.CONTROL_ID);
-            configureButtonBindings();
+            controller.ifPresent((ignored) -> this.configureButtonBindings());
         }
 
-        public void configureButtonBindings() {
+        private void configureButtonBindings() {
             // Initialize the buttons
-            pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
-            releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
-            loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
+            pickUpButton = new JoystickButton(controller.get(), Constants.Joystick.RB_BUTTON_ID);
+            releaseButton = new JoystickButton(controller.get(), Constants.Joystick.LT_BUTTON_ID);
+            loadButton = new JoystickButton(controller.get(), Constants.Joystick.LB_BUTTON_ID);
 
             // Configure the bindings
             pickUpButton.whenPressed(runCommandAndCancelWhenPressedAgain(new BallPickUpCommand()));
