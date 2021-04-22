@@ -106,7 +106,7 @@ public class SwerveModule implements Sendable {
     private SwerveLimiter limiter;
     private SwerveModuleState desiredState = new SwerveModuleState();
     public final double halSensorPosition;
-    public boolean centricSwerveMode;
+    public final boolean centricSwerveMode;
     public final boolean limitedModuleStates;
     public boolean currentRotationInverted = false;
     private Vector2d[] problemDirectionsWhileBreaking;
@@ -182,10 +182,6 @@ public class SwerveModule implements Sendable {
         } else {
             return new SwerveModuleState(desiredState.speedMetersPerSecond, desiredState.angle);
         }
-    }
-
-    public void setCentricSwerveMode(boolean on) {
-        centricSwerveMode = on;
     }
 
     public void setDesiredState(SwerveModuleState state, double rotationOfsetFactor) {

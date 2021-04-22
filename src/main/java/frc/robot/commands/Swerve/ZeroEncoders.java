@@ -3,11 +3,14 @@ package frc.robot.commands.swerve;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
+import frc.robot.Controller;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveModule;
 
@@ -21,6 +24,17 @@ public class ZeroEncoders extends ParallelCommandGroup {
             commands.add(commandGroup);
         });
         addCommands(commands.toArray(SequentialCommandGroup[]::new));
+        addCommands(new InstantCommand(
+                () -> Controller.getInstance().driveJoystick.setRumble(RumbleType.kLeftRumble, 1.0)));
+        addCommands(new InstantCommand(
+                () -> Controller.getInstance().driveJoystick.setRumble(RumbleType.kRightRumble, 1.0)));
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        super.end(interrupted);
+        Controller.getInstance().driveJoystick.setRumble(RumbleType.kLeftRumble, 0.0);
+        Controller.getInstance().driveJoystick.setRumble(RumbleType.kRightRumble, 0.0);
     }
 
     private class GoToHalSensor extends CommandBase {
@@ -89,12 +103,15 @@ public class ZeroEncoders extends ParallelCommandGroup {
             if (module.isHalSensorTriggered())
                 module.setRotationEncoderTicks(module.halSensorPosition);
 
-            // TODO: Debug this if statement 
-            // if (Math.abs(module.getRotationEncoderTicks() - startingPosition) > Constants.SwerveDrive.maxFineTuneOffsetForZeroEncodersCommand) {
-            //     CommandScheduler.getInstance().cancel(parentSequentialCommand);
-            //     SequentialCommandGroup newZeroCommandForModule = new SequentialCommandGroup(new GoToHalSensor(module));
-            //     newZeroCommandForModule.addCommands(new Finetune(module, newZeroCommandForModule));
-            //     CommandScheduler.getInstance().schedule(newZeroCommandForModule);
+            // TODO: Debug this if statement
+            // if (Math.abs(module.getRotationEncoderTicks() - startingPosition) >
+            // Constants.SwerveDrive.maxFineTuneOffsetForZeroEncodersCommand) {
+            // CommandScheduler.getInstance().cancel(parentSequentialCommand);
+            // SequentialCommandGroup newZeroCommandForModule = new
+            // SequentialCommandGroup(new GoToHalSensor(module));
+            // newZeroCommandForModule.addCommands(new Finetune(module,
+            // newZeroCommandForModule));
+            // CommandScheduler.getInstance().schedule(newZeroCommandForModule);
             // }
         }
 

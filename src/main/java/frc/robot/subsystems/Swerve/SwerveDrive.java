@@ -98,7 +98,7 @@ public class SwerveDrive extends SwerveDriveBase {
     public void drive(ChassisSpeeds requestedMovement) {
         currentChassisSpeeds = requestedMovement;
         Map<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
-                .toLabledSwerveModuleStates(requestedMovement);
+                .toLabledSwerveModuleStates(currentChassisSpeeds);
         states = normalizeStates(states);
         // Map<Constants.SwerveDrive.MountingLocations, Double> rotationOfsetFactors =
         // SwerveLimiterBase
@@ -110,7 +110,7 @@ public class SwerveDrive extends SwerveDriveBase {
                                 1.0 /* rotationOfsetFactors.get(labeledState.getKey()) */));
 
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
-            correctRotationDirections(Math.abs(requestedMovement.omegaRadiansPerSecond) > 0.01);
+            correctRotationDirections(Math.abs(currentChassisSpeeds.omegaRadiansPerSecond) > 0.01);
 
         forEachModule((module) -> module.drive(speedFactor));
     }
@@ -121,27 +121,21 @@ public class SwerveDrive extends SwerveDriveBase {
                         entry.getKey(),
                         new SwerveLimiter.ModuleRotationVectors(entry.getValue().getModuleRotation(),
                                 entry.getValue().getTargetVector())))
-                .collect(Collectors.toMap(
-                        Entry::getKey,Entry::getValue));
-    }
-
-    @Override
-    public void setCentricSwerveMode(boolean on) {
-        forEachModule((module) -> module.setCentricSwerveMode(on));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     private void correctRotationDirections(boolean isRobotRotating) {
         Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> moduleRotatoinVectors = getModuleRotationVectorMap();
         Map<Constants.SwerveDrive.MountingLocations, Optional<Boolean>> corrections = SwerveLimiter
                 .getModuleRotaionDirectionCorrections(moduleRotatoinVectors, isRobotRotating);
-        corrections.entrySet().stream()
-                .filter((correctionEntry) -> correctionEntry.getValue().isPresent())
+        corrections.entrySet().stream().filter((correctionEntry) -> correctionEntry.getValue().isPresent())
                 .map((correctionEntry) -> new AbstractMap.SimpleEntry<>(correctionEntry.getKey(),
                         correctionEntry.getValue().get()))
                 .filter((correctionEntry) -> correctionEntry.getValue())
                 .forEach((correctionEntry) -> modules.get(correctionEntry.getKey()).invertRotationDirection());
 
-        SmartDashboard.putStringArray("Corrections", corrections.values().stream().map((Optional<Boolean> correction) -> correction.toString()).toArray(String[]::new));
+        SmartDashboard.putStringArray("Corrections", corrections.values().stream()
+                .map((Optional<Boolean> correction) -> correction.toString()).toArray(String[]::new));
     }
 
     @Override

@@ -75,10 +75,10 @@ public final class Constants {
             public static final int fieledOriented = Joystick.Y_BUTTON_ID;
             public static final int throwerOriented = Joystick.A_BUTTON_ID;
             public static final int pickupOriented = Joystick.B_BUTTON_ID;
-            public static final int slowSpeedMode = Joystick.RT_BUTTON_ID;
-            public static final int breakButton = Joystick.RB_BUTTON_ID;
-            public static final int centircSwerveMode = Joystick.LB_BUTTON_ID;
-            public static final int fullSpeed = Joystick.LT_BUTTON_ID;
+            public static final int slowSpeedMode = Joystick.RB_BUTTON_ID;
+            public static final int breakButton = Joystick.RT_BUTTON_ID;
+            public static final int centircSwerveMode = Joystick.LT_BUTTON_ID;
+            public static final int fullSpeed = Joystick.LB_BUTTON_ID;
         }
 
         private static void setSwerveDriveConstants() {
@@ -93,7 +93,7 @@ public final class Constants {
         }
 
         public static final boolean enabled = true;
-        public static final boolean rotateAllModulesInSameDirection = true;
+        public static final boolean rotateAllModulesInSameDirection = false;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
         private static final boolean swerveTestOn2019Robot = false;
@@ -131,8 +131,8 @@ public final class Constants {
         }
 
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
-        public static double defaultSpeedFactor = 1.0;
-        public static double slowSpeedFactor = 0.25;
+        public static double defaultSpeedFactor = 0.75;
+        public static double slowSpeedFactor = 0.35;
 
         // setting up commmon configurations for all swerve modules
         static {

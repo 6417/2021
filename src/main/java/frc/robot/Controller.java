@@ -5,6 +5,7 @@ import static frc.robot.Robot.getNavx;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -14,7 +15,6 @@ import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
 import frc.robot.commands.swerve.BreakCommand;
-import frc.robot.commands.swerve.CentricSwerveMode;
 import frc.robot.commands.swerve.FieldOriented;
 import frc.robot.commands.swerve.PickupOriented;
 import frc.robot.commands.swerve.SetSpeedFactor;
@@ -69,6 +69,10 @@ public class Controller {
         public double getDpad() {
             return controller.map((joystick) -> joystick.getPOV()).orElse(0);
         }
+
+        public void setRumble(RumbleType type, double value) {
+            controller.ifPresent((Joystick joystick) -> joystick.setRumble(type, value));
+        }
     }
 
     private Runnable runCommandAndCancelWhenPressedAgain(CommandBase command) {
@@ -89,7 +93,6 @@ public class Controller {
         JoystickButton slowSpeedFactorButton;
         JoystickButton zeroNavxButton;
         JoystickButton breakButton;
-        JoystickButton centricSwerveModeButton;
         JoystickButton fullSpeedButton;
 
         private DriveJoystick() {
@@ -109,8 +112,6 @@ public class Controller {
                     Constants.SwerveDrive.ButtounIds.slowSpeedMode);
             zeroNavxButton = new JoystickButton(controller.get(), Constants.zeroNavxButtonID);
             breakButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.breakButton);
-            centricSwerveModeButton = new JoystickButton(controller.get(),
-                    Constants.SwerveDrive.ButtounIds.centircSwerveMode);
             fullSpeedButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.fullSpeed);
 
             // Configure the binding
@@ -118,13 +119,24 @@ public class Controller {
             fieldOrientedButton.whenPressed(new FieldOriented());
             throwerOrientedButton.whenPressed(new ThrowerOriented());
             pickupOrientedButton.whenPressed(new PickupOriented());
-            slowSpeedFactorButton.whenPressed(new SetSpeedFactor(Constants.SwerveDrive.slowSpeedFactor));
-            slowSpeedFactorButton.whenReleased(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
+            CommandBase slowSpeedCommand = new SetSpeedFactor(Constants.SwerveDrive.slowSpeedFactor);
+            slowSpeedFactorButton.whenPressed(() -> {
+                if (!CommandScheduler.getInstance().isScheduled(slowSpeedCommand))
+                    CommandScheduler.getInstance().schedule(slowSpeedCommand);
+                else
+                    CommandScheduler.getInstance()
+                            .schedule(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
+            });
             zeroNavxButton.whenPressed(getNavx()::reset);
             breakButton.whileHeld(new BreakCommand());
-            centricSwerveModeButton.whileHeld(new CentricSwerveMode());
-            fullSpeedButton.whenPressed(new SetSpeedFactor(1.0));
-            fullSpeedButton.whenReleased(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
+            CommandBase fullSpeedCommand = new SetSpeedFactor(1.0);
+            fullSpeedButton.whenPressed(() -> {
+                if (!CommandScheduler.getInstance().isScheduled(fullSpeedCommand))
+                    CommandScheduler.getInstance().schedule(fullSpeedCommand);
+                else
+                    CommandScheduler.getInstance()
+                            .schedule(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
+            });
         }
     }
 
