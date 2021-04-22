@@ -76,7 +76,9 @@ public final class Constants {
             public static final int throwerOriented = Joystick.A_BUTTON_ID;
             public static final int pickupOriented = Joystick.B_BUTTON_ID;
             public static final int slowSpeedMode = Joystick.RT_BUTTON_ID;
-            public static final int breakButton = Joystick.X_BUTTON_ID;
+            public static final int breakButton = Joystick.RB_BUTTON_ID;
+            public static final int centircSwerveMode = Joystick.LB_BUTTON_ID;
+            public static final int fullSpeed = Joystick.LT_BUTTON_ID;
         }
 
         private static void setSwerveDriveConstants() {

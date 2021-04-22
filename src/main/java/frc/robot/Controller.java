@@ -14,6 +14,7 @@ import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
 import frc.robot.commands.swerve.BreakCommand;
+import frc.robot.commands.swerve.CentricSwerveMode;
 import frc.robot.commands.swerve.FieldOriented;
 import frc.robot.commands.swerve.PickupOriented;
 import frc.robot.commands.swerve.SetSpeedFactor;
@@ -88,6 +89,8 @@ public class Controller {
         JoystickButton slowSpeedFactorButton;
         JoystickButton zeroNavxButton;
         JoystickButton breakButton;
+        JoystickButton centricSwerveModeButton;
+        JoystickButton fullSpeedButton;
 
         private DriveJoystick() {
             super(Constants.Joystick.DRIVER_ID);
@@ -106,6 +109,9 @@ public class Controller {
                     Constants.SwerveDrive.ButtounIds.slowSpeedMode);
             zeroNavxButton = new JoystickButton(controller.get(), Constants.zeroNavxButtonID);
             breakButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.breakButton);
+            centricSwerveModeButton = new JoystickButton(controller.get(),
+                    Constants.SwerveDrive.ButtounIds.centircSwerveMode);
+            fullSpeedButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.fullSpeed);
 
             // Configure the binding
             zeroEncodersButton.whenPressed(runCommandAndCancelWhenPressedAgain(new ZeroEncoders()));
@@ -116,6 +122,9 @@ public class Controller {
             slowSpeedFactorButton.whenReleased(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
             zeroNavxButton.whenPressed(getNavx()::reset);
             breakButton.whileHeld(new BreakCommand());
+            centricSwerveModeButton.whileHeld(new CentricSwerveMode());
+            fullSpeedButton.whenPressed(new SetSpeedFactor(1.0));
+            fullSpeedButton.whenReleased(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
         }
     }
 

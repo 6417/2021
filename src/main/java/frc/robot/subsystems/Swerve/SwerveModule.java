@@ -106,7 +106,7 @@ public class SwerveModule implements Sendable {
     private SwerveLimiter limiter;
     private SwerveModuleState desiredState = new SwerveModuleState();
     public final double halSensorPosition;
-    public final boolean centricSwerve;
+    public boolean centricSwerveMode;
     public final boolean limitedModuleStates;
     public boolean currentRotationInverted = false;
     private Vector2d[] problemDirectionsWhileBreaking;
@@ -124,7 +124,7 @@ public class SwerveModule implements Sendable {
         limiter = config.limiterInitializer.get();
         motors.maxVelocity = config.maxVelocity;
         halSensorPosition = config.halSensorPosition;
-        centricSwerve = config.centricSwerve;
+        centricSwerveMode = config.centricSwerve;
         limitedModuleStates = config.limitModuleStates;
         motors.maxDriveAccelerationFroward = config.driveAccelerationForward;
         motors.maxDriveAccelerationSideWays = config.driveAccelerationSideWays;
@@ -184,6 +184,10 @@ public class SwerveModule implements Sendable {
         }
     }
 
+    public void setCentricSwerveMode(boolean on) {
+        centricSwerveMode = on;
+    }
+
     public void setDesiredState(SwerveModuleState state, double rotationOfsetFactor) {
         if (limitedModuleStates)
             desiredState = limiter.limitState(state, getModuleRotation(),
@@ -193,7 +197,7 @@ public class SwerveModule implements Sendable {
             desiredState.speedMetersPerSecond = state.speedMetersPerSecond;
         }
 
-        if (centricSwerve)
+        if (centricSwerveMode)
             desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
         else if (desiredState.speedMetersPerSecond < 0.0) {
             desiredState.angle.rotateBy(Rotation2d.fromDegrees(180));

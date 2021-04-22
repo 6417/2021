@@ -125,6 +125,11 @@ public class SwerveDrive extends SwerveDriveBase {
                         Entry::getKey,Entry::getValue));
     }
 
+    @Override
+    public void setCentricSwerveMode(boolean on) {
+        forEachModule((module) -> module.setCentricSwerveMode(on));
+    }
+
     private void correctRotationDirections(boolean isRobotRotating) {
         Map<Constants.SwerveDrive.MountingLocations, SwerveLimiter.ModuleRotationVectors> moduleRotatoinVectors = getModuleRotationVectorMap();
         Map<Constants.SwerveDrive.MountingLocations, Optional<Boolean>> corrections = SwerveLimiter

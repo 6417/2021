@@ -77,4 +77,8 @@ public class SwerveDriveBase extends SubsystemBase {
     public void deactivateBreak() {
         
     }
+
+    public void setCentricSwerveMode(boolean on) {
+
+    }
 }
