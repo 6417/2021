@@ -91,7 +91,7 @@ public final class Constants {
         }
 
         public static final boolean enabled = true;
-        public static final boolean rotateAllModulesInSameDirection = false;
+        public static final boolean rotateAllModulesInSameDirection = true;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
         private static final boolean swerveTestOn2019Robot = false;
@@ -129,7 +129,7 @@ public final class Constants {
         }
 
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
-        public static double defaultSpeedFactor = 0.75;
+        public static double defaultSpeedFactor = 1.0;
         public static double slowSpeedFactor = 0.25;
 
         // setting up commmon configurations for all swerve modules

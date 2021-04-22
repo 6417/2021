@@ -1,12 +1,14 @@
 package frc.robot.utilities.swerveLimiter;
 
 import java.util.AbstractMap;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
@@ -73,7 +75,8 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * @return The rotation direction of a module with the provided vectors.
      */
     private static ModuleRotationDirection getRotationDirection(ModuleRotationVectors rotationVectorPair) {
-        if (rotationVectorPair.moduleRotation.dot(rotationVectorPair.desiredRotation) > rotatoinDirectionInversionTolerance)
+        if (rotationVectorPair.moduleRotation
+                .dot(rotationVectorPair.desiredRotation) > rotatoinDirectionInversionTolerance)
             return ModuleRotationDirection.None;
         if (Math.signum(rotationVectorPair.moduleRotation.cross(rotationVectorPair.desiredRotation)) < 0.0)
             return ModuleRotationDirection.Counterclockwise;
@@ -95,19 +98,22 @@ public class SwerveLimiter extends SwerveLimiterBase {
      * @return The rotation direction that is most occurring, if there's an equal
      *         count of both rotation directions it will return counterclockwise.
      */
-    private static <MountingLocation extends Enum<MountingLocation>> ModuleRotationDirection getCommonRotation(
+    private static <MountingLocation extends Enum<MountingLocation>> ModuleRotationDirection getDesiredRotationDirection(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
-        int counterclockwiseCount = getNumberOfRotationDirectionsInMap(rotationVectorPairs,
-                ModuleRotationDirection.Counterclockwise);
-        int clockwiseCount = getNumberOfRotationDirectionsInMap(rotationVectorPairs, ModuleRotationDirection.Clockwise);
-        SmartDashboard.putNumber("clockwiseCount", clockwiseCount);
-        SmartDashboard.putNumber("counterClockwiseCount", counterclockwiseCount);
-        if (counterclockwiseCount < clockwiseCount)
-            return ModuleRotationDirection.Clockwise;
-        return ModuleRotationDirection.Counterclockwise;
+        return getRotationDirection(rotationVectorPairs.get(rotationVectorPairs.entrySet().stream()
+                .map((vectorPairEntry) -> new AbstractMap.SimpleEntry<>(vectorPairEntry.getKey(),
+                        vectorPairEntry.getValue().desiredRotation.dot(vectorPairEntry.getValue().moduleRotation)))
+                .max(Comparator.comparing(Entry<MountingLocation, Double>::getValue))
+                .map((dotproductEntry) -> dotproductEntry.getKey()).get()));
     }
 
-    public static double rotatoinDirectionInversionTolerance = 1.0;
+    public static double rotatoinDirectionInversionTolerance = 0.9;
+
+    private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> mapWithEmptyOptionals(
+            Stream<Entry<MountingLocation, ModuleRotationVectors>> stream) {
+        return stream.map((entry) -> new AbstractMap.SimpleEntry<MountingLocation, Optional<Boolean>>(entry.getKey(),
+                Optional.empty())).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    }
 
     /**
      * @return A map of booleans, true means the rotation direction of the module at
@@ -116,18 +122,20 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> getModuleRotationDirectionCorrectionsWithOutRobotRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
-        ModuleRotationDirection commonRotation = getCommonRotation(rotationVectorPairs);
-        return rotationVectorPairs.entrySet().stream().map(
-                new Function<Entry<MountingLocation, ModuleRotationVectors>, Entry<MountingLocation, Optional<Boolean>>>() {
-                    public Entry<MountingLocation, Optional<Boolean>> apply(
-                            Entry<MountingLocation, ModuleRotationVectors> rotationVectorPair) {
-                        if (rotationVectorPair.getValue().moduleRotation
-                                .dot(rotationVectorPair.getValue().desiredRotation) > rotatoinDirectionInversionTolerance)
-                            return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(), Optional.empty());
-                        return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(),
-                                Optional.of(getRotationDirection(rotationVectorPair.getValue()) != commonRotation));
-                    }
-                }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        ModuleRotationDirection desiredRotationDirection = getDesiredRotationDirection(rotationVectorPairs);
+        if (desiredRotationDirection == ModuleRotationDirection.None) {
+            return mapWithEmptyOptionals(rotationVectorPairs.entrySet().stream());
+        }
+
+        return rotationVectorPairs.entrySet().stream().map((rotationVectorPair) -> {
+            if (rotationVectorPair.getValue().moduleRotation
+                    .dot(rotationVectorPair.getValue().desiredRotation) > rotatoinDirectionInversionTolerance)
+                return new AbstractMap.SimpleEntry<MountingLocation, Optional<Boolean>>(rotationVectorPair.getKey(),
+                        Optional.empty());
+            return new AbstractMap.SimpleEntry<MountingLocation, Optional<Boolean>>(rotationVectorPair.getKey(),
+                    Optional.of(getRotationDirection(rotationVectorPair.getValue()) != desiredRotationDirection));
+
+        }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     /**
@@ -156,18 +164,19 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> getModuleRotationDirectionCorrectionsWithRobotRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
-        return rotationVectorPairs.entrySet().stream().map(
-                new Function<Entry<MountingLocation, ModuleRotationVectors>, Entry<MountingLocation, Optional<Boolean>>>() {
-                    public Entry<MountingLocation, Optional<Boolean>> apply(
-                            Entry<MountingLocation, ModuleRotationVectors> rotationVectorPair) {
-                        if (rotationVectorPair.getValue().moduleRotation
-                                .dot(rotationVectorPair.getValue().desiredRotation) > rotatoinDirectionInversionTolerance)
-                            return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(), Optional.empty());
-                        return new AbstractMap.SimpleEntry<>(rotationVectorPair.getKey(),
-                                Optional.of(rotationVectorPair.getValue().moduleRotation
-                                        .dot(rotationVectorPair.getValue().desiredRotation) < 0.0));
-                    }
-                }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        // return rotationVectorPairs.entrySet().stream().map((rotationVectorPair) -> {
+        // if (rotationVectorPair.getValue().moduleRotation
+        // .dot(rotationVectorPair.getValue().desiredRotation) >
+        // rotatoinDirectionInversionTolerance)
+        // return new AbstractMap.SimpleEntry<MountingLocation,
+        // Optional<Boolean>>(rotationVectorPair.getKey(),
+        // Optional.empty());
+        // return new AbstractMap.SimpleEntry<MountingLocation,
+        // Optional<Boolean>>(rotationVectorPair.getKey(),
+        // Optional.of(rotationVectorPair.getValue().moduleRotation
+        // .dot(rotationVectorPair.getValue().desiredRotation) < 0.0));
+        // }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        return mapWithEmptyOptionals(rotationVectorPairs.entrySet().stream());
     }
 
     /**

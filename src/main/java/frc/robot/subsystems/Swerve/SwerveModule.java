@@ -154,7 +154,7 @@ public class SwerveModule implements Sendable {
     private double angleToRotationMotorEncoderTicks(double angle) {
         double angleDelta = Math.acos(getModuleRotation().dot(Vector2d.fromRad(angle)));
         if (currentRotationInverted)
-            angleDelta = Math.PI * 2 - angleDelta;
+            angleDelta = Math.PI * 2 + angleDelta;
         double steeringDirection = Math.signum(getModuleRotation().cross(Vector2d.fromRad(angle))); // don't know why it
                                                                                                     // works, but it
                                                                                                     // works
@@ -291,6 +291,7 @@ public class SwerveModule implements Sendable {
 
     public void invertRotationDirection() {
         currentRotationInverted = !currentRotationInverted;
+        System.out.println("Rotation direction Inverted");
     }
 
     public void setEncoderZeroedFalse() {
