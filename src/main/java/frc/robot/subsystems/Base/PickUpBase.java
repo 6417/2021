@@ -1,5 +1,7 @@
 package frc.robot.subsystems.base;
 
+import java.util.Optional;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.PickUpSubsystem.BallColor;
 import frc.robot.utilities.GroveColorSensor.Color;
@@ -28,8 +30,8 @@ public class PickUpBase extends SubsystemBase{
     public void releaseBall(){
     }
 
-    public boolean getLightBarrier(){
-        return false;
+    public Optional<Boolean> getLightBarrier(){
+        return Optional.empty();
     }
 
     public BallColor getBallColor(){
@@ -38,5 +40,8 @@ public class PickUpBase extends SubsystemBase{
 
     public Color getRGB(){
         return null;
+    }
+
+    public void putColorInDashBoard(){
     }
 }
