@@ -142,13 +142,10 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public BallColor getBallColor() {
-        if (currentColor.blue < Constants.BallPickUp.comparativeValueBlueLow
-                && currentColor.red > Constants.BallPickUp.comparativeValueRedLow) { // wenn blau über 52 und rot über
-                                                                                     // 100
+        if(currentColor.red > Constants.BallPickUp.comparativeValueRedLow && currentColor.blue < 60){
             return BallColor.yellow;
-        } else if (currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh
-                && currentColor.red > Constants.BallPickUp.comparativeValueRedTwo) { // wenn blau über 65 und rot über
-                                                                                     // 70
+        }
+        else if(currentColor.red < Constants.BallPickUp.comparativeValueBlueLow && currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh){
             return BallColor.blue;
         }
         return BallColor.colorNotFound;
