@@ -25,12 +25,12 @@ public class LoadBallCommand extends CommandBase{
 
     @Override
     public void end(boolean interupted){
+        PickUpSubsystem.getInstance().stopMotors();
     }
 
     @Override
     public boolean isFinished(){
-        if(timer.getPastTime().get() < 1000){
-            System.out.println(timer.getPastTime().get());
+        if(timer.getPastTime().get() < 300){
             return false;
         }
         else{
