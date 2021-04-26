@@ -271,10 +271,10 @@ public final class Constants {
         public static final boolean tunnelMotorInvertation = true;
 
         // variables to find out the ballcolor
-        public static final int comparativeValueBlueLow = 52;
+        public static final int comparativeValueBlueLow = 105;
         public static final int comparativeValueBlueHigh = 70;
-        public static final int comparativeValueRedLow = 100;
-        public static final int comparativeValueRedTwo = 65;
+        public static final int comparativeValueRedLow = 110;
+        public static final int comparativeValueRedHigh = 60;
 
         public static final double ticksForTunnelMotor = 0; 
 
