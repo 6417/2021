@@ -9,7 +9,7 @@ package frc.robot.commands.Thrower;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ThrowerSubsystem;
-import frc.robot.subsystems.Base.ThrowerSubsystemBase;
+import frc.robot.subsystems.base.ThrowerSubsystemBase;
 import frc.robot.utilities.Timer;
 
 /**
@@ -29,21 +29,18 @@ public class CalibrateShootingAngleCommand extends CommandBase {
    */
   public CalibrateShootingAngleCommand() {
     throwerSubsystem = ThrowerSubsystem.getInstance();
-    stallStartTime = 0;
-    accelerationStart = System.currentTimeMillis();
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    stallStartTime = 0;
-    accelerationStart = System.currentTimeMillis();
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    throwerSubsystem.runShootingAngleMotor(-0.1);;
+    throwerSubsystem.runShootingAngleMotor(0.2);
   }
 
   // Called once the command ends or is interrupted.
@@ -56,24 +53,6 @@ public class CalibrateShootingAngleCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (System.currentTimeMillis() - accelerationStart <= 200) {
-      return false;
-    }
-
-    if (throwerSubsystem.getShootingAngleMotorSpeed() <= -800) {
-      stallStartTime = 0;
-      return false;
-    }
-
-    if (System.currentTimeMillis() - stallStartTime >= 100 && stallStartTime != 0) {
-      return true;
-    }
-    
-    if(throwerSubsystem.getShootingAngleMotorSpeed() >= -800 && stallStartTime == 0) {
-      stallStartTime = System.currentTimeMillis();
-      return false;
-    }
-
-    return true;
+    return throwerSubsystem.getShootingAngleMotorLimitSwitch();
   }
 }

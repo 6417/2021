@@ -17,6 +17,7 @@ import frc.robot.commands.swerve.ThrowerOriented;
 import frc.robot.commands.swerve.ZeroEncoders;
 import frc.robot.commands.Thrower.CalibrateShootingAngleCommand;
 import frc.robot.commands.Thrower.CalibrateTurretShootingDirectionCommand;
+import frc.robot.commands.Thrower.SetTurretShootingAngleCommand;
 import frc.robot.commands.Thrower.SetTurretShootingDirectionCommand;
 import frc.robot.commands.Thrower.ShootCommand;
 import frc.robot.subsystems.ThrowerSubsystem;
@@ -91,7 +92,6 @@ public class Controller {
             pickupOrientedButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.pickupOriented);
             slowSpeedFactorButton = new JoystickButton(controller, Constants.SwerveDrive.ButtounIds.slowSpeedMode);
             zeroNavxButton = new JoystickButton(controller, Constants.zeroNavxButtonID);
-            calibrateThrowerButton = new JoystickButton(this.controller, Constants.Joystick.A_BUTTON_ID);
 
             // Configure the binding
             zeroEncodersButton.whenPressed(new ZeroEncoders());
@@ -101,8 +101,6 @@ public class Controller {
             slowSpeedFactorButton.whenPressed(new SetSpeedFactor(Constants.SwerveDrive.slowSpeedFactor));
             slowSpeedFactorButton.whenReleased(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
             zeroNavxButton.whenPressed(new ZeroNavx());
-            // Configure the bindings
-            calibrateThrowerButton.whenPressed(new CalibrateShootingAngleCommand());
         }
     }
 
@@ -117,6 +115,11 @@ public class Controller {
         JoystickButton loadButton;
         LoadBallCommand loadBallCommand;
 
+        JoystickButton calibrateThrowerButton;
+        JoystickButton runAngleMotorButton;
+        JoystickButton setAngleMotorPositionButton;
+        JoystickButton shootButton;
+
         public ControlJoystick() {
             super(Constants.Joystick.CONTROL_ID);
             configureButtonBindings();
@@ -124,6 +127,10 @@ public class Controller {
 
         public void configureButtonBindings() {
             // Initialize the buttons
+            calibrateThrowerButton = new JoystickButton(controller, Constants.Joystick.A_BUTTON_ID);
+            runAngleMotorButton = new JoystickButton(controller, Constants.Joystick.X_BUTTON_ID);
+            setAngleMotorPositionButton = new JoystickButton(controller, Constants.Joystick.Y_BUTTON_ID);
+            shootButton = new JoystickButton(controller, Constants.Joystick.B_BUTTON_ID);
 
             // Configure the bindings
             pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
@@ -147,6 +154,12 @@ public class Controller {
             loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
             loadBallCommand = new LoadBallCommand();
             loadButton.whenPressed(loadBallCommand);
+
+            calibrateThrowerButton.whenPressed(new CalibrateShootingAngleCommand());
+            runAngleMotorButton.whileHeld(() -> ThrowerSubsystem.getInstance().runShootingAngleMotor(controller.getY() * 0.2));
+            runAngleMotorButton.whenReleased(() -> ThrowerSubsystem.getInstance().runShootingAngleMotor(0));
+            setAngleMotorPositionButton.whenPressed(new SetTurretShootingAngleCommand());
+            shootButton.whileHeld(new ShootCommand());
         }
     }
 }

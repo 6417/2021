@@ -7,9 +7,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.utilities.Controller;
-
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -24,7 +21,6 @@ public class RobotContainer {
   // private final JoystickButton pickUpButton = new JoystickButton(Controller.getInstance().controlJoystick, 2);
 
   public RobotContainer() {
-    controller = Controller.getInstance();
   }
 
 }

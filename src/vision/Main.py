@@ -16,53 +16,10 @@ import cv2
 import ctypes
 from math import tan
 
-#			JSON	format:
-#			{
-#							"team":	<team	number>,
-#							"ntmode":	<"client"	or	"server",	"client"	if	unspecified>
-#							"cameras":	[
-#											{
-#															"name":	<camera	name>
-#															"path":	<path,	e.g.	"/dev/video0">
-#															"pixel	format":	<"MJPEG",	"YUYV",	etc>			//	optional
-#															"width":	<video	mode	width>														//	optional
-#															"height":	<video	mode	height>												//	optional
-#															"fps":	<video	mode	fps>																		//	optional
-#															"brightness":	<percentage	brightness>				//	optional
-#															"white	balance":	<"auto",	"hold",	value>	//	optional
-#															"exposure":	<"auto",	"hold",	value>						//	optional
-#															"properties":	[																										//	optional
-#																			{
-#																							"name":	<property	name>
-#																							"value":	<property	value>
-#																			}
-#															],
-#															"stream":	{																														//	optional
-#																			"properties":	[
-#																							{
-#																											"name":	<stream	property	name>
-#																											"value":	<stream	property	value>
-#																							}
-#																			]
-#															}
-#											}
-#							]
-#							"switched	cameras":	[
-#											{
-#															"name":	<virtual	camera	name>
-#															"key":	<network	table	key	used	for	selection>
-#															//	if	NT	value	is	a	string,	it's	treated	as	a	name
-#															//	if	NT	value	is	a	double,	it's	treated	as	an	integer	index
-#											}
-#							]
-#			}
-
 configFile = "/boot/frc.json"
-
 
 class CameraConfig:
     pass
-
 
 team = None
 server = False
@@ -71,18 +28,19 @@ cameras = []
 servers = []
 
 #	HSV	Filter	values
-min_hue = 0
+min_hue = 0 
 min_sat = 0
 min_val = 220
 max_hue = 180
-max_sat = 255
+max_sat = 60 
 max_val = 255
 
 #	Data	of	setup
 target_height = 1.5
-camera_height = 0.72
+camera_height = 0.53
 
-size_reference = 260
+# The size reference for the side stripes down to 1m 
+size_reference = 240 
 
 horizontal_fov = 62.2
 
@@ -162,6 +120,8 @@ def getMidPoint(pointList):
 def getDistance(point1,	point2):
     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)**0.5
 
+def getDistanceFromYDifferences(yDifference):
+    return 0.000378 * (yDifference**2) - (0.116484 * yDifference) + 10.0025
 
 def getMiddleLineLengthStraight(distance):
     return 689.356*(distance ** -0.99836)
@@ -305,20 +265,27 @@ def startNetworkTables():
     return networkTablesInstance,	dashboard
 
 def generateDebugImage(img):
-    cv2.putText(img,	"Distance_total:    " + str(round(distance, 3)),
-                (0,	250),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
-    cv2.putText(img,	"Robot	Viewing	dir(rel	to	target):    " + str(round(toAimingSystem(getMidPoint(
-        locations))[0] * (horizontal_fov/2), 3)), (0, 280), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-    cv2.putText(img, "Line Length:  " + str(round(lineLength, 2)),
-                (0, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-    cv2.putText(img, "Straight Line Length: " + str(round(straightLineLength, 1)),
-                (0, 340), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-    cv2.putText(img, "TargetAngle: " + str(round(targetAngle, 1)),
-                (0, 370), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-    cv2.putText(img, "Viewing Side: " + str(round(side, 1)),
-                (0, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
-    cv2.line(img, (int(locations[0][0]), int(locations[0][1])), (int(
-        locations[1][0]), int(locations[1][1])), (0, 255, 0), thickness=2)
+    try:
+        cv2.putText(img,	"Distance_total:    " + str(round(distance, 3)),
+                    (0,	250),	cv2.FONT_HERSHEY_SIMPLEX,	1,	(255,	255,	255))
+        cv2.putText(img,	"Robot	Viewing	dir(rel	to	target):    " + str(round(toAimingSystem(getMidPoint(
+            locations))[0] * (horizontal_fov/2), 3)), (0, 280), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(img, "Line Length:  " + str(round(lineLength, 2)),
+                    (0, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(img, "Straight Line Length: " + str(round(straightLineLength, 1)),
+                    (0, 340), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(img, "TargetAngle: " + str(round(targetAngle, 1)),
+                    (0, 370), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(img, "Viewing Side: " + str(round(side, 1)),
+                    (0, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(img, "Line Length: " + str(round(y_differences[0], 1)),
+                    (0, 430), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(img, "Line2 Length: " + str(round(y_differences[1], 1)),
+                    (0, 460), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.line(img, (int(locations[0][0]), int(locations[0][1])), (int(
+            locations[1][0]), int(locations[1][1])), (0, 255, 0), thickness=2)
+    except:
+        print("Error in data to generate debug image")
     return img
 
 def filterImage(rawImage):
@@ -358,8 +325,8 @@ if __name__ == "__main__":
     watchdog.join()
 
     # Starting the streams
-    # outputStream = cs.putVideo("Processed_Image", res[0], res[1])
-    # binaryStream	=	cs.putVideo("Binary	Image",	res[0],	res[1])
+    outputStream = cs.putVideo("Processed_Image", res[0], res[1])
+    binaryStream	=	cs.putVideo("Binary	Image",	res[0],	res[1])
 
     print("Started vision program")
 
@@ -430,26 +397,28 @@ if __name__ == "__main__":
                     # cv2.circle(img,	(int(midpoint[0]),	int(
                     #     midpoint[1])),	4,	(255,	255,	255))
                 except:
-                    print("no	boxes")
+                    pass
 
-            #Determine the side from wich the robot is looking at the target
-            viewingSide = (locations[0][0] > locations[1][0]) * 2 - 1
+            if len(locations) >= 2:
+                #Determine the side from wich the robot is looking at the target
+                viewingSide = (locations[0][0] > locations[1][0]) * 2 - 1
 
-            np.sort(heights)
+                np.sort(heights)
 
-            for i in range(2):
-                distances = np.append(distances, ((
-                    size_reference / y_differences[i])**2 - (target_height - camera_height)**2)**0.5)
+                #for i in range(2):
+                    #distances = np.append(distances, ((
+                        #size_reference / y_differences[i])**2 - (target_height - camera_height)**2)**0.5)
 
-            distance = (distances[0] + distances[1])/2
-            robotAngle = toAimingSystem(getMidPoint(locations))[
-                0] * (horizontal_fov/2)
-            lineLength = (abs(locations[0][0] - locations[1][0])
-                          ** 2 + abs(locations[0][1] - locations[1][1])**2)**0.5
-            straightLineLength = getMiddleLineLengthStraight(distance)
-            targetAngle = getTargetAngle(abs(straightLineLength - lineLength))
+                #distance = (distances[0] + distances[1])/2
+                distance = getDistanceFromYDifferences(y_differences[0]) 
+                robotAngle = toAimingSystem(getMidPoint(locations))[
+                    0] * (horizontal_fov/2)
+                lineLength = (abs(locations[0][0] - locations[1][0])
+                            ** 2 + abs(locations[0][1] - locations[1][1])**2)**0.5
+                straightLineLength = getMiddleLineLengthStraight(distance)
+                targetAngle = getTargetAngle(abs(straightLineLength - lineLength))
             
-            # img = generateDebugImage(img)
+            img = generateDebugImage(img)
 
             if distance <= 4.5:
                 targetInView = True
@@ -457,6 +426,9 @@ if __name__ == "__main__":
         if targetInView == False:
             distance = 0
             robotAngle = 0
+            targetAngle = 0
+            viewingSide = 0
+            y_differences = [0, 0]
 
         # writing fps on debug image
 
@@ -466,8 +438,8 @@ if __name__ == "__main__":
         #             cv2.FONT_HERSHEY_SIMPLEX,	1,	(0,	0,	255))
 
         #manually toggle streams on and off
-        # outputStream.putFrame(img)
-        # binaryStream.putFrame(binary_img)
+        outputStream.putFrame(img)
+        binaryStream.putFrame(binary_img)
 
         #send values through networktables
         dashboard.putNumber('distance',	distance)
@@ -476,4 +448,5 @@ if __name__ == "__main__":
         dashboard.putBoolean('currentValues',	True)
         dashboard.putNumber('targetAngle', targetAngle)
         dashboard.putNumber('viewingSide', viewingSide)
+        dashboard.putNumber('stripeHeight', (y_differences[0] + y_differences[1]) / 2)
         dashboard.putNumber('fps', fps)

@@ -7,10 +7,10 @@
 
 package frc.robot;
 
-<<<<<<< refs/remotes/origin/develop
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -22,21 +22,6 @@ import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
-
-=======
-import java.util.Optional;
->>>>>>> Turn the feederMotor and turn the Turret to a given angle
-import java.util.function.Supplier;
-
-
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
-<<<<<<< refs/remotes/origin/develop
-=======
-import frc.robot.utilities.PIDValues;
->>>>>>> Turn the feederMotor and turn the Turret to a given angle
-import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
-import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -68,10 +53,6 @@ public final class Constants {
     }
 
     public static final int zeroNavxButtonID = Joystick.BACK_BUTTON_ID;
-
-    public static final class Vision {
-        public static final boolean IS_ENABLED = false;
-    }
 
     public static final class SwerveDrive {
         public static enum MountingLocations {
@@ -295,6 +276,8 @@ public final class Constants {
         public static final double releaseSpeed = 0.3;  // TODO optimal speed 
 
         public static final boolean isLightBarrierInverted = true;
+    }
+
     public static class Vision {
         public static final boolean IS_ENABLED = true;
     }
@@ -313,13 +296,23 @@ public final class Constants {
                     values.upperSpeedLimit = Optional.of(0.1);
                 }
             }
+            public static class AngleMotor {
+                public static PIDValues values = new PIDValues(0.05, 0, 0.5);
+                static {
+                    values.lowerSpeedLimit = Optional.of(-0.2);
+                    values.upperSpeedLimit = Optional.of(0.2);
+                }
+            }
+            public static class ShooterMotor {
+                public static PIDValues values = new PIDValues(0.0005, 0, 0, 0.0003);
+            }
         }
 
         public static class Motors {
-            public static final int LOADER_ID = 15;
-            public static final int SHOOT_DIRECTION_ID = 8;
-            public static final int SHOOT_ANGLE_ID = 2;
-            public static final int SHOOT_ID = 14;
+            public static final int LOADER_ID = 20;
+            public static final int SHOOT_DIRECTION_ID = 21;
+            public static final int SHOOT_ANGLE_ID = 23;
+            public static final int SHOOT_ID = 22;
             public static final Supplier<FridolinsMotor> loaderMotor = () -> new FridoCANSparkMax(LOADER_ID,
                     MotorType.kBrushless);
             public static final Supplier<FridolinsMotor> directionMotor = () -> new FridoCANSparkMax(SHOOT_DIRECTION_ID,
@@ -331,3 +324,4 @@ public final class Constants {
         }
     }
 }
+

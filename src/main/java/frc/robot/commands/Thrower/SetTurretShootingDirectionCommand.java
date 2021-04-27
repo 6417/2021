@@ -11,7 +11,7 @@ import frc.robot.Constants;
 import frc.robot.utilities.VisionService;
 import frc.robot.utilities.baseClasses.VisionServiceBase;
 import frc.robot.subsystems.ThrowerSubsystem;
-import frc.robot.subsystems.Base.ThrowerSubsystemBase;
+import frc.robot.subsystems.base.ThrowerSubsystemBase;
 
 import java.util.Optional;
 

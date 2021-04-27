@@ -9,7 +9,7 @@ package frc.robot.commands.Thrower;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ThrowerSubsystem;
-import frc.robot.subsystems.Base.ThrowerSubsystemBase;
+import frc.robot.subsystems.base.ThrowerSubsystemBase;
 
 /**
  * An example command that uses an example subsystem.
@@ -32,6 +32,8 @@ public class ShootCommand extends CommandBase {
   public void execute() {
     throwerSubsystem.runLoaderMotor(0.5);
     throwerSubsystem.runShooter(1);
+    //MAX = 5200
+    //throwerSubsystem.setShooterSpeed(2000);
   }
 
   // Called once the command ends or is interrupted.
