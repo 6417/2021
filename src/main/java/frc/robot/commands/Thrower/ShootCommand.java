@@ -32,6 +32,8 @@ public class ShootCommand extends CommandBase {
   public void execute() {
     throwerSubsystem.runLoaderMotor(0.5);
     throwerSubsystem.runShooter(1);
+    //MAX = 5200
+    //throwerSubsystem.setShooterSpeed(2000);
   }
 
   // Called once the command ends or is interrupted.

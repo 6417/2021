@@ -10,6 +10,7 @@ package frc.robot;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -328,13 +329,23 @@ public final class Constants {
                     values.upperSpeedLimit = Optional.of(0.1);
                 }
             }
+            public static class AngleMotor {
+                public static PIDValues values = new PIDValues(0.05, 0, 0.5);
+                static {
+                    values.lowerSpeedLimit = Optional.of(-0.2);
+                    values.upperSpeedLimit = Optional.of(0.2);
+                }
+            }
+            public static class ShooterMotor {
+                public static PIDValues values = new PIDValues(0.0005, 0, 0, 0.0003);
+            }
         }
 
         public static class Motors {
-            public static final int LOADER_ID = 15;
-            public static final int SHOOT_DIRECTION_ID = 8;
-            public static final int SHOOT_ANGLE_ID = 2;
-            public static final int SHOOT_ID = 14;
+            public static final int LOADER_ID = 20;
+            public static final int SHOOT_DIRECTION_ID = 21;
+            public static final int SHOOT_ANGLE_ID = 23;
+            public static final int SHOOT_ID = 22;
             public static final Supplier<FridolinsMotor> loaderMotor = () -> new FridoCANSparkMax(LOADER_ID,
                     MotorType.kBrushless);
             public static final Supplier<FridolinsMotor> directionMotor = () -> new FridoCANSparkMax(SHOOT_DIRECTION_ID,
@@ -346,3 +357,4 @@ public final class Constants {
         }
     }
 }
+

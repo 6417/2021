@@ -43,7 +43,7 @@ public class CalibrateTurretShootingDirectionCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    throwerSubsystem.runShootingDirectionMotor(-0.1);
+    throwerSubsystem.runShootingDirectionMotor(0.2);
   }
 
   // Called once the command ends or is interrupted.
@@ -60,7 +60,7 @@ public class CalibrateTurretShootingDirectionCommand extends CommandBase {
       return false;
     }
 
-    if (throwerSubsystem.getShootingDirectionMotorSpeed() <= -2) {
+    if (throwerSubsystem.getShootingDirectionMotorSpeed() >= 2) {
       stallStartTime = 0;
       return false;
     }
@@ -69,7 +69,7 @@ public class CalibrateTurretShootingDirectionCommand extends CommandBase {
       return true;
     }
     
-    if(throwerSubsystem.getShootingDirectionMotorSpeed() >= -2 && stallStartTime == 0) {
+    if(throwerSubsystem.getShootingDirectionMotorSpeed() <= -2 && stallStartTime == 0) {
       stallStartTime = System.currentTimeMillis();
       return false;
     }

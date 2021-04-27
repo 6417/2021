@@ -6,8 +6,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ThrowerSubsystemBase extends SubsystemBase{
   public double getShootingDirectionMotorSpeed() {return 0;}
+  public double getShootingDirectionMotorEncoderTicks() {return 0;}
   public double getShootingAngleMotorSpeed() {return 0;}
   public double getCurrentTurretShootingDirection() {return 0;}
+  public boolean getShootingAngleMotorLimitSwitch() {return false;}
+  public double getShootingAngleMotorEncoderTicks() {return 0;}
   public void runLoaderMotor(double speed) {}
   public void runShootingDirectionMotor(double speed) {}
   public void runShootingAngleMotor(double speed) {}

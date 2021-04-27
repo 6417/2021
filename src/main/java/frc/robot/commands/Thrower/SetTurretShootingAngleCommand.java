@@ -12,12 +12,11 @@ public class SetTurretShootingAngleCommand extends CommandBase {
     private final ThrowerSubsystemBase thrower;
     private final VisionServiceBase vision;
     private VisionService.Values values;
-    private double encoderTicks;
+    private double setPoint;
 
     public SetTurretShootingAngleCommand() {
         thrower = ThrowerSubsystem.getInstance();
         vision = VisionService.getInstance();
-        encoderTicks = 0;
     }
 
     @Override
@@ -28,12 +27,17 @@ public class SetTurretShootingAngleCommand extends CommandBase {
     @Override
     public void execute() {
         values = vision.getValues();
-        thrower.setTurretShootingAngle(thrower.calculateTurretAngleTicks(values));
+        if (values.targetInView)
+        {
+            setPoint = thrower.calculateTurretAngleTicks(values);
+            thrower.setTurretShootingAngle(setPoint);
+        }
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        System.out.println(ThrowerSubsystem.getInstance().getShootingAngleMotorEncoderTicks() + "     " + setPoint + "        " + values.stripeHeight);
+        return Math.abs(ThrowerSubsystem.getInstance().getShootingAngleMotorEncoderTicks() - setPoint) < 1;
     }
 
     @Override

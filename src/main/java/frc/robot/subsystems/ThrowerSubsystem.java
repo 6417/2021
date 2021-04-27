@@ -23,13 +23,13 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   private FridolinsMotor loaderMotor;
   private FridoCANSparkMax turretDirectionMotor;
   private FridoCANSparkMax turretAngleMotor;
-  private FridolinsMotor shootMotor;
+  private FridoCANSparkMax shootMotor;
   
   public ThrowerSubsystem() {
     loaderMotor = Constants.Thrower.Motors.loaderMotor.get();
     turretDirectionMotor = (FridoCANSparkMax)Constants.Thrower.Motors.directionMotor.get();
     turretAngleMotor = (FridoCANSparkMax)Constants.Thrower.Motors.angleMotor.get();
-    shootMotor = Constants.Thrower.Motors.shootMotor.get();
+    shootMotor = (FridoCANSparkMax)Constants.Thrower.Motors.shootMotor.get();
 
     initMotors();
   }
@@ -52,6 +52,9 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     turretAngleMotor.factoryDefault();
     shootMotor.factoryDefault();
 
+    shootMotor.selectBuiltinFeedbackSensor();
+    shootMotor.setPID(Constants.Thrower.PIDControllers.ShooterMotor.values);
+
     loaderMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
     loaderMotor.enableReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
 
@@ -61,12 +64,13 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
     turretAngleMotor.selectBuiltinFeedbackSensor();
     turretAngleMotor.setInverted(false);
-
     turretAngleMotor.setEncoderPosition(0);
-    turretAngleMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, true);
+    turretAngleMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, true);
+    turretAngleMotor.setPID(Constants.Thrower.PIDControllers.AngleMotor.values);
 
     turretDirectionMotor.setPID(Constants.Thrower.PIDControllers.DirectionMotor.values);
     turretDirectionMotor.setEncoderPosition(0);
+
   }
 
   private double convertTurretAngleToEncoderTicks(double angle) {
@@ -82,14 +86,6 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     return 0;
   }
 
-  private boolean getBallAcquiredLightBarrier() {
-    return loaderMotor.isForwardLimitSwitchActive(); 
-  }
-
-  private boolean getBallLoadedLightBarrier() {
-    return loaderMotor.isReverseLimitSwitchActive();
-  }
-
   @Override
   public double getShootingDirectionMotorSpeed() {
     return turretDirectionMotor.getEncoder().getVelocity();
@@ -103,6 +99,16 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   @Override
   public double getCurrentTurretShootingDirection() {
     return convertEncoderTicksToTurretAngle(turretDirectionMotor.getEncoderTicks());
+  }
+
+  @Override
+  public boolean getShootingAngleMotorLimitSwitch() {
+    return turretAngleMotor.isForwardLimitSwitchActive();
+  }
+
+  @Override
+  public double getShootingAngleMotorEncoderTicks() {
+    return turretAngleMotor.getEncoderTicks();
   }
 
   @Override
@@ -148,7 +154,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
   @Override
   public void setTurretShootingAngle(double angle) {
-    turretAngleMotor.setPosition(convertTurretAngleToEncoderTicks(angle));    
+    turretAngleMotor.setPosition(angle);    
   }
 
   @Override
@@ -158,12 +164,12 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Encoder Value of the Thrower", turretDirectionMotor.getEncoderTicks());
   }
 
   @Override
   public double calculateTurretAngleTicks(Values values) {
-    return 0;
+    return 0.954845 * values.stripeHeight - 225.326;
+    //return 0.000316 * Math.pow(values.stripeHeight, 3) - 0.088683 * Math.pow(values.stripeHeight, 2) + 9.09257 * values.stripeHeight - 496.119;
   }  
 
   @Override
@@ -173,7 +179,8 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   
   @Override
   public void initSendable(SendableBuilder builder) {
+    builder.addDoubleProperty("AngleMotor encoder", () -> turretAngleMotor.getEncoderTicks(), null);
+    builder.addDoubleProperty("ShootMotorSpeed", () -> shootMotor.getEncoderVelocity(), null);
     super.initSendable(builder);
   }
 }
-
