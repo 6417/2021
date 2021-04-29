@@ -272,7 +272,7 @@ public final class Constants {
 
         // variables to find out the ballcolor
         public static final int comparativeValueBlueLow = 105;
-        public static final int comparativeValueBlueHigh = 70;
+        public static final int comparativeValueBlueHigh = 50;
         public static final int comparativeValueRedLow = 110;
         public static final int comparativeValueRedHigh = 60;
 
