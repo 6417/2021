@@ -29,6 +29,6 @@ public class BallPickUpCommand extends CommandBase {
 
     @Override
     public boolean isFinished(){
-        return latchedBoolean.update(PickUpSubsystem.getInstance().getLightBarrier());
+        return latchedBoolean.update(PickUpSubsystem.getInstance().getLightBarrier().orElse(false));
     }
 }

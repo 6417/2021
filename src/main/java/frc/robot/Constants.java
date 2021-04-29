@@ -88,7 +88,7 @@ public final class Constants {
             maxSpeedOfDrive = 0.8531647523;
         }
 
-        public static final boolean enabled = true;
+        public static final boolean enabled = false;
         public static final boolean rotateAllModulesInSameDirection = true;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
@@ -271,19 +271,20 @@ public final class Constants {
         public static final boolean tunnelMotorInvertation = true;
 
         // variables to find out the ballcolor
-        public static final int comparativeValueBlueLow = 52;
-        public static final int comparativeValueBlueHigh = 70;
-        public static final int comparativeValueRedLow = 100;
-        public static final int comparativeValueRedTwo = 65;
+        public static final int comparativeValueBlueLow = 105;
+        public static final int comparativeValueBlueHigh = 50;
+        public static final int comparativeValueRedLow = 110;
+        public static final int comparativeValueRedHigh = 60;
 
         public static final double ticksForTunnelMotor = 0; 
 
         public static final int countsPerRevTunnelMotor = 1; 
         public static final int countsPerRevPickUpMotor = 1; 
 
-        public static final double pickUpSpeed = 0.5;   // TODO optimal speed
-        public static final double loadSpeed = 0.5;     // TODO optimal speed
-        public static final double releaseSpeed = 0.3;  // TODO optimal speed 
+        public static final double pickUpSpeed = 1;   // TODO optimal speed
+        public static final double tunnelMotorPickUpSpeed = 0.4; // TODO
+        public static final double loadSpeed = 1;     // TODO optimal speed
+        public static final double releaseSpeed = 1;  // TODO optimal speed 
 
         public static final boolean isLightBarrierInverted = true;
     }

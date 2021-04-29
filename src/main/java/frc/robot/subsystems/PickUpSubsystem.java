@@ -1,10 +1,15 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.networktables.NetworkTableEntry;
+import java.util.Optional;
+import edu.wpi.first.hal.util.UncleanStatusException;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
+import frc.robot.commands.ballPickUp.PickUpDefaultCommand;
 import frc.robot.subsystems.base.PickUpBase;
 import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.LightBarrier;
@@ -12,7 +17,6 @@ import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
-import frc.robot.utilities.Timer;
 
 public class PickUpSubsystem extends PickUpBase {
 
@@ -29,48 +33,58 @@ public class PickUpSubsystem extends PickUpBase {
 
     private GroveColorSensor colorSensor;
 
-    // private NetworkTableEntry colorBox;
-
-    private boolean isBallintunnel;
+    public static boolean ballInTunnel;
 
     private Thread updateBallColorThread; // we use this thread to update the ballcolor (there msut be a delay)
 
-    private LightBarrier lightBarrier;
+    private Optional<LightBarrier> lightBarrier;
 
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
         tunnelMotor = Constants.BallPickUp.tunnelMotor.get();
-        // tunnelMotor.setInverted(Constants.BallPickUp.tunnelMotorInvertation);
-
-        // factory defaults
         pickUpMotor.factoryDefault();
         tunnelMotor.factoryDefault();
 
-        // Encoders
-        pickUpMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder,
-                Constants.BallPickUp.countsPerRevPickUpMotor);
-        tunnelMotor.configEncoder(FridolinsMotor.FeedbackDevice.CANEncoder,
-                Constants.BallPickUp.countsPerRevTunnelMotor);
-
         // light barriers
-        lightBarrier = new LightBarrier(0);
-        lightBarrier.setInverted(Constants.BallPickUp.isLightBarrierInverted);
+        initializeLightBarrier();
+        lightBarrier.ifPresent((lightBarrier) -> lightBarrier.setInverted(Constants.BallPickUp.isLightBarrierInverted));
 
+        // color sensor and colorthread to updatje Ballcolor
         colorSensor = new GroveColorSensor(Port.kMXP, IntegrationTime._50MS, Gain.X1);
-
-        // colorBox = Shuffleboard.getTab("SmartDashboard").add("BallColor",
-        // false).withWidget(BuiltInWidgets.kBooleanBox)
-        // .withProperties(Map.of("Color when false", "#b3e6e6")).getEntry();
 
         updateBallColorThread = new Thread(this::updateBallColorLoop);
         updateBallColorThread.start();
+
+        // defaultcommand
+        CommandScheduler.getInstance().schedule(new PickUpDefaultCommand());
+
+        lightBarrier.filter((lightBarrier) -> lightBarrier.isActiv())
+            .ifPresent((lightBarrier) -> DriverStation.getInstance().reportError("Lightbarrier might not be properly connected, expected false and accutaly was true (if lightbarrier was activate on purpose ignore this massage)", false));
+    }
+
+    private void initializeLightBarrier() {
+        try{
+            lightBarrier = Optional.of(new LightBarrier(0));
+        }catch(UncleanStatusException e)
+        {
+            lightBarrier = Optional.empty();
+            DriverStation.getInstance().reportError("LightBarrier not connected", false);
+        }
+    }
+
+    @Override
+    public void periodic() {
+        super.periodic();
+        if(lightBarrier.isEmpty()){
+            initializeLightBarrier();
+        }
     }
 
     public static PickUpBase getInstance() {
         if (instance == null) {
             if (Constants.BallPickUp.isEnabled) {
                 instance = new PickUpSubsystem();
-                // instance.setDefaultCommand();
+                // instance.setDefaultCommand(new PickUpDefaultCommand());
             } else {
                 instance = new PickUpBase();
             }
@@ -89,27 +103,20 @@ public class PickUpSubsystem extends PickUpBase {
         }
     }
 
-    public boolean getLightBarrier() {
-        return lightBarrier.isActiv();
+    @Override
+    public Optional<Boolean> getLightBarrier() {
+        return lightBarrier.flatMap((LightBarrier lightBarrier) -> Optional.of(lightBarrier.isActiv()));
     }
 
     @Override
     public void pickUpBall() {
-        if (!lightBarrier.isActiv()) {
-            pickUpMotor.set(Constants.BallPickUp.pickUpSpeed);
-            tunnelMotor.set(-Constants.BallPickUp.pickUpSpeed);
-            System.out.println("speed was set");
-        } else {
-            pickUpMotor.stopMotor();
-            tunnelMotor.stopMotor();
-            isBallintunnel = true;
-            return;
-        }
+        pickUpMotor.set(Constants.BallPickUp.pickUpSpeed);
+        tunnelMotor.set(-Constants.BallPickUp.tunnelMotorPickUpSpeed);
     }
 
     @Override
     public void loadBall() {
-
+        tunnelMotor.set(-0.5);
     }
 
     @Override
@@ -131,20 +138,25 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public BallColor getBallColor() {
-        if (currentColor.blue < Constants.BallPickUp.comparativeValueBlueLow
-                && currentColor.red > Constants.BallPickUp.comparativeValueRedLow) { // wenn blau über 52 und rot über
-                                                                                     // 100
+        System.out.println("Method running");
+        if(currentColor.red > Constants.BallPickUp.comparativeValueRedLow && currentColor.blue < 60){
             return BallColor.yellow;
-        } else if (currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh
-                && currentColor.red > Constants.BallPickUp.comparativeValueRedTwo) { // wenn blau über 65 und rot über
-                                                                                     // 70
+        }
+        else if(currentColor.red < Constants.BallPickUp.comparativeValueBlueLow && currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh){
             return BallColor.blue;
         }
         return BallColor.colorNotFound;
     }
 
     @Override
+    public void putColorInDashBoard() {
+        SmartDashboard.putString("Ballcolor", getBallColor().toString());
+    }
+
+    @Override
     public void initSendable(SendableBuilder builder) {
-        builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null);
+        lightBarrier.ifPresent((lightBarrier) -> builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null));
+        builder.addStringProperty("BallColor", getBallColor()::toString, null);
+        builder.addBooleanProperty("BallInTunnel", () -> ballInTunnel, null);
     }
 }
