@@ -1,14 +1,12 @@
 package frc.robot.subsystems;
 
-import java.sql.Driver;
 import java.util.Optional;
-
 import edu.wpi.first.hal.util.UncleanStatusException;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
 import frc.robot.commands.ballPickUp.PickUpDefaultCommand;
@@ -19,8 +17,6 @@ import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
-import frc.robot.utilities.Timer;
-import frc.robot.utilities.LatchedBoolean;
 
 public class PickUpSubsystem extends PickUpBase {
 
@@ -59,7 +55,7 @@ public class PickUpSubsystem extends PickUpBase {
         updateBallColorThread = new Thread(this::updateBallColorLoop);
         updateBallColorThread.start();
 
-        // defautl command
+        // defaultcommand
         CommandScheduler.getInstance().schedule(new PickUpDefaultCommand());
 
         lightBarrier.filter((lightBarrier) -> lightBarrier.isActiv())
@@ -88,7 +84,7 @@ public class PickUpSubsystem extends PickUpBase {
         if (instance == null) {
             if (Constants.BallPickUp.isEnabled) {
                 instance = new PickUpSubsystem();
-                // instance.setDefaultCommand();
+                // instance.setDefaultCommand(new PickUpDefaultCommand());
             } else {
                 instance = new PickUpBase();
             }
@@ -142,6 +138,7 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public BallColor getBallColor() {
+        System.out.println("Method running");
         if(currentColor.red > Constants.BallPickUp.comparativeValueRedLow && currentColor.blue < 60){
             return BallColor.yellow;
         }
@@ -159,5 +156,7 @@ public class PickUpSubsystem extends PickUpBase {
     @Override
     public void initSendable(SendableBuilder builder) {
         lightBarrier.ifPresent((lightBarrier) -> builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null));
+        builder.addStringProperty("BallColor", getBallColor()::toString, null);
+        builder.addBooleanProperty("BallInTunnel", () -> ballInTunnel, null);
     }
 }
