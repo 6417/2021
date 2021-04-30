@@ -201,6 +201,10 @@ public class SwerveModule implements Sendable {
         }
     }
 
+    public void updateLimiterGauseYOffset(double gauseYOffset) {
+        // limiter.updateGauseYOffset(gauseYOffset);
+    }
+
     public void enableLimitSwitch() {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, true);
     }
@@ -216,7 +220,7 @@ public class SwerveModule implements Sendable {
     public void disableLimitSwitch() {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
-
+    
     private double getMaxDriveAccelerationBasedOnCurrentRotation(double desiredVelocity) {
         return MathUtilities.map(Math.abs(new Vector2d(0.0, 1.0).dot(getModuleRotation())), 0.0, 1.0,
                 motors.maxDriveAccelerationSideWays, motors.maxDriveAccelerationFroward)
@@ -311,7 +315,9 @@ public class SwerveModule implements Sendable {
                 null);
         builder.addDoubleProperty("Desired state angle", () -> desiredState.angle.getDegrees(), null);
         builder.addDoubleProperty("Desired state rotation encoder ticks",
-                () -> angleToRotationMotorEncoderTicks(desiredState.angle.getRadians()), null);
+                () -> applyMaxAccelerationToDriveMotorVelocity(
+                        angleToRotationMotorEncoderTicks(desiredState.angle.getRadians())),
+                null);
         builder.addDoubleProperty("Module angel", () -> getModuleRotationAngle() * 360 / (Math.PI * 2), null);
         builder.addDoubleProperty("Moudle speed", () -> getSpeed(), null);
         builder.addDoubleProperty("Module Rotation Encoder Ticks", motors.rotation::getEncoderTicks, null);

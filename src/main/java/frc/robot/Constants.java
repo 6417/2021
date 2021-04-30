@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -20,6 +21,7 @@ import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
@@ -100,6 +102,9 @@ public final class Constants {
         private static final boolean centricSwerve = false;
         public static double zeroingSpeed;
         public static final double deadBand = 0.075;
+        public static final int limiterYOffsetMovingAverageHistorySize = 20;
+        public static final double yOffsetMapperMaxVoltage = 12.5;
+        public static final double yOffsetMapperMinVoltage = 9;
         public static final double finetuningZeroFactor = 0.1;
         public static double maxFineTuneOffsetForZeroEncodersCommand;
         public static double maxSpeedOfDrive; // in meters per second
@@ -171,41 +176,50 @@ public final class Constants {
             commonConfigurations.problemDirectionsBreakModeGauseStrechingFactor = 1.0;
         }
 
-        private static FridolinsMotor motorInitializer(int id, MotorType motorType) {
-            FridolinsMotor motor = new FridoCANSparkMax(id, motorType);
+        private static FridoCANSparkMax angleMotorInitializer(int id, MotorType motorType) {
+            FridoCANSparkMax motor = new FridoCANSparkMax(id, motorType);
             motor.factoryDefault();
+            return motor;
+        }
+
+        private static FridolinsMotor driveMotorInitializer(int id, MotorType motorType) {
+            FridoCANSparkMax motor = angleMotorInitializer(id, motorType);
+            motor.enableForwardLimitSwitch(LimitSwitchPolarity.kDisabled, false);
+            motor.enableReverseLimitSwitch(LimitSwitchPolarity.kDisabled, false);
+            motor.enableSoftLimit(SoftLimitDirection.kForward, false);
+            motor.enableSoftLimit(SoftLimitDirection.kReverse, false);
             return motor;
         }
 
         private static void addModuleSpecificConfigurarions() {
             SwerveModule.Config frontLeftConfig = commonConfigurations.clone();
             frontLeftConfig.mountingPoint = new Translation2d(0.139, 0.2725);
-            frontLeftConfig.driveMotorInitializer = () -> motorInitializer(32, MotorType.kBrushless);
-            frontLeftConfig.rotationMotorInitializer = () -> motorInitializer(33, MotorType.kBrushless);
+            frontLeftConfig.driveMotorInitializer = () -> driveMotorInitializer(32, MotorType.kBrushless);
+            frontLeftConfig.rotationMotorInitializer = () -> angleMotorInitializer(33, MotorType.kBrushless);
             frontLeftConfig.driveMotorInverted = false;
             frontLeftConfig.halSensorPosition = 8.952413559 + 9.0;
             swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
 
             SwerveModule.Config frontRightConfig = commonConfigurations.clone();
             frontRightConfig.mountingPoint = new Translation2d(-0.139, 0.2725);
-            frontRightConfig.driveMotorInitializer = () -> motorInitializer(30, MotorType.kBrushless);
-            frontRightConfig.rotationMotorInitializer = () -> motorInitializer(31, MotorType.kBrushless);
+            frontRightConfig.driveMotorInitializer = () -> driveMotorInitializer(30, MotorType.kBrushless);
+            frontRightConfig.rotationMotorInitializer = () -> angleMotorInitializer(31, MotorType.kBrushless);
             frontRightConfig.driveMotorInverted = false;
             frontRightConfig.halSensorPosition = 8.785744667 + 9.0;
             swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
 
             SwerveModule.Config backLeftConfig = commonConfigurations.clone();
             backLeftConfig.mountingPoint = new Translation2d(0.139, -0.2725);
-            backLeftConfig.driveMotorInitializer = () -> motorInitializer(36, MotorType.kBrushless);
-            backLeftConfig.rotationMotorInitializer = () -> motorInitializer(37, MotorType.kBrushless);
+            backLeftConfig.driveMotorInitializer = () -> driveMotorInitializer(36, MotorType.kBrushless);
+            backLeftConfig.rotationMotorInitializer = () -> angleMotorInitializer(37, MotorType.kBrushless);
             backLeftConfig.driveMotorInverted = false;
             backLeftConfig.halSensorPosition = 8.904793739 + 9.0;
             swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
 
             SwerveModule.Config backRightConfig = commonConfigurations.clone();
             backRightConfig.mountingPoint = new Translation2d(-0.139, -0.2725);
-            backRightConfig.driveMotorInitializer = () -> motorInitializer(34, MotorType.kBrushless);
-            backRightConfig.rotationMotorInitializer = () -> motorInitializer(35, MotorType.kBrushless);
+            backRightConfig.driveMotorInitializer = () -> driveMotorInitializer(34, MotorType.kBrushless);
+            backRightConfig.rotationMotorInitializer = () -> angleMotorInitializer(35, MotorType.kBrushless);
             backRightConfig.driveMotorInverted = false;
             backRightConfig.halSensorPosition = 8.952413559 + 9.0;
             swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);

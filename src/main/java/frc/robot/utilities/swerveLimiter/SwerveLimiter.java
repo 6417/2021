@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpiutil.math.MathUtil;
+import frc.robot.utilities.Algorithms;
 import frc.robot.utilities.MathUtilities;
 import frc.robot.utilities.Pair;
 import frc.robot.utilities.Timer;
@@ -101,18 +102,24 @@ public class SwerveLimiter extends SwerveLimiterBase {
     private static <MountingLocation extends Enum<MountingLocation>> ModuleRotationDirection getDesiredRotationDirection(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
         return getRotationDirection(rotationVectorPairs.get(rotationVectorPairs.entrySet().stream()
-                .map((vectorPairEntry) -> new AbstractMap.SimpleEntry<>(vectorPairEntry.getKey(),
-                        vectorPairEntry.getValue().desiredRotation.dot(vectorPairEntry.getValue().moduleRotation)))
+                .map(Algorithms
+                        .mapEntryFunction((vectorPair) -> vectorPair.desiredRotation.dot(vectorPair.moduleRotation)))
                 .max(Comparator.comparing(Entry<MountingLocation, Double>::getValue))
                 .map((dotproductEntry) -> dotproductEntry.getKey()).get()));
     }
 
     public static double rotatoinDirectionInversionTolerance = 0.9;
 
+    public void updateGauseYOffset(double gauseYOffset) {
+        this.gauseYOffset = gauseYOffset;
+    }
+
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> mapWithEmptyOptionals(
             Stream<Entry<MountingLocation, ModuleRotationVectors>> stream) {
-        return stream.map((entry) -> new AbstractMap.SimpleEntry<MountingLocation, Optional<Boolean>>(entry.getKey(),
-                Optional.empty())).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        return stream
+                .map(Algorithms.<MountingLocation, ModuleRotationVectors, Optional<Boolean>>mapEntryFunction(
+                        (ModuleRotationVectors moduleRotationVectors) -> Optional.empty()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     /**
@@ -127,15 +134,14 @@ public class SwerveLimiter extends SwerveLimiterBase {
             return mapWithEmptyOptionals(rotationVectorPairs.entrySet().stream());
         }
 
-        return rotationVectorPairs.entrySet().stream().map((rotationVectorPair) -> {
-            if (rotationVectorPair.getValue().moduleRotation
-                    .dot(rotationVectorPair.getValue().desiredRotation) > rotatoinDirectionInversionTolerance)
-                return new AbstractMap.SimpleEntry<MountingLocation, Optional<Boolean>>(rotationVectorPair.getKey(),
-                        Optional.empty());
-            return new AbstractMap.SimpleEntry<MountingLocation, Optional<Boolean>>(rotationVectorPair.getKey(),
-                    Optional.of(getRotationDirection(rotationVectorPair.getValue()) != desiredRotationDirection));
+        return rotationVectorPairs.entrySet().stream().map(Algorithms
+                .<MountingLocation, ModuleRotationVectors, Optional<Boolean>>mapEntryFunction((rotationVectorPair) -> {
+                    if (rotationVectorPair.moduleRotation
+                            .dot(rotationVectorPair.desiredRotation) > rotatoinDirectionInversionTolerance)
+                        return Optional.empty();
+                    return Optional.of(getRotationDirection(rotationVectorPair) != desiredRotationDirection);
 
-        }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                })).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     /**
@@ -194,9 +200,9 @@ public class SwerveLimiter extends SwerveLimiterBase {
         double resultOfModifiedGauseCurve = modifiedGauseCurve(speed);
         if (centricSwerve)
             return MathUtil.clamp(resultOfModifiedGauseCurve / (getLoopTime() / defaultLoopTime), 0.0,
-                    resultOfModifiedGauseCurve);
+                    resultOfModifiedGauseCurve > 1.0 ? 1.0 : resultOfModifiedGauseCurve);
         return MathUtilities.map(MathUtil.clamp(resultOfModifiedGauseCurve / (getLoopTime() / defaultLoopTime), 0.0,
-                resultOfModifiedGauseCurve), 0.0, 1.0, -1.0, 1.0);
+                resultOfModifiedGauseCurve > 1.0 ? 1.0 : resultOfModifiedGauseCurve), 0.0, 1.0, -1.0, 1.0);
     }
 
     /**

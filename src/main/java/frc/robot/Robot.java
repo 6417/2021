@@ -49,13 +49,21 @@ public class Robot extends TimedRobot {
         while(getNavx().isCalibrating());
         getNavx().reset();
         VisionService.getInstance();
-        PowerDistributionPanel pdp = new PowerDistributionPanel(62); // to display amps on shuffleboard
+        getPdp();
         SmartDashboard.putData(new CommandBase() {
             @Override
             public void initialize() {
                 VisionService.getInstance().setConnectionStatus();
             }
         });
+    }
+
+    private static PowerDistributionPanel pdp;
+
+    public static PowerDistributionPanel getPdp() {
+        if (pdp == null)
+            pdp = new PowerDistributionPanel(62);
+        return pdp;
     }
 
     /**
