@@ -69,4 +69,16 @@ public class SwerveDriveBase extends SubsystemBase {
     public void setSpeedFactor(double speedFactor) {
         
     }
+
+    public void activateBreak() {
+
+    }
+
+    public void deactivateBreak() {
+        
+    }
+
+    public void setCentricSwerveMode(boolean on) {
+
+    }
 }

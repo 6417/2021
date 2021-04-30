@@ -11,9 +11,12 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.swerve.SwerveDrive;
-import frc.robot.utilities.Controller;
+import frc.robot.utilities.VisionService;
+import frc.robot.Controller;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -23,8 +26,6 @@ import frc.robot.utilities.Controller;
  * project.
  */
 public class Robot extends TimedRobot {
-    private RobotContainer m_robotContainer;
-
     private static AHRS navx;
 
     public static AHRS getNavx() {
@@ -47,6 +48,22 @@ public class Robot extends TimedRobot {
         getNavx().calibrate();
         while(getNavx().isCalibrating());
         getNavx().reset();
+        VisionService.getInstance();
+        getPdp();
+        SmartDashboard.putData(new CommandBase() {
+            @Override
+            public void initialize() {
+                VisionService.getInstance().setConnectionStatus();
+            }
+        });
+    }
+
+    private static PowerDistributionPanel pdp;
+
+    public static PowerDistributionPanel getPdp() {
+        if (pdp == null)
+            pdp = new PowerDistributionPanel(62);
+        return pdp;
     }
 
     /**
@@ -102,7 +119,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        VisionService.getInstance().setConnectionStatus();
     }
 
     /**        
