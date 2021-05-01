@@ -27,8 +27,8 @@ public class SwerveDriveBase extends SubsystemBase {
 
     }
 
-    public HashMap<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
-        HashMap<Constants.SwerveDrive.MountingLocations, Boolean> defaultReturn = new HashMap<>();
+    public Map<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
+        Map<Constants.SwerveDrive.MountingLocations, Boolean> defaultReturn = new HashMap<>();
         for (var location : Constants.SwerveDrive.MountingLocations.values())
             defaultReturn.put(location, false);
         return defaultReturn;
@@ -68,17 +68,5 @@ public class SwerveDriveBase extends SubsystemBase {
 
     public void setSpeedFactor(double speedFactor) {
         
-    }
-
-    public void activateBreak() {
-
-    }
-
-    public void deactivateBreak() {
-        
-    }
-
-    public void setCentricSwerveMode(boolean on) {
-
     }
 }

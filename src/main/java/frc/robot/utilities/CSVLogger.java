@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class CSVLogger implements AutoCloseable {
     private static final long limitedSize = 3000; // maximum elements in a column
-    private HashMap<String, List<String>> data;
-    private HashMap<String, Integer> headerIndices = new HashMap<>();
+    private Map<String, List<String>> data;
+    private Map<String, Integer> headerIndices = new HashMap<>();
     private FileWriter csvFile;
     private String filePath;
     private int indexOfNewHeader = 0;
