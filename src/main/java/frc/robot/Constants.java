@@ -14,7 +14,9 @@ import java.util.Optional;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.subsystems.swerve.SwerveModule;
+import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
@@ -270,12 +272,6 @@ public final class Constants {
         public static Supplier<FridolinsMotor> tunnelMotor = () -> new FridoCANSparkMax(tunnelMotor_ID, MotorType.kBrushless);
         public static final boolean tunnelMotorInvertation = true;
 
-        // variables to find out the ballcolor
-        public static final int comparativeValueBlueLow = 105;
-        public static final int comparativeValueBlueHigh = 50;
-        public static final int comparativeValueRedLow = 110;
-        public static final int comparativeValueRedHigh = 60;
-
         public static final double ticksForTunnelMotor = 0; 
 
         public static final int countsPerRevTunnelMotor = 1; 
@@ -287,5 +283,13 @@ public final class Constants {
         public static final double releaseSpeed = 1;  // TODO optimal speed 
 
         public static final boolean isLightBarrierInverted = true;
+
+        public static final GroveColorSensor.Color yellowBallColor = new Color(red, green, blue)
+        public static final GroveColorSensor.Color blueBallColor = new Color(red, green, blue);
+        public static final GroveColorSensor.Color clearColor = new Color(red, green, blue);
+
+        public static final double comparativeValueClearAndBlue = 0.9; // TODO
+        public static final double comparativeValueClearAndYellow = 0.9; // TODO
+        public static final double comparativeValueClear = 0.9; // TODO
     }
 }
