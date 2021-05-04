@@ -13,6 +13,7 @@ import frc.robot.commands.ballPickUp.PickUpDefaultCommand;
 import frc.robot.subsystems.base.PickUpBase;
 import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.LightBarrier;
+import frc.robot.utilities.Vector3d;
 import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
@@ -39,6 +40,10 @@ public class PickUpSubsystem extends PickUpBase {
 
     private Optional<LightBarrier> lightBarrier;
 
+    private final Vector3d blueBallColorVector;
+    private final Vector3d yellowBallColorVector;
+    private final Vector3d clearColorVector;
+
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
         tunnelMotor = Constants.BallPickUp.tunnelMotor.get();
@@ -60,6 +65,10 @@ public class PickUpSubsystem extends PickUpBase {
 
         lightBarrier.filter((lightBarrier) -> lightBarrier.isActiv())
             .ifPresent((lightBarrier) -> DriverStation.getInstance().reportError("Lightbarrier might not be properly connected, expected false and accutaly was true (if lightbarrier was activate on purpose ignore this massage)", false));
+
+        blueBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.blueBallColor);
+        yellowBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.yellowBallColor);
+        clearColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.clearColor);
     }
 
     private void initializeLightBarrier() {
@@ -138,12 +147,15 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public BallColor getBallColor() {
-        System.out.println("Method running");
-        if(currentColor.red > Constants.BallPickUp.comparativeValueRedLow && currentColor.blue < 60){
-            return BallColor.yellow;
-        }
-        else if(currentColor.red < Constants.BallPickUp.comparativeValueBlueLow && currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh){
-            return BallColor.blue;
+        Vector3d currentBallColorVector = new Vector3d(currentColor.red, currentColor.green, currentColor.blue);
+        if(currentBallColorVector.normalize().dot(clearColorVector.normalize()) < Constants.BallPickUp.comparativeValueClear) {
+            double currentVectorBlueVectorProduct = currentBallColorVector.normalize().dot(blueBallColorVector.normalize());
+            double currentVectorYellowVectorProduct = currentBallColorVector.normalize().dot(yellowBallColorVector.normalize());
+            if(currentVectorBlueVectorProduct < currentVectorYellowVectorProduct){
+                return BallColor.yellow;
+            }
+            else
+                return BallColor.blue;
         }
         return BallColor.colorNotFound;
     }
