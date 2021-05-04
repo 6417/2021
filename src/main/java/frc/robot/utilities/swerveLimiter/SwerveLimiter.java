@@ -1,11 +1,9 @@
 package frc.robot.utilities.swerveLimiter;
 
-import java.util.AbstractMap;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,7 +24,6 @@ public class SwerveLimiter extends SwerveLimiterBase {
         public double gauseYOffset;
         public Supplier<Long> clock;
         public long defaultLoopTime;
-        public boolean centricSwerve;
 
         public Config clone() {
             try {
@@ -42,17 +39,15 @@ public class SwerveLimiter extends SwerveLimiterBase {
         }
     }
 
-    private double gauseStrechingFactor;
+    private final double gauseStrechingFactor;
     private Timer loopTimeTimer;
     private long defaultLoopTime;
-    private final boolean centricSwerve;
-    private double gauseYOffset;
+    private final double gauseYOffset;
 
     public SwerveLimiter(Config config) {
         gauseStrechingFactor = config.gauseXStrechingFactor;
         loopTimeTimer = new Timer(config.clock);
         defaultLoopTime = config.defaultLoopTime;
-        centricSwerve = config.centricSwerve;
         gauseYOffset = config.gauseYOffset;
     }
 
@@ -77,22 +72,11 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private static ModuleRotationDirection getRotationDirection(ModuleRotationVectors rotationVectorPair) {
         if (rotationVectorPair.moduleRotation
-                .dot(rotationVectorPair.desiredRotation) > rotatoinDirectionInversionTolerance)
+                .dot(rotationVectorPair.desiredRotation) > rotationDirectionInversionTolerance)
             return ModuleRotationDirection.None;
         if (Math.signum(rotationVectorPair.moduleRotation.cross(rotationVectorPair.desiredRotation)) < 0.0)
             return ModuleRotationDirection.Counterclockwise;
         return ModuleRotationDirection.Clockwise;
-    }
-
-    /**
-     * @param rotationVectorPairs The map to be checked.
-     * @param direction           The element of which the count shall be returned.
-     * @return The number of elements equal to {@link #element}.
-     */
-    private static <MountingLocation extends Enum<MountingLocation>> int getNumberOfRotationDirectionsInMap(
-            Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs, ModuleRotationDirection direction) {
-        return (int) rotationVectorPairs.values().stream().map(SwerveLimiter::getRotationDirection)
-                .filter((rotationDirection) -> direction == rotationDirection).count();
     }
 
     /**
@@ -108,12 +92,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
                 .map((dotproductEntry) -> dotproductEntry.getKey()).get()));
     }
 
-    public static double rotatoinDirectionInversionTolerance = 0.9;
-
-    public void updateGauseYOffset(double gauseYOffset) {
-        this.gauseYOffset = gauseYOffset;
-    }
-
+    public static double rotationDirectionInversionTolerance = 0.9;
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> mapWithEmptyOptionals(
             Stream<Entry<MountingLocation, ModuleRotationVectors>> stream) {
         return stream
@@ -137,7 +116,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
         return rotationVectorPairs.entrySet().stream().map(Algorithms
                 .<MountingLocation, ModuleRotationVectors, Optional<Boolean>>mapEntryFunction((rotationVectorPair) -> {
                     if (rotationVectorPair.moduleRotation
-                            .dot(rotationVectorPair.desiredRotation) > rotatoinDirectionInversionTolerance)
+                            .dot(rotationVectorPair.desiredRotation) > rotationDirectionInversionTolerance)
                         return Optional.empty();
                     return Optional.of(getRotationDirection(rotationVectorPair) != desiredRotationDirection);
 
@@ -170,19 +149,14 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Optional<Boolean>> getModuleRotationDirectionCorrectionsWithRobotRotation(
             Map<MountingLocation, ModuleRotationVectors> rotationVectorPairs) {
-        // return rotationVectorPairs.entrySet().stream().map((rotationVectorPair) -> {
-        // if (rotationVectorPair.getValue().moduleRotation
-        // .dot(rotationVectorPair.getValue().desiredRotation) >
-        // rotatoinDirectionInversionTolerance)
-        // return new AbstractMap.SimpleEntry<MountingLocation,
-        // Optional<Boolean>>(rotationVectorPair.getKey(),
-        // Optional.empty());
-        // return new AbstractMap.SimpleEntry<MountingLocation,
-        // Optional<Boolean>>(rotationVectorPair.getKey(),
-        // Optional.of(rotationVectorPair.getValue().moduleRotation
-        // .dot(rotationVectorPair.getValue().desiredRotation) < 0.0));
-        // }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-        return mapWithEmptyOptionals(rotationVectorPairs.entrySet().stream());
+        return rotationVectorPairs.entrySet().stream().map(Algorithms
+                .<MountingLocation, ModuleRotationVectors, Optional<Boolean>>mapEntryFunction((rotationVectorPair) -> {
+                    if (rotationVectorPair.moduleRotation
+                            .dot(rotationVectorPair.desiredRotation) > rotationDirectionInversionTolerance)
+                        return Optional.empty();
+                    return Optional.of(rotationVectorPair.moduleRotation.dot(rotationVectorPair.desiredRotation) < 0.0);
+                })).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        // return mapWithEmptyOptionals(rotationVectorPairs.entrySet().stream());
     }
 
     /**
@@ -198,9 +172,6 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private double getLimitedDotProduct(double speed) {
         double resultOfModifiedGauseCurve = modifiedGauseCurve(speed);
-        if (centricSwerve)
-            return MathUtil.clamp(resultOfModifiedGauseCurve / (getLoopTime() / defaultLoopTime), 0.0,
-                    resultOfModifiedGauseCurve > 1.0 ? 1.0 : resultOfModifiedGauseCurve);
         return MathUtilities.map(MathUtil.clamp(resultOfModifiedGauseCurve / (getLoopTime() / defaultLoopTime), 0.0,
                 resultOfModifiedGauseCurve > 1.0 ? 1.0 : resultOfModifiedGauseCurve), 0.0, 1.0, -1.0, 1.0);
     }
@@ -212,12 +183,7 @@ public class SwerveLimiter extends SwerveLimiterBase {
      */
     private Vector2d getLimitedVectorCloserToModuleRotation(Pair<Vector2d, Vector2d> solutions, Vector2d moduleRotation,
             Vector2d actualTargetVector) {
-        if (centricSwerve) {
-            if (solutions.first.dot(actualTargetVector) > solutions.second.dot(actualTargetVector)
-                    ^ moduleRotation.dot(actualTargetVector) < 0.0)
-                return solutions.first;
-            return solutions.second;
-        } else if (solutions.first.dot(actualTargetVector) > solutions.second.dot(actualTargetVector))
+        if (solutions.first.dot(actualTargetVector) > solutions.second.dot(actualTargetVector))
             return solutions.first;
         return solutions.second;
     }
@@ -238,16 +204,6 @@ public class SwerveLimiter extends SwerveLimiterBase {
     }
 
     /**
-     * Rotates {@link #moduleRotation} by 180° if {@link #targetRotation} has an
-     * angle grater than 90° to {@link #moduleRotation}, because the other way than
-     * is shorter.
-     */
-    private void rotateModuleRotationIfNecessary(Vector2d moduleRotation, Vector2d targetRotation) {
-        if (Math.signum(moduleRotation.dot(targetRotation)) < 0.0)
-            moduleRotation.rotate(180);
-    }
-
-    /**
      * @param vec                  The rotation vector of the state the length is
      *                             not used, if the length is 0 the angle will be 0.
      * @param speedMetersPerSecond The speed which the state will have.
@@ -264,21 +220,14 @@ public class SwerveLimiter extends SwerveLimiterBase {
      *                              vector.
      * @param moduleSpeed           The current cruising velocity of the module in
      *                              percent.
-     * @param rotatoinOfsetFactor   Factor to multiply the limited dotproduct, use
-     *                              the getRotationOfsetFunction to compute it.
-     * 
      * @return A limited swerve module state based on the velocity.
      */
     @Override
     public SwerveModuleState limitState(SwerveModuleState desiredState, Vector2d currentModuleRotation,
-            double moduleSpeed, double rotatoinOfsetFactor) {
+            double moduleSpeed) {
         Vector2d moduleRotation = currentModuleRotation.clone();
         Vector2d targetVector = Vector2d.fromRad(desiredState.angle.getRadians());
-
-        if (centricSwerve)
-            rotateModuleRotationIfNecessary(moduleRotation, targetVector);
-
-        double limitedDotProduct = getLimitedDotProduct(Math.abs(moduleSpeed)) * rotatoinOfsetFactor;
+        double limitedDotProduct = getLimitedDotProduct(Math.abs(moduleSpeed));
         Pair<Vector2d, Vector2d> limitedTargetVectors = moduleRotation.normalize().inverseDot(limitedDotProduct);
 
         return vectorToSwerveModuleState(

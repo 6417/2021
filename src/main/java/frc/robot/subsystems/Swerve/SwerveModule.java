@@ -38,7 +38,6 @@ public class SwerveModule implements Sendable {
         public boolean driveMotorInverted;
         public double halSensorPosition;
         public boolean limitModuleStates;
-        public boolean centricSwerve;
         public LimitSwitchPolarity limitSwitchPolarity;
         public double driveAccelerationForward;
         public double driveAccelerationSideWays;
@@ -64,7 +63,6 @@ public class SwerveModule implements Sendable {
                 copy.driveMotorInverted = driveMotorInverted;
                 copy.halSensorPosition = halSensorPosition;
                 copy.limitModuleStates = limitModuleStates;
-                copy.centricSwerve = centricSwerve;
                 copy.limitSwitchPolarity = limitSwitchPolarity;
                 copy.driveAccelerationForward = driveAccelerationForward;
                 copy.driveAccelerationSideWays = driveAccelerationSideWays;
@@ -89,7 +87,6 @@ public class SwerveModule implements Sendable {
         public Motors(FridolinsMotor drive, FridolinsMotor.FeedbackDevice driveEncoderType, boolean driveMotorInverted,
                 Optional<Boolean> driveSensorInverted, FridolinsMotor rotation,
                 FridolinsMotor.FeedbackDevice rotationEncoderType, LimitSwitchPolarity limitSwitchPolarity) {
-            // DO NOT MAKE FACTORY DEFAULTS, for some reason it breaks every thing
             this.drive = drive;
             this.rotation = rotation;
             this.drive.configEncoder(driveEncoderType, (int) driveMotorTicksPerRotation);
@@ -106,7 +103,6 @@ public class SwerveModule implements Sendable {
     private SwerveLimiter limiter;
     private SwerveModuleState desiredState = new SwerveModuleState();
     public final double halSensorPosition;
-    public final boolean centricSwerveMode;
     public final boolean limitedModuleStates;
     public boolean currentRotationInverted = false;
     private Vector2d[] problemDirectionsWhileBreaking;
@@ -124,7 +120,6 @@ public class SwerveModule implements Sendable {
         limiter = config.limiterInitializer.get();
         motors.maxVelocity = config.maxVelocity;
         halSensorPosition = config.halSensorPosition;
-        centricSwerveMode = config.centricSwerve;
         limitedModuleStates = config.limitModuleStates;
         motors.maxDriveAccelerationFroward = config.driveAccelerationForward;
         motors.maxDriveAccelerationSideWays = config.driveAccelerationSideWays;
@@ -174,53 +169,29 @@ public class SwerveModule implements Sendable {
         return motors.drive.getEncoderVelocity();
     }
 
-    private static SwerveModuleState optimize(SwerveModuleState desiredState, Rotation2d currentAngle) {
-        var delta = desiredState.angle.minus(currentAngle);
-        if (Math.abs(delta.getDegrees()) > 90.0) {
-            return new SwerveModuleState(-desiredState.speedMetersPerSecond,
-                    desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)));
-        } else {
-            return new SwerveModuleState(desiredState.speedMetersPerSecond, desiredState.angle);
-        }
-    }
-
-    public void setDesiredState(SwerveModuleState state, double rotationOfsetFactor) {
+    public void setDesiredState(SwerveModuleState state) {
         if (limitedModuleStates)
             desiredState = limiter.limitState(state, getModuleRotation(),
-                    driveMotorEncoderVelocityToPercent(getSpeed()), rotationOfsetFactor);
+                    driveMotorEncoderVelocityToPercent(getSpeed()));
         else {
-            desiredState = limiter.limitState(state, getModuleRotation(), 0.0, 1.0 /* rotationOfsetFactor */);
+            desiredState = limiter.limitState(state, getModuleRotation(), 0.0);
             desiredState.speedMetersPerSecond = state.speedMetersPerSecond;
         }
 
-        if (centricSwerveMode)
-            desiredState = optimize(desiredState, new Rotation2d(getModuleRotationAngle()));
-        else if (desiredState.speedMetersPerSecond < 0.0) {
+        if (desiredState.speedMetersPerSecond < 0) {
             desiredState.angle.rotateBy(Rotation2d.fromDegrees(180));
             desiredState.speedMetersPerSecond *= -1;
         }
-    }
-
-    public void updateLimiterGauseYOffset(double gauseYOffset) {
-        // limiter.updateGauseYOffset(gauseYOffset);
     }
 
     public void enableLimitSwitch() {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, true);
     }
 
-    public void activateBreak() {
-        motors.drive.setIdleMode(IdleModeType.kBrake);
-    }
-
-    public void deactivateBreak() {
-        motors.drive.setIdleMode(IdleModeType.kCoast);
-    }
-
     public void disableLimitSwitch() {
         motors.rotation.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen, false);
     }
-    
+
     private double getMaxDriveAccelerationBasedOnCurrentRotation(double desiredVelocity) {
         return MathUtilities.map(Math.abs(new Vector2d(0.0, 1.0).dot(getModuleRotation())), 0.0, 1.0,
                 motors.maxDriveAccelerationSideWays, motors.maxDriveAccelerationFroward)
@@ -295,7 +266,6 @@ public class SwerveModule implements Sendable {
 
     public void invertRotationDirection() {
         currentRotationInverted = !currentRotationInverted;
-        System.out.println("Rotation direction Inverted");
     }
 
     public void setEncoderZeroedFalse() {

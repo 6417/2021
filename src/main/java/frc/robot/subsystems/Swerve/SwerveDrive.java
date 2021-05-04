@@ -15,12 +15,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
-import frc.robot.Robot;
 import frc.robot.commands.swerve.DefaultDriveCommand;
 import frc.robot.subsystems.base.SwerveDriveBase;
 import frc.robot.utilities.Algorithms;
-import frc.robot.utilities.MathUtilities;
-import frc.robot.utilities.MovingAverageFilter;
 import frc.robot.utilities.SwerveKinematics;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
@@ -101,15 +98,12 @@ public class SwerveDrive extends SwerveDriveBase {
         Map<Constants.SwerveDrive.MountingLocations, SwerveModuleState> states = kinematics
                 .toLabledSwerveModuleStates(currentChassisSpeeds);
         states = normalizeStates(states);
-        // Map<Constants.SwerveDrive.MountingLocations, Double> rotationOfsetFactors =
-        // SwerveLimiterBase
-        // .getRotationOfsets(modules, states);
 
         states.entrySet()
                 .forEach((Entry<Constants.SwerveDrive.MountingLocations, SwerveModuleState> labeledState) -> modules
-                        .get(labeledState.getKey()).setDesiredState(labeledState.getValue(),
-                                1.0 /* rotationOfsetFactors.get(labeledState.getKey()) */));
+                        .get(labeledState.getKey()).setDesiredState(labeledState.getValue()));
 
+    
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(Math.abs(currentChassisSpeeds.omegaRadiansPerSecond) > 0.01);
 
@@ -122,20 +116,6 @@ public class SwerveDrive extends SwerveDriveBase {
                         (module) -> new SwerveLimiter.ModuleRotationVectors(module.getModuleRotation(),
                                 module.getTargetVector())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-    }
-
-    @Override
-    public void periodic() {
-        forEachModule((module) -> module.updateLimiterGauseYOffset(getUpdatedYOffset()));
-    }
-
-    MovingAverageFilter yOffsetLimiter = new MovingAverageFilter(
-            Constants.SwerveDrive.limiterYOffsetMovingAverageHistorySize);
-
-    private double getUpdatedYOffset() {
-        return MathUtilities.map(yOffsetLimiter.calculate(Robot.getPdp().getVoltage()),
-                Constants.SwerveDrive.yOffsetMapperMinVoltage, Constants.SwerveDrive.yOffsetMapperMinVoltage,
-                Constants.SwerveDrive.limiterConfig.gauseYOffset, 2);
     }
 
     private void correctRotationDirections(boolean isRobotRotating) {
@@ -154,8 +134,8 @@ public class SwerveDrive extends SwerveDriveBase {
     }
 
     @Override
-    public HashMap<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
-        HashMap<Constants.SwerveDrive.MountingLocations, Boolean> result = new HashMap<>();
+    public Map<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
+        Map<Constants.SwerveDrive.MountingLocations, Boolean> result = new HashMap<>();
         forEachModuleEntry(
                 (labeledModule) -> result.put(labeledModule.getKey(), labeledModule.getValue().isHalSensorTriggered()));
         return result;
@@ -220,15 +200,5 @@ public class SwerveDrive extends SwerveDriveBase {
     @Override
     public void setDriveMode(DriveMode driveMode) {
         this.driveMode = driveMode;
-    }
-
-    @Override
-    public void activateBreak() {
-        forEachModule((module) -> module.activateBreak());
-    }
-
-    @Override
-    public void deactivateBreak() {
-        forEachModule((module) -> module.deactivateBreak());
     }
 }

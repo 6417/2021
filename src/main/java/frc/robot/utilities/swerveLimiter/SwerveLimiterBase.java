@@ -17,7 +17,7 @@ import frc.robot.utilities.Vector2d;
 
 public abstract class SwerveLimiterBase {
         public abstract SwerveModuleState limitState(SwerveModuleState desiredSteate, Vector2d currentModuleRotation,
-                        double moduleSpeed, double rotatoinOfsetFactor);
+                        double moduleSpeed);
 
         /**
          * Function for {@link #RotationDirectionCorectorGetter}, which does nothing.
@@ -34,28 +34,6 @@ public abstract class SwerveLimiterBase {
                 public Map<MountingLocation, Optional<Boolean>> getModuleRotationDirectionCorrections(
                                 Map<MountingLocation, ModuleRotationVectors> rotationDirections,
                                 boolean isRobotRotating);
-        }
-
-        public static <MountingLocation extends Enum<MountingLocation>> Map<MountingLocation, Double> getRotationOfsets(
-                        Map<MountingLocation, SwerveModule> modules,
-                        Map<MountingLocation, SwerveModuleState> desiredStates) {
-                double minimalDotproductBetweenModuleAndTargetVector = modules.entrySet().stream()
-                                .map((Entry<MountingLocation, SwerveModule> moduleEntry) -> Vector2d
-                                                .fromRad(desiredStates.get(moduleEntry.getKey()).angle.getRadians())
-                                                .dot(moduleEntry.getValue().getModuleRotation()))
-                                .min(Comparator.naturalOrder()).get();
-                Map<MountingLocation, Double> results = new HashMap<>();
-                modules.entrySet().forEach((Entry<MountingLocation, SwerveModule> moduleEntry) -> results.put(
-                                moduleEntry.getKey(), MathUtil.clamp(
-                                                MathUtilities.map(moduleEntry.getValue().getModuleRotation()
-                                                                .dot(Vector2d.fromRad(desiredStates
-                                                                                .get(moduleEntry.getKey()).angle
-                                                                                                .getRadians())),
-                                                                minimalDotproductBetweenModuleAndTargetVector, 1.0,
-                                                                -1.0, 1.0),
-                                                -1.0, 1.0)));
-
-                return results;
         }
 
         public static enum ModuleRotationDirection {
