@@ -20,6 +20,7 @@ import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
+import frc.robot.utilities.fridolinsMotor.FridoTalon;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
@@ -113,7 +114,7 @@ public final class Constants {
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
         public static double defaultSpeedFactor = 0.75;
         public static double slowSpeedFactor = 0.35;
-        
+
         static {
             setSwerveDriveConstants();
             setUpLimiterConfig();
@@ -131,8 +132,8 @@ public final class Constants {
             commonConfigurations.wheelCircumference = 0.09767 * Math.PI;
             commonConfigurations.limiterInitializer = () -> new SwerveLimiter(limiterConfig);
             commonConfigurations.maxVelocity = maxSpeedOfDrive;
-            commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.CANEncoder;
-            commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.CANEncoder;
+            commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.BuiltIn;
+            commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.BuiltIn;
             commonConfigurations.limitModuleStates = false;
             commonConfigurations.limitSwitchPolarity = LimitSwitchPolarity.kNormallyOpen;
             commonConfigurations.driveAccelerationForward = 2000;
@@ -226,5 +227,43 @@ public final class Constants {
         public static final double releaseSpeed = 1; // TODO optimal speed
 
         public static final boolean isLightBarrierInverted = true;
+    }
+
+    public static class TankDrive {
+        public static final boolean IS_ENABLED = true;
+        public static final double SECONDS_TO_ACCELERATE = 0.125;
+
+        public static final int MOTOR_DRIVE_FRONT_RIGHT_ID = 0;
+        public static final int MOTOR_DRIVE_FRONT_LEFT_ID = 2;
+        public static final int MOTOR_DRIVE_BACK_RIGHT_ID = 1;
+        public static final int MOTOR_DRIVE_BACK_LEFT_ID = 3;
+        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoTalon(
+                MOTOR_DRIVE_FRONT_RIGHT_ID, 1, 0);
+        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoTalon(
+                MOTOR_DRIVE_BACK_RIGHT_ID, 3, 2);
+        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoTalon(
+                MOTOR_DRIVE_FRONT_LEFT_ID, 5, 4);
+        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoTalon(
+                MOTOR_DRIVE_BACK_LEFT_ID, 7, 6);
+
+        // public static final Supplier<FridolinsMotor> frontRightMotorInitializer = ()
+        // -> new FridoCANSparkMax(12, MotorType.kBrushless);
+        // public static final Supplier<FridolinsMotor> backRightMotorInitializer = ()
+        // -> new FridoCANSparkMax(13, MotorType.kBrushless);
+        // public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = ()
+        // -> new FridoCANSparkMax(10, MotorType.kBrushless);
+        // public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () ->
+        // new FridoCANSparkMax(11, MotorType.kBrushless);
+
+        public static final int ticksPerRotation = 512;
+        public static final double wheelDiameter = 0.10;
+        public static final Supplier<Translation2d> frontLeftWheelDisplacementMeters = () -> new Translation2d(0.26,
+                0.19);
+        public static final Supplier<Translation2d> frontRightWheelDisplacementMeters = () -> new Translation2d(-0.26,
+                0.19);
+        public static final Supplier<Translation2d> backLeftWheelDisplacementMeters = () -> new Translation2d(0.26,
+                -0.19);
+        public static final Supplier<Translation2d> backRightWheelDisplacementMeters = () -> new Translation2d(-0.26,
+                -0.19);
     }
 }

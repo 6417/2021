@@ -5,6 +5,8 @@ import java.util.Optional;
 public class PIDValues implements Cloneable {
     public Optional<Double> kF = Optional.empty();
     public Optional<Integer> slotIdX = Optional.empty();
+    public Optional<Double> upperSpeedLimit = Optional.empty();
+    public Optional<Double> lowerSpeedLimit = Optional.empty(); 
     public double kP;
     public double kI;
     public double kD;

@@ -139,26 +139,31 @@ public class FridoMotorLogger implements FridolinsMotor {
 
     @Override
     public double get() {
+        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public boolean getInverted() {
+        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void disable() {
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void stopMotor() {
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void pidWrite(double output) {
+        // TODO Auto-generated method stub
 
     }
 

@@ -198,7 +198,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
 
     @Override
     public void configEncoder(FridolinsMotor.FeedbackDevice device, int countsPerRev) {
-        if (device == FeedbackDevice.CANEncoder) {
+        if (device == FeedbackDevice.BuiltIn) {
             this.encoder = super.getEncoder();
             return;
         }
@@ -206,7 +206,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         this.encoder.setPositionConversionFactor(countsPerRev);
     }
 
-    public void selectBuiltinFeedbackSensor() {
+    private void selectBuiltinFeedbackSensor() {
         this.encoder = super.getEncoder();
         super.getEncoder().setPositionConversionFactor(0);
     }
