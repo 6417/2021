@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -67,6 +68,10 @@ public class SwerveDriveBase extends SubsystemBase {
     }
 
     public void setSpeedFactor(double speedFactor) {
+        
+    }
+
+    public void configureButtonBindings(Joystick joystick) {
         
     }
 }

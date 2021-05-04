@@ -8,14 +8,25 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
+import frc.robot.Controller;
+import frc.robot.Robot;
 import frc.robot.Constants.SwerveDrive.MountingLocations;
+import frc.robot.commands.swerve.BreakCommand;
 import frc.robot.commands.swerve.DefaultDriveCommand;
+import frc.robot.commands.swerve.FieldOriented;
+import frc.robot.commands.swerve.PickupOriented;
+import frc.robot.commands.swerve.SetSpeedFactor;
+import frc.robot.commands.swerve.ThrowerOriented;
+import frc.robot.commands.swerve.ZeroEncoders;
 import frc.robot.subsystems.base.SwerveDriveBase;
 import frc.robot.utilities.Algorithms;
 import frc.robot.utilities.SwerveKinematics;
@@ -103,7 +114,6 @@ public class SwerveDrive extends SwerveDriveBase {
                 .forEach((Entry<Constants.SwerveDrive.MountingLocations, SwerveModuleState> labeledState) -> modules
                         .get(labeledState.getKey()).setDesiredState(labeledState.getValue()));
 
-    
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(Math.abs(currentChassisSpeeds.omegaRadiansPerSecond) > 0.01);
 
@@ -200,5 +210,26 @@ public class SwerveDrive extends SwerveDriveBase {
     @Override
     public void setDriveMode(DriveMode driveMode) {
         this.driveMode = driveMode;
+    }
+
+    @Override
+    public void configureButtonBindings(Joystick joystick) {
+        JoystickButton zeroEncodersButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.zeroEncoders);
+        JoystickButton fieldOrientedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.fieledOriented);
+        JoystickButton throwerOrientedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.throwerOriented);
+        JoystickButton pickupOrientedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.pickupOriented);
+        JoystickButton slowSpeedFactorButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.slowSpeedMode);
+        JoystickButton zeroNavxButton = new JoystickButton(joystick, Constants.zeroNavxButtonID);
+        JoystickButton breakButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.breakButton);
+        JoystickButton fullSpeedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.fullSpeed);
+
+        zeroEncodersButton.whenPressed(Controller.runCommandAndCancelWhenPressedAgain(new ZeroEncoders()));
+        fieldOrientedButton.whenPressed(new FieldOriented());
+        throwerOrientedButton.whenPressed(new ThrowerOriented());
+        pickupOrientedButton.whenPressed(new PickupOriented());
+        slowSpeedFactorButton.whenPressed(Controller.runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
+        zeroNavxButton.whenPressed(() -> Robot.getNavx().reset());
+        breakButton.whileHeld(new BreakCommand());
+        fullSpeedButton.whenPressed(Controller.runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
     }
 }
