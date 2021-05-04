@@ -1,5 +1,7 @@
 package frc.robot.utilities;
 
+import frc.robot.utilities.GroveColorSensor.Color;
+
 public class Vector3d {
     public double x;
     public double y;
@@ -30,5 +32,9 @@ public class Vector3d {
 
     public double dot(Vector3d vec) {
         return x * vec.x + y * vec.y + z * vec.z;
+    }
+
+    public static Vector3d fromBallColorToVector(Color color){
+        return new Vector3d(color.red, color.green, color.blue);
     }
 }
