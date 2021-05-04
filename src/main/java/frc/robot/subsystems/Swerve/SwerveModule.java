@@ -178,8 +178,10 @@ public class SwerveModule implements Sendable {
             desiredState.speedMetersPerSecond = state.speedMetersPerSecond;
         }
 
-        desiredState.angle.rotateBy(Rotation2d.fromDegrees(180));
-        desiredState.speedMetersPerSecond *= -1;
+        if (desiredState.speedMetersPerSecond < 0) {
+            desiredState.angle.rotateBy(Rotation2d.fromDegrees(180));
+            desiredState.speedMetersPerSecond *= -1;
+        }
     }
 
     public void enableLimitSwitch() {

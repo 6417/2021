@@ -78,7 +78,7 @@ public final class Constants {
         private static void setSwerveDriveConstants() {
             zeroingSpeed = 0.1;
             maxFineTuneOffsetForZeroEncodersCommand = 1.0;
-            maxSpeedOfDrive = 0.293 * Math.PI; // calculated needs to measured
+            maxSpeedOfDrive = 0.6981;
         }
 
         private static void setUpLimiterConfig() {
@@ -124,7 +124,7 @@ public final class Constants {
         private static void addCommonModuleConfigurarions() {
             commonConfigurations.driveMotorTicksPerRotation = 5800 / 3;
             commonConfigurations.rotationMotorTicksPerRotation = 36.0;
-            commonConfigurations.drivePID = new PIDValues(0.00001, 0.0, 0.0, 0.000166);
+            commonConfigurations.drivePID = new PIDValues(0.00001, 0.0, 0.0, 0.0002);
             commonConfigurations.drivePID.slotIdX = Optional.of(0);
             commonConfigurations.drivePID.setAcceleration(0.0000001);
             commonConfigurations.rotationPID = new PIDValues(0.3959, 0.0, 0.2);
@@ -146,6 +146,7 @@ public final class Constants {
         private static FridoCANSparkMax angleMotorInitializer(int id, MotorType motorType) {
             FridoCANSparkMax motor = new FridoCANSparkMax(id, motorType);
             motor.factoryDefault();
+            motor.enableVoltageCompensation(10.4);
             return motor;
         }
 
