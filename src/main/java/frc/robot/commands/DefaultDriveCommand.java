@@ -2,7 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Controller;
-import frc.robot.subsystems.MecanumDriveSubsystem;
+import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
 
 public class DefaultDriveCommand extends CommandBase {
     public DefaultDriveCommand() {
