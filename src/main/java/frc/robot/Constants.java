@@ -61,10 +61,6 @@ public class Constants {
     }
 
     public static class SwerveDrive {
-        public static enum MountingLocations {
-            FrontRight, FrontLeft, BackRight, BackLeft
-        }
-
         public static class ButtounIds extends DriveButtonIds {
             public static final int zeroEncoders = Joystick.START_BUTTON_ID;
             public static final int breakButton = Joystick.RT_BUTTON_ID;
@@ -86,7 +82,7 @@ public class Constants {
             SwerveLimiter.rotationDirectionInversionTolerance = 0.9;
         }
 
-        public static final boolean enabled = false && driveEnabled;
+        public static final boolean enabled = false && Drive.enabled;
         public static final boolean rotateAllModulesInSameDirection = false;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
@@ -225,6 +221,14 @@ public class Constants {
         public static final boolean isLightBarrierInverted = true;
     }
 
+    public static class Drive {
+        public static final boolean enabled = true;
+        
+        public static enum MountingLocations {
+            FrontRight, FrontLeft, BackRight, BackLeft
+        }
+    }
+
     public static class DriveButtonIds {
         public static final int fieledOriented = Joystick.Y_BUTTON_ID;
         public static final int throwerOriented = Joystick.A_BUTTON_ID;
@@ -232,16 +236,16 @@ public class Constants {
         public static final int slowSpeedMode = Joystick.RB_BUTTON_ID;
     }
 
-    public static final boolean driveEnabled = true;
-
     public static class MecanumDrive {
         public static class ButtonIds extends DriveButtonIds {
 
         }
 
+
+        
         public static final double slowModeSpeedFactor = 0.4;
 
-        public static final boolean IS_ENABLED = true && driveEnabled;
+        public static final boolean IS_ENABLED = true && Drive.enabled;
         public static final double SECONDS_TO_ACCELERATE = 0.125;
 
         public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoCANSparkMax(31, MotorType.kBrushed);
