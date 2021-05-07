@@ -96,11 +96,11 @@ public class Constants {
         public static double maxSpeedOfDrive; // in meters per second
         public static final double maxRotationSpeed = 15 * Math.PI / 16; // at full rotation speed the robot will turn
                                                                          // by 180 degrees, in rad per second
-        public static final Map<MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
+        public static final Map<Drive.MountingLocations, SwerveModule.Config> swerveModuleConfigs = new HashMap<>();
 
         public static SwerveLimiter.Config limiterConfig = new SwerveLimiter.Config();
-        public static final SwerveLimiter.RotationDirectionCorrectorGetter<MountingLocations> directionCorectorGetter = (
-                Map<MountingLocations, SwerveLimiter.ModuleRotationVectors> rotationDirections,
+        public static final SwerveLimiter.RotationDirectionCorrectorGetter<Drive.MountingLocations> directionCorectorGetter = (
+                Map<Drive.MountingLocations, SwerveLimiter.ModuleRotationVectors> rotationDirections,
                 boolean isRobotRotating) -> SwerveLimiter.getModuleRotaionDirectionCorrections(rotationDirections,
                         isRobotRotating);
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
@@ -159,7 +159,7 @@ public class Constants {
             frontLeftConfig.rotationMotorInitializer = () -> angleMotorInitializer(33, MotorType.kBrushless);
             frontLeftConfig.driveMotorInverted = false;
             frontLeftConfig.halSensorPosition = 8.952413559 + 9.0;
-            swerveModuleConfigs.put(MountingLocations.FrontLeft, frontLeftConfig);
+            swerveModuleConfigs.put(Drive.MountingLocations.FrontLeft, frontLeftConfig);
 
             SwerveModule.Config frontRightConfig = commonConfigurations.clone();
             frontRightConfig.mountingPoint = new Translation2d(-0.139, 0.2725);
@@ -167,7 +167,7 @@ public class Constants {
             frontRightConfig.rotationMotorInitializer = () -> angleMotorInitializer(31, MotorType.kBrushless);
             frontRightConfig.driveMotorInverted = false;
             frontRightConfig.halSensorPosition = 8.785744667 + 9.0;
-            swerveModuleConfigs.put(MountingLocations.FrontRight, frontRightConfig);
+            swerveModuleConfigs.put(Drive.MountingLocations.FrontRight, frontRightConfig);
 
             SwerveModule.Config backLeftConfig = commonConfigurations.clone();
             backLeftConfig.mountingPoint = new Translation2d(0.139, -0.2725);
@@ -175,7 +175,7 @@ public class Constants {
             backLeftConfig.rotationMotorInitializer = () -> angleMotorInitializer(37, MotorType.kBrushless);
             backLeftConfig.driveMotorInverted = false;
             backLeftConfig.halSensorPosition = 8.904793739 + 9.0;
-            swerveModuleConfigs.put(MountingLocations.BackLeft, backLeftConfig);
+            swerveModuleConfigs.put(Drive.MountingLocations.BackLeft, backLeftConfig);
 
             SwerveModule.Config backRightConfig = commonConfigurations.clone();
             backRightConfig.mountingPoint = new Translation2d(-0.139, -0.2725);
@@ -183,7 +183,7 @@ public class Constants {
             backRightConfig.rotationMotorInitializer = () -> angleMotorInitializer(35, MotorType.kBrushless);
             backRightConfig.driveMotorInverted = false;
             backRightConfig.halSensorPosition = 8.952413559 + 9.0;
-            swerveModuleConfigs.put(MountingLocations.BackRight, backRightConfig);
+            swerveModuleConfigs.put(Drive.MountingLocations.BackRight, backRightConfig);
         }
 
     }
