@@ -22,7 +22,7 @@ import frc.robot.commands.swerve.PickupOriented;
 import frc.robot.commands.swerve.SetSpeedFactor;
 import frc.robot.commands.swerve.ThrowerOriented;
 import frc.robot.commands.swerve.ZeroEncoders;
-import frc.robot.subsystems.MecanumDriveSubsystem;
+import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class Controller {

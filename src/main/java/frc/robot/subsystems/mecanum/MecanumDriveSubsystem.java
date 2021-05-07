@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.mecanum;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -25,6 +25,8 @@ import frc.robot.utilities.fridolinsMotor.FridolinsMotor.FeedbackDevice;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 
 public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
+
+    
     private static MecanumDriveSubsystemBase instance;
 
     private SlewRateLimiter inputLimiterX;
