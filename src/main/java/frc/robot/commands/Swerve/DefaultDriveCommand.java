@@ -85,7 +85,7 @@ public class DefaultDriveCommand extends CommandBase {
                     SwerveDrive.getInstance().drive(ChassisSpeeds.fromFieldRelativeSpeeds(xyVector.x, xyVector.y,
                             rotationSpeed, new Rotation2d(0.0)));
                     break;
-                case PickupOriented:
+                case PickUpOriented:
                     SwerveDrive.getInstance().drive(ChassisSpeeds.fromFieldRelativeSpeeds(xyVector.x, xyVector.y,
                             rotationSpeed, new Rotation2d(Math.PI)));
                     break;

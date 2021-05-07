@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.Drive.DriveMode;
 import frc.robot.subsystems.swerve.SwerveModule;
-import frc.robot.subsystems.swerve.SwerveDrive.DriveMode;
 
 public class SwerveDriveBase extends SubsystemBase {
     public DriveMode getDriveMode() {

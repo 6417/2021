@@ -157,5 +157,4 @@ public class FridoTalon extends Talon implements FridolinsMotor {
         // TODO Auto-generated method stub
 
     }
-
 }

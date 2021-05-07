@@ -3,9 +3,11 @@ package frc.robot;
 import static frc.robot.Robot.getNavx;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -20,6 +22,7 @@ import frc.robot.commands.swerve.PickupOriented;
 import frc.robot.commands.swerve.SetSpeedFactor;
 import frc.robot.commands.swerve.ThrowerOriented;
 import frc.robot.commands.swerve.ZeroEncoders;
+import frc.robot.subsystems.MecanumDriveSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class Controller {
@@ -89,7 +92,12 @@ public class Controller {
     public class DriveJoystick extends SuperJoystick {
         private DriveJoystick() {
             super(Constants.Joystick.DRIVER_ID);
-            controller.ifPresent(SwerveDrive.getInstance()::configureButtonBindings);
+            controller.ifPresent(this::configureButtonBindings);
+        }
+
+        private void configureButtonBindings(Joystick joystick) {
+            SwerveDrive.getInstance().configureButtonBindings(joystick);    
+            MecanumDriveSubsystem.getInstance().configureButtonBindings(joystick);
         }
     }
 

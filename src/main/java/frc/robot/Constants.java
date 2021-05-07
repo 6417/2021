@@ -36,7 +36,7 @@ import frc.robot.utilities.swerveLimiter.SwerveLimiter;
  * wherever the constants are needed, to reduce verbosity.
  */
 
-public final class Constants {
+public class Constants {
     public static final class Joystick {
         public static final int DRIVER_ID = 1;
         public static final int CONTROL_ID = 2;
@@ -60,17 +60,13 @@ public final class Constants {
         public static final boolean IS_ENABLED = true;
     }
 
-    public static final class SwerveDrive {
+    public static class SwerveDrive {
         public static enum MountingLocations {
             FrontRight, FrontLeft, BackRight, BackLeft
         }
 
-        public static final class ButtounIds {
+        public static class ButtounIds extends DriveButtonIds {
             public static final int zeroEncoders = Joystick.START_BUTTON_ID;
-            public static final int fieledOriented = Joystick.Y_BUTTON_ID;
-            public static final int throwerOriented = Joystick.A_BUTTON_ID;
-            public static final int pickupOriented = Joystick.B_BUTTON_ID;
-            public static final int slowSpeedMode = Joystick.RB_BUTTON_ID;
             public static final int breakButton = Joystick.RT_BUTTON_ID;
             public static final int centircSwerveMode = Joystick.LT_BUTTON_ID;
             public static final int fullSpeed = Joystick.LB_BUTTON_ID;
@@ -90,7 +86,7 @@ public final class Constants {
             SwerveLimiter.rotationDirectionInversionTolerance = 0.9;
         }
 
-        public static final boolean enabled = true;
+        public static final boolean enabled = false && driveEnabled;
         public static final boolean rotateAllModulesInSameDirection = false;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
@@ -132,8 +128,8 @@ public final class Constants {
             commonConfigurations.wheelCircumference = 0.09767 * Math.PI;
             commonConfigurations.limiterInitializer = () -> new SwerveLimiter(limiterConfig);
             commonConfigurations.maxVelocity = maxSpeedOfDrive;
-            commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.BuiltIn;
-            commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.BuiltIn;
+            commonConfigurations.driveEncoderType = FridolinsMotor.FeedbackDevice.CANEncoder;
+            commonConfigurations.rotationEncoderType = FridolinsMotor.FeedbackDevice.CANEncoder;
             commonConfigurations.limitModuleStates = false;
             commonConfigurations.limitSwitchPolarity = LimitSwitchPolarity.kNormallyOpen;
             commonConfigurations.driveAccelerationForward = 2000;
@@ -229,22 +225,29 @@ public final class Constants {
         public static final boolean isLightBarrierInverted = true;
     }
 
-    public static class TankDrive {
-        public static final boolean IS_ENABLED = true;
+    public static class DriveButtonIds {
+        public static final int fieledOriented = Joystick.Y_BUTTON_ID;
+        public static final int throwerOriented = Joystick.A_BUTTON_ID;
+        public static final int pickupOriented = Joystick.B_BUTTON_ID;
+        public static final int slowSpeedMode = Joystick.RB_BUTTON_ID;
+    }
+
+    public static final boolean driveEnabled = true;
+
+    public static class MecanumDrive {
+        public static class ButtonIds extends DriveButtonIds {
+
+        }
+
+        public static final double slowModeSpeedFactor = 0.4;
+
+        public static final boolean IS_ENABLED = true && driveEnabled;
         public static final double SECONDS_TO_ACCELERATE = 0.125;
 
-        public static final int MOTOR_DRIVE_FRONT_RIGHT_ID = 0;
-        public static final int MOTOR_DRIVE_FRONT_LEFT_ID = 2;
-        public static final int MOTOR_DRIVE_BACK_RIGHT_ID = 1;
-        public static final int MOTOR_DRIVE_BACK_LEFT_ID = 3;
-        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoTalon(
-                MOTOR_DRIVE_FRONT_RIGHT_ID, 1, 0);
-        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoTalon(
-                MOTOR_DRIVE_BACK_RIGHT_ID, 3, 2);
-        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoTalon(
-                MOTOR_DRIVE_FRONT_LEFT_ID, 5, 4);
-        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoTalon(
-                MOTOR_DRIVE_BACK_LEFT_ID, 7, 6);
+        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoCANSparkMax(31, MotorType.kBrushed);
+        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoCANSparkMax(35, MotorType.kBrushed);
+        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoCANSparkMax(33, MotorType.kBrushed);
+        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoCANSparkMax(37, MotorType.kBrushed);
 
         // public static final Supplier<FridolinsMotor> frontRightMotorInitializer = ()
         // -> new FridoCANSparkMax(12, MotorType.kBrushless);
@@ -265,5 +268,15 @@ public final class Constants {
                 -0.19);
         public static final Supplier<Translation2d> backRightWheelDisplacementMeters = () -> new Translation2d(-0.26,
                 -0.19);
+
+        public static final double defaultSpeedFac1or = 1.0;
+		public static final boolean frontLeftMotorInverted = true;
+		public static final boolean frontRightMotorInverted = false;
+		public static final boolean backLeftMotorInverted = true;
+        public static final boolean backRightMotorInverted = false;
+        public static final boolean frontLeftEncoderInverted = true;
+        public static final boolean frontRightEncoderInverted = false;
+        public static final boolean backLeftEncoderInverted = true;
+        public static final boolean backRightEncoderInverted = false;
     }
 }

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.MecanumDriveSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.utilities.VisionService;
 import frc.robot.Controller;
@@ -40,11 +41,9 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotInit() {
-        // Instantiate our RobotContainer. This will perform all our button bindings,
-        // and put our
-        // autonomous chooser on the dashboard.
         Controller.getInstance();
         SwerveDrive.getInstance();
+        MecanumDriveSubsystem.getInstance();
         getNavx().calibrate();
         while(getNavx().isCalibrating());
         getNavx().reset();
@@ -131,18 +130,5 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
 
-    }
-
-    @Override
-    public void testInit() {
-        // Cancels all running commands at the start of test mode.
-        CommandScheduler.getInstance().cancelAll();
-    }
-
-    /**
-     * This function is called periodically during test mode.
-     */
-    @Override
-    public void testPeriodic() {
     }
 }

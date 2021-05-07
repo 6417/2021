@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
 import frc.robot.Controller;
@@ -27,16 +26,13 @@ import frc.robot.commands.swerve.PickupOriented;
 import frc.robot.commands.swerve.SetSpeedFactor;
 import frc.robot.commands.swerve.ThrowerOriented;
 import frc.robot.commands.swerve.ZeroEncoders;
+import frc.robot.subsystems.Drive.DriveMode;
 import frc.robot.subsystems.base.SwerveDriveBase;
 import frc.robot.utilities.Algorithms;
 import frc.robot.utilities.SwerveKinematics;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 public class SwerveDrive extends SwerveDriveBase {
-    public static enum DriveMode {
-        ThrowerOriented, PickupOriented, FieldOriented;
-    }
-
     private DriveMode driveMode = DriveMode.ThrowerOriented;
     private static SwerveDriveBase instance = null;
     private SwerveKinematics<Constants.SwerveDrive.MountingLocations> kinematics;
@@ -71,6 +67,8 @@ public class SwerveDrive extends SwerveDriveBase {
             if (Constants.SwerveDrive.enabled) {
                 instance = new SwerveDrive();
                 instance.setDefaultCommand(new DefaultDriveCommand());
+                // if (!Constants.MecanumDrive.IS_ENABLED)
+                //     throw new Error("Tank drive can't be enabled while swerve drive is anabled");
             } else
                 instance = new SwerveDriveBase();
         return instance;
@@ -215,10 +213,14 @@ public class SwerveDrive extends SwerveDriveBase {
     @Override
     public void configureButtonBindings(Joystick joystick) {
         JoystickButton zeroEncodersButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.zeroEncoders);
-        JoystickButton fieldOrientedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.fieledOriented);
-        JoystickButton throwerOrientedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.throwerOriented);
-        JoystickButton pickupOrientedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.pickupOriented);
-        JoystickButton slowSpeedFactorButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.slowSpeedMode);
+        JoystickButton fieldOrientedButton = new JoystickButton(joystick,
+                Constants.SwerveDrive.ButtounIds.fieledOriented);
+        JoystickButton throwerOrientedButton = new JoystickButton(joystick,
+                Constants.SwerveDrive.ButtounIds.throwerOriented);
+        JoystickButton pickupOrientedButton = new JoystickButton(joystick,
+                Constants.SwerveDrive.ButtounIds.pickupOriented);
+        JoystickButton slowSpeedFactorButton = new JoystickButton(joystick,
+                Constants.SwerveDrive.ButtounIds.slowSpeedMode);
         JoystickButton zeroNavxButton = new JoystickButton(joystick, Constants.zeroNavxButtonID);
         JoystickButton breakButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.breakButton);
         JoystickButton fullSpeedButton = new JoystickButton(joystick, Constants.SwerveDrive.ButtounIds.fullSpeed);
@@ -227,9 +229,10 @@ public class SwerveDrive extends SwerveDriveBase {
         fieldOrientedButton.whenPressed(new FieldOriented());
         throwerOrientedButton.whenPressed(new ThrowerOriented());
         pickupOrientedButton.whenPressed(new PickupOriented());
-        slowSpeedFactorButton.whenPressed(Controller.runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
-        zeroNavxButton.whenPressed(() -> Robot.getNavx().reset());
+        slowSpeedFactorButton.whenPressed(Controller
+                .runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
         breakButton.whileHeld(new BreakCommand());
-        fullSpeedButton.whenPressed(Controller.runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
+        fullSpeedButton.whenPressed(Controller
+                .runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
     }
 }
