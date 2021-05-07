@@ -28,9 +28,9 @@ public class SwerveDriveBase extends SubsystemBase {
 
     }
 
-    public Map<Constants.SwerveDrive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
-        Map<Constants.SwerveDrive.MountingLocations, Boolean> defaultReturn = new HashMap<>();
-        for (var location : Constants.SwerveDrive.MountingLocations.values())
+    public Map<Constants.Drive.MountingLocations, Boolean> areHalSensoredOfMoudlesTriggered() {
+        Map<Constants.Drive.MountingLocations, Boolean> defaultReturn = new HashMap<>();
+        for (var location : Constants.Drive.MountingLocations.values())
             defaultReturn.put(location, false);
         return defaultReturn;
     }
@@ -39,11 +39,11 @@ public class SwerveDriveBase extends SubsystemBase {
 
     }
 
-    public void setCurrentModuleRotatoinToHome(Constants.SwerveDrive.MountingLocations moduleLocation) {
+    public void setCurrentModuleRotatoinToHome(Constants.Drive.MountingLocations moduleLocation) {
 
     }
 
-    public void setModuleRotationEncoderTicks(Constants.SwerveDrive.MountingLocations mountingLocation, double ticks) {
+    public void setModuleRotationEncoderTicks(Constants.Drive.MountingLocations mountingLocation, double ticks) {
         
     }
 
@@ -56,14 +56,14 @@ public class SwerveDriveBase extends SubsystemBase {
     }
 
     public void forEachModuleEntry(
-            Consumer<Map.Entry<Constants.SwerveDrive.MountingLocations, SwerveModule>> consumer) {
+            Consumer<Map.Entry<Constants.Drive.MountingLocations, SwerveModule>> consumer) {
     }
 
-    public boolean isModuleZeroed(Constants.SwerveDrive.MountingLocations mountingLocation) {
+    public boolean isModuleZeroed(Constants.Drive.MountingLocations mountingLocation) {
         return false;
     }
 
-    public void withModule(Constants.SwerveDrive.MountingLocations mountingLocation, Consumer<SwerveModule> consumer) {
+    public void withModule(Constants.Drive.MountingLocations mountingLocation, Consumer<SwerveModule> consumer) {
 
     }
 
