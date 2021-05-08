@@ -16,6 +16,7 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import frc.robot.subsystems.mecanum.MecanumModule;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
@@ -240,9 +241,6 @@ public class Constants {
         public static class ButtonIds extends DriveButtonIds {
 
         }
-
-
-        
         public static final double slowModeSpeedFactor = 0.4;
 
         public static final boolean IS_ENABLED = true && Drive.enabled;
@@ -253,14 +251,43 @@ public class Constants {
         public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoCANSparkMax(33, MotorType.kBrushed);
         public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoCANSparkMax(37, MotorType.kBrushed);
 
-        // public static final Supplier<FridolinsMotor> frontRightMotorInitializer = ()
-        // -> new FridoCANSparkMax(12, MotorType.kBrushless);
-        // public static final Supplier<FridolinsMotor> backRightMotorInitializer = ()
-        // -> new FridoCANSparkMax(13, MotorType.kBrushless);
-        // public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = ()
-        // -> new FridoCANSparkMax(10, MotorType.kBrushless);
-        // public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () ->
-        // new FridoCANSparkMax(11, MotorType.kBrushless);
+        public static final Map<Drive.MountingLocations, MecanumModule.Config> moduleConfigs = new HashMap<>();
+
+        static{
+            MecanumModule.Config frontRightModuleConfig = new MecanumModule.Config();
+            frontRightModuleConfig.encoderInverted = false;
+            frontRightModuleConfig.motorInverted = false;
+            frontRightModuleConfig.motorInitializer = frontRightMotorInitializer;
+            frontRightModuleConfig.mountingPoint = new Translation2d(0, 0);
+            moduleConfigs.put(Drive.MountingLocations.FrontRight, frontRightModuleConfig);
+        }
+
+        static{
+            MecanumModule.Config frontLeftModuleConfig = new MecanumModule.Config();
+            frontLeftModuleConfig.encoderInverted = true;
+            frontLeftModuleConfig.motorInverted = true;
+            frontLeftModuleConfig.motorInitializer = frontLeftMotorInitializer;
+            frontLeftModuleConfig.mountingPoint = new Translation2d(0, 0);
+            moduleConfigs.put(Drive.MountingLocations.FrontLeft, frontLeftModuleConfig);
+        }
+
+        static{
+            MecanumModule.Config backRightModuleConfig = new MecanumModule.Config();
+            backRightModuleConfig.encoderInverted = false;
+            backRightModuleConfig.motorInverted = false;
+            backRightModuleConfig.motorInitializer = backRightMotorInitializer;
+            backRightModuleConfig.mountingPoint = new Translation2d(0, 0);
+            moduleConfigs.put(Drive.MountingLocations.BackRight, backRightModuleConfig);
+        }
+
+        static{
+            MecanumModule.Config backLeftModuleConfig = new MecanumModule.Config();
+            backLeftModuleConfig.encoderInverted = true;
+            backLeftModuleConfig.motorInverted = true;
+            backLeftModuleConfig.motorInitializer = backLeftMotorInitializer;
+            backLeftModuleConfig.mountingPoint = new Translation2d(0, 0);
+            moduleConfigs.put(Drive.MountingLocations.BackLeft, backLeftModuleConfig);
+        }
 
         public static final int ticksPerRotation = 512;
         public static final double wheelDiameter = 0.10;
@@ -274,13 +301,5 @@ public class Constants {
                 -0.19);
 
         public static final double defaultSpeedFac1or = 1.0;
-		public static final boolean frontLeftMotorInverted = true;
-		public static final boolean frontRightMotorInverted = false;
-		public static final boolean backLeftMotorInverted = true;
-        public static final boolean backRightMotorInverted = false;
-        public static final boolean frontLeftEncoderInverted = true;
-        public static final boolean frontRightEncoderInverted = false;
-        public static final boolean backLeftEncoderInverted = true;
-        public static final boolean backRightEncoderInverted = false;
     }
 }
