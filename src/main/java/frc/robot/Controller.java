@@ -1,27 +1,15 @@
 package frc.robot;
 
-import static frc.robot.Robot.getNavx;
-
 import java.util.Optional;
-import java.util.function.Consumer;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
-import frc.robot.commands.swerve.BreakCommand;
-import frc.robot.commands.swerve.FieldOriented;
-import frc.robot.commands.swerve.PickupOriented;
-import frc.robot.commands.swerve.SetSpeedFactor;
-import frc.robot.commands.swerve.ThrowerOriented;
-import frc.robot.commands.swerve.ZeroEncoders;
 import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 

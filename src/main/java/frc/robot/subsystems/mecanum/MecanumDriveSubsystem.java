@@ -1,5 +1,11 @@
 package frc.robot.subsystems.mecanum;
 
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.Joystick;
@@ -20,35 +26,23 @@ import frc.robot.commands.mecanum.PickupOriented;
 import frc.robot.commands.mecanum.ThrowerOriented;
 import frc.robot.subsystems.Drive.DriveMode;
 import frc.robot.subsystems.base.MecanumDriveSubsystemBase;
-import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
-import frc.robot.utilities.fridolinsMotor.FridolinsMotor.FeedbackDevice;
-import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
+import frc.robot.utilities.Algorithms;
 
 public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
 
-    
     private static MecanumDriveSubsystemBase instance;
 
     private SlewRateLimiter inputLimiterX;
     private SlewRateLimiter inputLimiterY;
     private SlewRateLimiter inputLimiterRotation;
-
     private DriveMode driveMode;
-
-    private FridolinsMotor frontrightMotor;
-    private FridolinsMotor backrightMotor;
-    private FridolinsMotor frontleftMotor;
-    private FridolinsMotor backleftMotor;
-
     private MecanumDrive drive;
     private MecanumDriveWheelSpeeds wheelSpeeds;
     private MecanumDriveKinematics mecanumDriveKinematics;
-
     private AHRS navx;
-
     private MecanumDriveOdometry odometry;
-
     private double speedFactor = Constants.MecanumDrive.defaultSpeedFac1or;
+    private Map<Constants.Drive.MountingLocations, MecanumModule> modules;
 
     private MecanumDriveSubsystem() {
         inputLimiterX = new SlewRateLimiter(1.0 / Constants.MecanumDrive.SECONDS_TO_ACCELERATE);
@@ -57,20 +51,42 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
 
         driveMode = DriveMode.ThrowerOriented;
 
-        configureMotors();
+        modules = Constants.MecanumDrive.moduleConfigs.entrySet().stream()
+                .map(Algorithms.mapEntryFunction((config) -> new MecanumModule(config)))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
-        mecanumDriveKinematics = new MecanumDriveKinematics(Constants.MecanumDrive.frontLeftWheelDisplacementMeters.get(),
-                Constants.MecanumDrive.frontRightWheelDisplacementMeters.get(),
-                Constants.MecanumDrive.backLeftWheelDisplacementMeters.get(),
-                Constants.MecanumDrive.backRightWheelDisplacementMeters.get());
+        mecanumDriveKinematics = new MecanumDriveKinematics(
+                Constants.MecanumDrive.moduleConfigs.get(Constants.Drive.MountingLocations.FrontLeft).mountingPoint,
+                Constants.MecanumDrive.moduleConfigs.get(Constants.Drive.MountingLocations.BackLeft).mountingPoint,
+                Constants.MecanumDrive.moduleConfigs.get(Constants.Drive.MountingLocations.FrontRight).mountingPoint,
+                Constants.MecanumDrive.moduleConfigs.get(Constants.Drive.MountingLocations.BackRight).mountingPoint);
         wheelSpeeds = new MecanumDriveWheelSpeeds();
 
-        drive = new MecanumDrive(frontleftMotor, backleftMotor, frontrightMotor, backrightMotor);
-        drive.setRightSideInverted(false);
+        drive = new MecanumDrive(modules.get(Constants.Drive.MountingLocations.FrontLeft),
+                modules.get(Constants.Drive.MountingLocations.BackLeft),
+                modules.get(Constants.Drive.MountingLocations.FrontRight),
+                modules.get(Constants.Drive.MountingLocations.BackRight));
 
         navx = Robot.getNavx();
         odometry = new MecanumDriveOdometry(mecanumDriveKinematics, navx.getRotation2d(),
                 new Pose2d(0, 0, new Rotation2d(0)));
+    }
+
+    public void updateOutputFactorsOfModules() {
+        MecanumModule moduleWithMostOutput = modules.values().stream()
+                .max(Comparator.comparing((module) -> module.get())).get();
+        if (moduleWithMostOutput.get() >= 1.0
+                && moduleWithMostOutput.getAcceleration() > Constants.MecanumDrive.outputFactorAccerleratoinFreshHold) {
+            double outputFactor = moduleWithMostOutput.getEncoderVelocity() / moduleWithMostOutput.getTargetVelocity();
+            modules.values().stream().filter((module) -> module != moduleWithMostOutput)
+                    .forEach(module -> module.updateOutputFactor(outputFactor));
+        } else
+            forEachModule((module) -> module.updateOutputFactor(1.0));
+    }
+
+    @Override
+    public void periodic() {
+        forEachModule((module) -> module.getAcceleration());
     }
 
     public static MecanumDriveSubsystemBase getInstance() {
@@ -79,45 +95,20 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
                 instance = new MecanumDriveSubsystem();
                 instance.setDefaultCommand(new DefaultDriveCommand());
                 // if (!Constants.SwerveDrive.enabled)
-                //     throw new Error("Swerve drive can't be enabled while swerve drive is enabled");
+                // throw new Error("Swerve drive can't be enabled while swerve drive is
+                // enabled");
             } else
                 instance = new MecanumDriveSubsystemBase();
         }
         return instance;
     }
 
-    private void configureMotors() {
-        frontrightMotor = Constants.MecanumDrive.frontRightMotorInitializer.get();
-        backrightMotor = Constants.MecanumDrive.backRightMotorInitializer.get();
-        frontleftMotor = Constants.MecanumDrive.frontLeftMotorInitializer.get();
-        backleftMotor = Constants.MecanumDrive.backLeftMotorInitializer.get();
-
-        frontleftMotor.setInverted(Constants.MecanumDrive.frontLeftMotorInverted);
-        frontrightMotor.setInverted(Constants.MecanumDrive.frontRightMotorInverted);
-        backleftMotor.setInverted(Constants.MecanumDrive.backLeftMotorInverted);
-        backrightMotor.setInverted(Constants.MecanumDrive.backRightMotorInverted);
-
-        frontrightMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
-        backrightMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
-        frontleftMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
-        backleftMotor.configEncoder(FeedbackDevice.QuadEncoder, 1);
-
-        frontleftMotor.setEncoderDirection(Constants.MecanumDrive.frontLeftEncoderInverted);
-        frontrightMotor.setEncoderDirection(Constants.MecanumDrive.frontLeftEncoderInverted);
-        backleftMotor.setEncoderDirection(Constants.MecanumDrive.backLeftEncoderInverted);
-        backrightMotor.setEncoderDirection(Constants.MecanumDrive.frontLeftEncoderInverted);
-
-        frontleftMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
-        frontrightMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
-        backleftMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
-        backrightMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
+    public void forEachModule(Consumer<MecanumModule> function) {
+        modules.values().stream().forEach(function);
     }
 
     private void resetEncoders() {
-        frontleftMotor.setEncoderPosition(0);
-        frontrightMotor.setEncoderPosition(0);
-        backleftMotor.setEncoderPosition(0);
-        backrightMotor.setEncoderPosition(0);
+        forEachModule((module) -> module.resetEncoder());
     }
 
     private double convertEncoderSpeedToMetersPerSecond(double encoderSpeed) {
@@ -127,13 +118,13 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
     @Override
     public void updateOdometry() {
         this.wheelSpeeds.frontLeftMetersPerSecond = convertEncoderSpeedToMetersPerSecond(
-                frontleftMotor.getEncoderVelocity());
+                modules.get(Constants.Drive.MountingLocations.FrontLeft).getEncoderVelocity());
         this.wheelSpeeds.frontRightMetersPerSecond = convertEncoderSpeedToMetersPerSecond(
-                frontrightMotor.getEncoderVelocity());
+                modules.get(Constants.Drive.MountingLocations.FrontRight).getEncoderVelocity());
         this.wheelSpeeds.rearLeftMetersPerSecond = convertEncoderSpeedToMetersPerSecond(
-                backleftMotor.getEncoderVelocity());
+                modules.get(Constants.Drive.MountingLocations.BackLeft).getEncoderVelocity());
         this.wheelSpeeds.rearRightMetersPerSecond = convertEncoderSpeedToMetersPerSecond(
-                backrightMotor.getEncoderVelocity());
+                modules.get(Constants.Drive.MountingLocations.BackRight).getEncoderVelocity());
         odometry.update(navx.getRotation2d(), this.wheelSpeeds);
     }
 
@@ -179,13 +170,17 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
 
     @Override
     public void configureButtonBindings(Joystick joystick) {
-        JoystickButton slowSpeedModeButton = new JoystickButton(joystick, Constants.MecanumDrive.ButtonIds.slowSpeedMode);
-        JoystickButton fieldOrientedButton = new JoystickButton(joystick, Constants.MecanumDrive.ButtonIds.fieledOriented);
-        JoystickButton pickUpOrientedButton = new JoystickButton(joystick, Constants.MecanumDrive.ButtonIds.fieledOriented);
-        JoystickButton throwerOrientedButton = new JoystickButton(joystick, Constants.MecanumDrive.ButtonIds.fieledOriented);
+        JoystickButton slowSpeedModeButton = new JoystickButton(joystick,
+                Constants.MecanumDrive.ButtonIds.slowSpeedMode);
+        JoystickButton fieldOrientedButton = new JoystickButton(joystick,
+                Constants.MecanumDrive.ButtonIds.fieledOriented);
+        JoystickButton pickUpOrientedButton = new JoystickButton(joystick,
+                Constants.MecanumDrive.ButtonIds.fieledOriented);
+        JoystickButton throwerOrientedButton = new JoystickButton(joystick,
+                Constants.MecanumDrive.ButtonIds.fieledOriented);
 
         slowSpeedModeButton.whenPressed(() -> {
-            if (speedFactor == Constants.MecanumDrive.slowModeSpeedFactor) 
+            if (speedFactor == Constants.MecanumDrive.slowModeSpeedFactor)
                 speedFactor = Constants.MecanumDrive.defaultSpeedFac1or;
             else
                 speedFactor = Constants.MecanumDrive.slowModeSpeedFactor;

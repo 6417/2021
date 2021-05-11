@@ -21,7 +21,6 @@ import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
-import frc.robot.utilities.fridolinsMotor.FridoTalon;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
@@ -83,6 +82,7 @@ public class Constants {
             SwerveLimiter.rotationDirectionInversionTolerance = 0.9;
         }
 
+        @SuppressWarnings("all")
         public static final boolean enabled = false && Drive.enabled;
         public static final boolean rotateAllModulesInSameDirection = false;
         public static final boolean joystickYinverted = true;
@@ -224,7 +224,7 @@ public class Constants {
 
     public static class Drive {
         public static final boolean enabled = true;
-        
+
         public static enum MountingLocations {
             FrontRight, FrontLeft, BackRight, BackLeft
         }
@@ -241,65 +241,69 @@ public class Constants {
         public static class ButtonIds extends DriveButtonIds {
 
         }
+
         public static final double slowModeSpeedFactor = 0.4;
 
+        @SuppressWarnings("all")
         public static final boolean IS_ENABLED = true && Drive.enabled;
         public static final double SECONDS_TO_ACCELERATE = 0.125;
 
-        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoCANSparkMax(31, MotorType.kBrushed);
-        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoCANSparkMax(35, MotorType.kBrushed);
-        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoCANSparkMax(33, MotorType.kBrushed);
-        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoCANSparkMax(37, MotorType.kBrushed);
+        public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoCANSparkMax(31,
+                MotorType.kBrushed);
+        public static final Supplier<FridolinsMotor> backRightMotorInitializer = () -> new FridoCANSparkMax(35,
+                MotorType.kBrushed);
+        public static final Supplier<FridolinsMotor> frontLeftMotorInitializer = () -> new FridoCANSparkMax(33,
+                MotorType.kBrushed);
+        public static final Supplier<FridolinsMotor> backLeftMotorInitializer = () -> new FridoCANSparkMax(37,
+                MotorType.kBrushed);
 
         public static final Map<Drive.MountingLocations, MecanumModule.Config> moduleConfigs = new HashMap<>();
 
-        static{
+        public static double outputFactorAccerleratoinFreshHold = 0.1;
+        public static MecanumModule.Config commonModuleConfigurations = new MecanumModule.Config();
+
+        static {
+            commonModuleConfigurations.pidValues = new PIDValues(0, 0, 0, 0);
+        }
+
+        static {
             MecanumModule.Config frontRightModuleConfig = new MecanumModule.Config();
             frontRightModuleConfig.encoderInverted = false;
             frontRightModuleConfig.motorInverted = false;
             frontRightModuleConfig.motorInitializer = frontRightMotorInitializer;
-            frontRightModuleConfig.mountingPoint = new Translation2d(0, 0);
+            frontRightModuleConfig.mountingPoint = new Translation2d(-0.2695,0.18);
             moduleConfigs.put(Drive.MountingLocations.FrontRight, frontRightModuleConfig);
         }
 
-        static{
+        static {
             MecanumModule.Config frontLeftModuleConfig = new MecanumModule.Config();
             frontLeftModuleConfig.encoderInverted = true;
             frontLeftModuleConfig.motorInverted = true;
             frontLeftModuleConfig.motorInitializer = frontLeftMotorInitializer;
-            frontLeftModuleConfig.mountingPoint = new Translation2d(0, 0);
+            frontLeftModuleConfig.mountingPoint = new Translation2d(0.2695, 0.18);
             moduleConfigs.put(Drive.MountingLocations.FrontLeft, frontLeftModuleConfig);
         }
 
-        static{
+        static {
             MecanumModule.Config backRightModuleConfig = new MecanumModule.Config();
             backRightModuleConfig.encoderInverted = false;
             backRightModuleConfig.motorInverted = false;
             backRightModuleConfig.motorInitializer = backRightMotorInitializer;
-            backRightModuleConfig.mountingPoint = new Translation2d(0, 0);
+            backRightModuleConfig.mountingPoint = new Translation2d(-0.2695, -0.18);
             moduleConfigs.put(Drive.MountingLocations.BackRight, backRightModuleConfig);
         }
 
-        static{
+        static {
             MecanumModule.Config backLeftModuleConfig = new MecanumModule.Config();
             backLeftModuleConfig.encoderInverted = true;
             backLeftModuleConfig.motorInverted = true;
             backLeftModuleConfig.motorInitializer = backLeftMotorInitializer;
-            backLeftModuleConfig.mountingPoint = new Translation2d(0, 0);
+            backLeftModuleConfig.mountingPoint = new Translation2d(0.2695, -0.18);
             moduleConfigs.put(Drive.MountingLocations.BackLeft, backLeftModuleConfig);
         }
 
         public static final int ticksPerRotation = 512;
         public static final double wheelDiameter = 0.10;
-        public static final Supplier<Translation2d> frontLeftWheelDisplacementMeters = () -> new Translation2d(0.26,
-                0.19);
-        public static final Supplier<Translation2d> frontRightWheelDisplacementMeters = () -> new Translation2d(-0.26,
-                0.19);
-        public static final Supplier<Translation2d> backLeftWheelDisplacementMeters = () -> new Translation2d(0.26,
-                -0.19);
-        public static final Supplier<Translation2d> backRightWheelDisplacementMeters = () -> new Translation2d(-0.26,
-                -0.19);
-
         public static final double defaultSpeedFac1or = 1.0;
     }
 }
