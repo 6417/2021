@@ -3,9 +3,11 @@ package frc.robot;
 import static frc.robot.Robot.getNavx;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -20,6 +22,7 @@ import frc.robot.commands.swerve.PickupOriented;
 import frc.robot.commands.swerve.SetSpeedFactor;
 import frc.robot.commands.swerve.ThrowerOriented;
 import frc.robot.commands.swerve.ZeroEncoders;
+import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class Controller {
     private static Controller instance;
@@ -39,7 +42,7 @@ public class Controller {
         return instance;
     }
 
-    private Runnable runCommandAndCancelWhenPressedAgain(CommandBase command) {
+    public static Runnable runCommandAndCancelWhenPressedAgain(CommandBase command) {
         return () -> {
             if (CommandScheduler.getInstance().isScheduled(command))
                 CommandScheduler.getInstance().cancel(command);
@@ -86,58 +89,9 @@ public class Controller {
 
 
     public class DriveJoystick extends SuperJoystick {
-        // Define Buttons to make Bindings
-        JoystickButton zeroEncodersButton;
-        JoystickButton fieldOrientedButton;
-        JoystickButton throwerOrientedButton;
-        JoystickButton pickupOrientedButton;
-        JoystickButton slowSpeedFactorButton;
-        JoystickButton zeroNavxButton;
-        JoystickButton breakButton;
-        JoystickButton fullSpeedButton;
-
         private DriveJoystick() {
             super(Constants.Joystick.DRIVER_ID);
-            controller.ifPresent((ignored) -> this.configureButtonBindings());
-        }
-
-        private void configureButtonBindings() {
-            // Initialize the buttons
-            zeroEncodersButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.zeroEncoders);
-            fieldOrientedButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.fieledOriented);
-            throwerOrientedButton = new JoystickButton(controller.get(),
-                    Constants.SwerveDrive.ButtounIds.throwerOriented);
-            pickupOrientedButton = new JoystickButton(controller.get(),
-                    Constants.SwerveDrive.ButtounIds.pickupOriented);
-            slowSpeedFactorButton = new JoystickButton(controller.get(),
-                    Constants.SwerveDrive.ButtounIds.slowSpeedMode);
-            zeroNavxButton = new JoystickButton(controller.get(), Constants.zeroNavxButtonID);
-            breakButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.breakButton);
-            fullSpeedButton = new JoystickButton(controller.get(), Constants.SwerveDrive.ButtounIds.fullSpeed);
-
-            // Configure the binding
-            zeroEncodersButton.whenPressed(runCommandAndCancelWhenPressedAgain(new ZeroEncoders()));
-            fieldOrientedButton.whenPressed(new FieldOriented());
-            throwerOrientedButton.whenPressed(new ThrowerOriented());
-            pickupOrientedButton.whenPressed(new PickupOriented());
-            CommandBase slowSpeedCommand = new SetSpeedFactor(Constants.SwerveDrive.slowSpeedFactor);
-            slowSpeedFactorButton.whenPressed(() -> {
-                if (!CommandScheduler.getInstance().isScheduled(slowSpeedCommand))
-                    CommandScheduler.getInstance().schedule(slowSpeedCommand);
-                else
-                    CommandScheduler.getInstance()
-                            .schedule(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
-            });
-            zeroNavxButton.whenPressed(getNavx()::reset);
-            breakButton.whileHeld(new BreakCommand());
-            CommandBase fullSpeedCommand = new SetSpeedFactor(1.0);
-            fullSpeedButton.whenPressed(() -> {
-                if (!CommandScheduler.getInstance().isScheduled(fullSpeedCommand))
-                    CommandScheduler.getInstance().schedule(fullSpeedCommand);
-                else
-                    CommandScheduler.getInstance()
-                            .schedule(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor));
-            });
+            controller.ifPresent(SwerveDrive.getInstance()::configureButtonBindings);
         }
     }
 
