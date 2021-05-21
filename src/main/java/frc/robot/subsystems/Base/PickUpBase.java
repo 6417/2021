@@ -45,4 +45,10 @@ public class PickUpBase extends SubsystemBase{
 
     public void putColorInDashBoard(){
     }
+
+	public void makeNewColorMeasurement() {
+	}
+
+	public void resetBallColor() {
+	}
 }

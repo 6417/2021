@@ -25,6 +25,7 @@ public class BallPickUpCommand extends CommandBase {
     @Override
     public void end(boolean interupted){
         PickUpSubsystem.getInstance().stopMotors();
+        PickUpSubsystem.getInstance().makeNewColorMeasurement();
     }
 
     @Override

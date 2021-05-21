@@ -21,6 +21,7 @@ public class ReleaseBallCommand extends CommandBase{
     @Override
     public void end(boolean interupted){
         PickUpSubsystem.getInstance().stopMotors();
+        PickUpSubsystem.getInstance().resetBallColor();
     }
 
     @Override

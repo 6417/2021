@@ -20,7 +20,7 @@ public class Vector3d {
     }
 
     public double magnitude() {
-        return Math.sqrt(x * x + y * y + z * z);
+        return Math.sqrt((x * x) + (y * y) + (z * z));
     }
 
     public Vector3d normalize() {
@@ -36,5 +36,10 @@ public class Vector3d {
 
     public static Vector3d fromBallColorToVector(Color color){
         return new Vector3d(color.red, color.green, color.blue);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[x: %.18f, y: %.18f, z: %.18f]", x, y, z);
     }
 }

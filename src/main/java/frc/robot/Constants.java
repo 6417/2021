@@ -284,10 +284,7 @@ public final class Constants {
 
         public static final boolean isLightBarrierInverted = true;
 
-        public static final GroveColorSensor.Color yellowBallColor = new GroveColorSensor.Color(127, 91, 54);
+        public static final GroveColorSensor.Color yellowBallColor = new GroveColorSensor.Color(119, 85, 51);
         public static final GroveColorSensor.Color blueBallColor = new GroveColorSensor.Color(78, 98, 78);
-        public static final GroveColorSensor.Color clearColor = new GroveColorSensor.Color(106, 85, 65);
-
-        public static final double comparativeValueClear = 0.9; // TODO
     }
 }
