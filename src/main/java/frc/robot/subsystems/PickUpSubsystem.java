@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
 import java.util.Optional;
+
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.hal.util.UncleanStatusException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C.Port;
@@ -18,6 +21,7 @@ import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 
 public class PickUpSubsystem extends PickUpBase {
 
@@ -47,6 +51,7 @@ public class PickUpSubsystem extends PickUpBase {
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
         tunnelMotor = Constants.BallPickUp.tunnelMotor.get();
+        pickUpMotor.setIdleMode(IdleModeType.kCoast);
         pickUpMotor.factoryDefault();
         tunnelMotor.factoryDefault();
 
@@ -148,12 +153,15 @@ public class PickUpSubsystem extends PickUpBase {
     @Override
     public BallColor getBallColor() {
         Vector3d currentBallColorVector = new Vector3d(currentColor.red, currentColor.green, currentColor.blue);
+
+        System.out.println(currentBallColorVector.normalize().dot(clearColorVector.normalize()));
+
         if(currentBallColorVector.normalize().dot(clearColorVector.normalize()) < Constants.BallPickUp.comparativeValueClear) {
             double currentVectorBlueVectorProduct = currentBallColorVector.normalize().dot(blueBallColorVector.normalize());
             double currentVectorYellowVectorProduct = currentBallColorVector.normalize().dot(yellowBallColorVector.normalize());
-            if(currentVectorBlueVectorProduct < currentVectorYellowVectorProduct){
+
+            if(currentVectorBlueVectorProduct < currentVectorYellowVectorProduct)
                 return BallColor.yellow;
-            }
             else
                 return BallColor.blue;
         }
@@ -169,6 +177,6 @@ public class PickUpSubsystem extends PickUpBase {
     public void initSendable(SendableBuilder builder) {
         lightBarrier.ifPresent((lightBarrier) -> builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null));
         builder.addStringProperty("BallColor", getBallColor()::toString, null);
-        builder.addBooleanProperty("BallInTunnel", () -> ballInTunnel, null);
+        builder.addBooleanProperty("BallinTunnel", () -> ballInTunnel, null);
     }
 }
