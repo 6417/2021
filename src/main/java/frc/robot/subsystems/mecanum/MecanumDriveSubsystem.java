@@ -11,20 +11,27 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.drive.RobotDriveBase;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
+import frc.robot.Controller;
 import frc.robot.Robot;
-import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.mecanum.DefaultDriveCommand;
 import frc.robot.commands.mecanum.FieldOriented;
 import frc.robot.commands.mecanum.PickupOriented;
+import frc.robot.commands.mecanum.SetSpeedFactor;
+import frc.robot.commands.mecanum.SwitchDriveMode;
 import frc.robot.commands.mecanum.ThrowerOriented;
-import frc.robot.subsystems.Drive.DriveMode;
+import frc.robot.subsystems.Drive.DriveOrientation;
 import frc.robot.subsystems.base.MecanumDriveSubsystemBase;
 import frc.robot.utilities.Algorithms;
 
@@ -35,7 +42,7 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
     private SlewRateLimiter inputLimiterX;
     private SlewRateLimiter inputLimiterY;
     private SlewRateLimiter inputLimiterRotation;
-    private DriveMode driveMode;
+    private DriveOrientation driveMode;
     private MecanumDrive drive;
     private MecanumDriveWheelSpeeds wheelSpeeds;
     private MecanumDriveKinematics mecanumDriveKinematics;
@@ -49,11 +56,14 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
         inputLimiterY = new SlewRateLimiter(1.0 / Constants.MecanumDrive.SECONDS_TO_ACCELERATE);
         inputLimiterRotation = new SlewRateLimiter(1.0 / Constants.MecanumDrive.SECONDS_TO_ACCELERATE);
 
-        driveMode = DriveMode.ThrowerOriented;
+        driveMode = DriveOrientation.ThrowerOriented;
 
         modules = Constants.MecanumDrive.moduleConfigs.entrySet().stream()
                 .map(Algorithms.mapEntryFunction((config) -> new MecanumModule(config)))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+        modules.entrySet().stream().forEach(
+                (moduleEntry) -> Shuffleboard.getTab("Mecanum modules").add("Mecanum module " + moduleEntry.getKey().toString(), moduleEntry.getValue()));
 
         mecanumDriveKinematics = new MecanumDriveKinematics(
                 Constants.MecanumDrive.moduleConfigs.get(Constants.Drive.MountingLocations.FrontLeft).mountingPoint,
@@ -66,6 +76,8 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
                 modules.get(Constants.Drive.MountingLocations.BackLeft),
                 modules.get(Constants.Drive.MountingLocations.FrontRight),
                 modules.get(Constants.Drive.MountingLocations.BackRight));
+
+        drive.setSafetyEnabled(false);
 
         navx = Robot.getNavx();
         odometry = new MecanumDriveOdometry(mecanumDriveKinematics, navx.getRotation2d(),
@@ -175,23 +187,26 @@ public class MecanumDriveSubsystem extends MecanumDriveSubsystemBase {
         JoystickButton fieldOrientedButton = new JoystickButton(joystick,
                 Constants.MecanumDrive.ButtonIds.fieledOriented);
         JoystickButton pickUpOrientedButton = new JoystickButton(joystick,
-                Constants.MecanumDrive.ButtonIds.fieledOriented);
+                Constants.MecanumDrive.ButtonIds.pickupOriented);
         JoystickButton throwerOrientedButton = new JoystickButton(joystick,
-                Constants.MecanumDrive.ButtonIds.fieledOriented);
+                Constants.MecanumDrive.ButtonIds.throwerOriented);
+        JoystickButton switchDriveModeButton = new JoystickButton(joystick, Constants.MecanumDrive.ButtonIds.switchDriveMode);
 
-        slowSpeedModeButton.whenPressed(() -> {
-            if (speedFactor == Constants.MecanumDrive.slowModeSpeedFactor)
-                speedFactor = Constants.MecanumDrive.defaultSpeedFac1or;
-            else
-                speedFactor = Constants.MecanumDrive.slowModeSpeedFactor;
-        });
+        slowSpeedModeButton.whenPressed(Controller.runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.MecanumDrive.slowModeSpeedFactor)));
+
         fieldOrientedButton.whenPressed(new FieldOriented());
         pickUpOrientedButton.whenPressed(new PickupOriented());
         throwerOrientedButton.whenPressed(new ThrowerOriented());
+        switchDriveModeButton.whenPressed(new SwitchDriveMode());
     }
 
     @Override
-    public void setDriveMode(DriveMode driveMode) {
+    public void setDriveOrientation(DriveOrientation driveMode) {
         this.driveMode = driveMode;
+    }
+
+    @Override
+    public void setSpeedFactor(double speedFactor) {
+        this.speedFactor = speedFactor;
     }
 }

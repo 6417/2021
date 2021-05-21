@@ -26,14 +26,14 @@ import frc.robot.commands.swerve.PickupOriented;
 import frc.robot.commands.swerve.SetSpeedFactor;
 import frc.robot.commands.swerve.ThrowerOriented;
 import frc.robot.commands.swerve.ZeroEncoders;
-import frc.robot.subsystems.Drive.DriveMode;
+import frc.robot.subsystems.Drive.DriveOrientation;
 import frc.robot.subsystems.base.SwerveDriveBase;
 import frc.robot.utilities.Algorithms;
 import frc.robot.utilities.SwerveKinematics;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
 
 public class SwerveDrive extends SwerveDriveBase {
-    private DriveMode driveMode = DriveMode.ThrowerOriented;
+    private DriveOrientation driveMode = DriveOrientation.ThrowerOriented;
     private static SwerveDriveBase instance = null;
     private SwerveKinematics<Constants.Drive.MountingLocations> kinematics;
     private Map<Constants.Drive.MountingLocations, SwerveModule> modules = new HashMap<>();
@@ -64,7 +64,7 @@ public class SwerveDrive extends SwerveDriveBase {
 
     public static SwerveDriveBase getInstance() {
         if (instance == null)
-            if (Constants.Drive.enabled) {
+            if (Constants.SwerveDrive.enabled) {
                 instance = new SwerveDrive();
                 instance.setDefaultCommand(new DefaultDriveCommand());
                 // if (!Constants.MecanumDrive.IS_ENABLED)
@@ -201,12 +201,12 @@ public class SwerveDrive extends SwerveDriveBase {
     }
 
     @Override
-    public DriveMode getDriveMode() {
+    public DriveOrientation getDriveMode() {
         return driveMode;
     }
 
     @Override
-    public void setDriveMode(DriveMode driveMode) {
+    public void setDriveMode(DriveOrientation driveMode) {
         this.driveMode = driveMode;
     }
 

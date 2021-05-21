@@ -3,15 +3,17 @@ package frc.robot.subsystems.mecanum;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Timer;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.FeedbackDevice;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 
-public class MecanumModule implements SpeedController {
+public class MecanumModule implements SpeedController, Sendable {
     public static class Config implements Cloneable {
         public boolean motorInverted;
         public boolean encoderInverted;
@@ -24,7 +26,10 @@ public class MecanumModule implements SpeedController {
             Config copy = new Config();
             copy.motorInverted = motorInverted;
             copy.encoderInverted = encoderInverted;
-            copy.motorInitializer = motorInitializer::get;
+            if (motorInitializer != null)
+                copy.motorInitializer = motorInitializer::get;
+            else
+                copy.motorInitializer = null;
             copy.mountingPoint = mountingPoint;
             copy.maxSpeed = maxSpeed;
             copy.pidValues = pidValues.clone();
@@ -42,8 +47,8 @@ public class MecanumModule implements SpeedController {
     public MecanumModule(Config config) {
         motor = config.motorInitializer.get();
         setInverted(config.motorInverted);
-        motor.setEncoderDirection(config.encoderInverted);
         motor.configEncoder(FeedbackDevice.QuadEncoder, 1);
+        motor.setEncoderDirection(config.encoderInverted);
         motor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
         motor.setPID(config.pidValues);
         maxSpeed = config.maxSpeed;
@@ -80,7 +85,8 @@ public class MecanumModule implements SpeedController {
     }
 
     /**
-     * This function should be called every iteration of the robot periodic when {@link #getAcceleration()} is used to get better results.
+     * This function should be called every iteration of the robot periodic when
+     * {@link #getAcceleration()} is used to get better results.
      */
     public void updateAcceleration() {
         previousVelocity = getEncoderVelocity();
@@ -88,7 +94,8 @@ public class MecanumModule implements SpeedController {
     }
 
     /**
-     * <b>The {@link #updateAcceleration()} function should be called every iteration of the robot periodic, to get better results.</b>
+     * <b>The {@link #updateAcceleration()} function should be called every
+     * iteration of the robot periodic, to get better results.</b>
      * 
      * @return the current acceleration of the module in encoder velocity units per
      *         miliseconds. If its called the first time it will retrun the current
@@ -124,5 +131,13 @@ public class MecanumModule implements SpeedController {
     @Override
     public void stopMotor() {
         motor.stopMotor();
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Encoder Position", motor::getEncoderTicks, null);
+        builder.addDoubleProperty("Encoder Velocity", motor::getEncoderVelocity, null);
+        builder.addDoubleProperty("Desired Velocity", () -> targetVelocity, null);
+        builder.addDoubleProperty("output factor", () -> outputFactor, null);
     }
 }

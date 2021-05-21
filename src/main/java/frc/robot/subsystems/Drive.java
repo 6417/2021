@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 public class Drive {
-    public enum DriveMode {
+    public enum DriveOrientation {
         FieldOriented, ThrowerOriented, PickUpOriented
     };
 }

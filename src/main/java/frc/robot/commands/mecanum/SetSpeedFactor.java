@@ -1,24 +1,24 @@
-package frc.robot.commands.swerve;
+package frc.robot.commands.mecanum;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.Constants;
+import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
 
 public class SetSpeedFactor extends CommandBase {
     private double speedFactor;
-    private static SubsystemBase speedFactorCommandRequirement = new SubsystemBase() {};
+
     public SetSpeedFactor(double speedFactor) {
         this.speedFactor = speedFactor;
-        addRequirements(speedFactorCommandRequirement);
     }
 
     @Override
     public void initialize() {
-        SwerveDrive.getInstance().setSpeedFactor(speedFactor);
+        MecanumDriveSubsystem.getInstance().setSpeedFactor(speedFactor);
     }
 
     @Override
-    public boolean isFinished() {
-        return true;
+    public void end(boolean interrupted) {
+        MecanumDriveSubsystem.getInstance().setSpeedFactor(Constants.MecanumDrive.defaultSpeedFac1or);
     }
 }

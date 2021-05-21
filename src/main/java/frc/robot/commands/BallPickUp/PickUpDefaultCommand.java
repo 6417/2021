@@ -13,7 +13,6 @@ public class PickUpDefaultCommand extends CommandBase{
 
     @Override
     public void initialize(){
-        System.out.println("hello");
     }
 
     @Override

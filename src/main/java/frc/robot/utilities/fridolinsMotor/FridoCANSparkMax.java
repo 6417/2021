@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.EncoderType;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utilities.CSVLogger;
 import frc.robot.utilities.PIDValues;
 
@@ -163,12 +164,19 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
     }
 
     @Override
+    public void stopMotor() {
+        super.stopMotor();
+    }
+
+    @Override
     public void setInverted(boolean inverted) {
         super.setInverted(inverted);
     }
 
     @Override
     public void setEncoderDirection(boolean inverted) {
+        if (encoder == null)
+            throw new Error("configEncoder must be called before using the setEncoderDirection function");
         this.encoder.setInverted(inverted);
     }
 

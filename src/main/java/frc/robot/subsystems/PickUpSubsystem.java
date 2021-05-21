@@ -137,7 +137,6 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public BallColor getBallColor() {
-        System.out.println("Method running");
         if(currentColor.red > Constants.BallPickUp.comparativeValueRedLow && currentColor.blue < 60){
             return BallColor.yellow;
         }

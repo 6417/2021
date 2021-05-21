@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Drive.DriveMode;
+import frc.robot.subsystems.Drive.DriveOrientation;
 
 public class MecanumDriveSubsystemBase extends SubsystemBase {
 
@@ -27,7 +27,10 @@ public class MecanumDriveSubsystemBase extends SubsystemBase {
     public void configureButtonBindings(Joystick joystick) {
     }
 
-	public void setDriveMode(DriveMode throweroriented) {
+	public void setDriveOrientation(DriveOrientation throweroriented) {
         
     }
+
+	public void setSpeedFactor(double speedFactor) {
+	}
 }

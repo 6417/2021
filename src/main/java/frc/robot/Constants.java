@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.mecanum.MecanumModule;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -57,7 +58,7 @@ public class Constants {
     public static final int zeroNavxButtonID = Joystick.BACK_BUTTON_ID;
 
     public static final class Vision {
-        public static final boolean IS_ENABLED = true;
+        public static final boolean IS_ENABLED = false;
     }
 
     public static class SwerveDrive {
@@ -190,7 +191,7 @@ public class Constants {
     }
 
     public static class BallPickUp {
-        public static boolean isEnabled = true;
+        public static boolean isEnabled = false;
 
         // MotorIDs
         public static final int pickUpMotor_ID = 12;
@@ -239,7 +240,7 @@ public class Constants {
 
     public static class MecanumDrive {
         public static class ButtonIds extends DriveButtonIds {
-
+			public static int switchDriveMode = Joystick.LB_BUTTON_ID;
         }
 
         public static final double slowModeSpeedFactor = 0.4;
@@ -263,42 +264,46 @@ public class Constants {
         public static MecanumModule.Config commonModuleConfigurations = new MecanumModule.Config();
 
         static {
-            commonModuleConfigurations.pidValues = new PIDValues(0, 0, 0, 0);
+            commonModuleConfigurations.maxSpeed = 4270000;
         }
 
         static {
-            MecanumModule.Config frontRightModuleConfig = new MecanumModule.Config();
+            MecanumModule.Config frontRightModuleConfig = commonModuleConfigurations.clone();
             frontRightModuleConfig.encoderInverted = false;
-            frontRightModuleConfig.motorInverted = false;
+            frontRightModuleConfig.motorInverted = true;
             frontRightModuleConfig.motorInitializer = frontRightMotorInitializer;
             frontRightModuleConfig.mountingPoint = new Translation2d(-0.2695,0.18);
+            frontRightModuleConfig.pidValues = new PIDValues(5.5e-9, 0, 0, 1.88e-7);
             moduleConfigs.put(Drive.MountingLocations.FrontRight, frontRightModuleConfig);
         }
 
         static {
-            MecanumModule.Config frontLeftModuleConfig = new MecanumModule.Config();
+            MecanumModule.Config frontLeftModuleConfig = commonModuleConfigurations.clone();
             frontLeftModuleConfig.encoderInverted = true;
             frontLeftModuleConfig.motorInverted = true;
             frontLeftModuleConfig.motorInitializer = frontLeftMotorInitializer;
             frontLeftModuleConfig.mountingPoint = new Translation2d(0.2695, 0.18);
+            frontLeftModuleConfig.pidValues = new PIDValues(9e-8, 0, 0, 1.88e-7);
             moduleConfigs.put(Drive.MountingLocations.FrontLeft, frontLeftModuleConfig);
         }
 
         static {
-            MecanumModule.Config backRightModuleConfig = new MecanumModule.Config();
+            MecanumModule.Config backRightModuleConfig = commonModuleConfigurations.clone();
             backRightModuleConfig.encoderInverted = false;
             backRightModuleConfig.motorInverted = false;
             backRightModuleConfig.motorInitializer = backRightMotorInitializer;
             backRightModuleConfig.mountingPoint = new Translation2d(-0.2695, -0.18);
+            backRightModuleConfig.pidValues = new PIDValues(2.1e-8, 0, 0, 2.1e-7);
             moduleConfigs.put(Drive.MountingLocations.BackRight, backRightModuleConfig);
         }
 
         static {
-            MecanumModule.Config backLeftModuleConfig = new MecanumModule.Config();
+            MecanumModule.Config backLeftModuleConfig = commonModuleConfigurations.clone();
             backLeftModuleConfig.encoderInverted = true;
             backLeftModuleConfig.motorInverted = true;
             backLeftModuleConfig.motorInitializer = backLeftMotorInitializer;
             backLeftModuleConfig.mountingPoint = new Translation2d(0.2695, -0.18);
+            backLeftModuleConfig.pidValues = new PIDValues(1e-7, 0, 0, 2.1e-7);
             moduleConfigs.put(Drive.MountingLocations.BackLeft, backLeftModuleConfig);
         }
 

@@ -8,12 +8,10 @@ public class FridoMotorLogger implements FridolinsMotor {
     private static boolean isLoggerActiv;
 
     public FridoMotorLogger(int deviceNumber) {
-        System.out.println("created Motor at device ID:" + deviceNumber);
        isLoggerActiv = false;
     }
 
     public FridoMotorLogger(int deviceNumber, String filePath) {
-        System.out.println("created Motor at device ID:" + deviceNumber);
         logger = new CSVLogger(filePath);
         isLoggerActiv = true;
     }
