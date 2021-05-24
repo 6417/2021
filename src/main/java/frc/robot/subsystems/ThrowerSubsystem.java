@@ -8,9 +8,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.subsystems.base.ThrowerSubsystemBase;
+import frc.robot.utilities.VisionService;
 import frc.robot.utilities.VisionService.Values;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
@@ -54,6 +54,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
     shootMotor.selectBuiltinFeedbackSensor();
     shootMotor.setPID(Constants.Thrower.PIDControllers.ShooterMotor.values);
+    shootMotor.enableVoltageCompensation(9);
 
     loaderMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
     loaderMotor.enableReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
@@ -79,7 +80,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   }
 
   private double convertEncoderTicksToTurretAngle(double encoderTicks) {
-    return 360 * ((turretDirectionMotor.getEncoderTicks() % Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION) / Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION); 
+    return 360 * ((encoderTicks % Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION) / Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION); 
   }
 
   private double convertShootingAngleToEncoderTicks(double angle) {
@@ -139,7 +140,6 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   @Override
   public void setTurretShootingDirection(double angle) {
     turretDirectionMotor.setPosition(convertTurretAngleToEncoderTicks(angle));
-    System.out.println("Set the position to " + convertTurretAngleToEncoderTicks(angle) + "    " + turretDirectionMotor.getEncoderTicks());
   }
 
   @Override
@@ -174,13 +174,16 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
   @Override
   public double calculateTurretDirection(Values values) {
-    return convertEncoderTicksToTurretAngle(turretDirectionMotor.getEncoderTicks()) + values.robotAngle ;
+    double encoderTicks = turretDirectionMotor.getEncoderTicks() - convertTurretAngleToEncoderTicks(values.robotAngle - Constants.Vision.CAMERA_OFFSET_DEGREE);
+    return convertEncoderTicksToTurretAngle(encoderTicks);
   }
   
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.addDoubleProperty("AngleMotor encoder", () -> turretAngleMotor.getEncoderTicks(), null);
     builder.addDoubleProperty("ShootMotorSpeed", () -> shootMotor.getEncoderVelocity(), null);
+    builder.addDoubleProperty("current Angle", () -> convertEncoderTicksToTurretAngle(turretDirectionMotor.getEncoderTicks()), null);
+    builder.addDoubleProperty("calculated ThrowerAngle", () -> calculateTurretDirection(VisionService.getInstance().getValues()), null);
     super.initSendable(builder);
   }
 }

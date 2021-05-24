@@ -313,28 +313,23 @@ public final class Constants {
 
     public static class Vision {
         public static final boolean IS_ENABLED = true;
+
+        public static final double CAMERA_OFFSET_DEGREE = -5.5;
     }
 
     public static class Thrower {
         public static final boolean IS_ENABLED = true;
-        public static final double GEAR_RATIO_TURRET_DIRECTION = 40.4;
+        public static final double GEAR_RATIO_TURRET_DIRECTION = 7 * (150 / 22);
         public static final int GEAR_RATIO_SHOOTING_ANGLE = 1;
         public static final double TURRET_DIRECTION_ANGLE_TOLERATION = 1;
+        public static final int ROBOT_START_OFFSET = 0;
 
         public static class PIDControllers {
             public static class DirectionMotor {
-                public static PIDValues values = new PIDValues(0.25, 0, 10);
-                static {
-                    values.lowerSpeedLimit = Optional.of(-0.1);
-                    values.upperSpeedLimit = Optional.of(0.1);
-                }
+                public static PIDValues values = new PIDValues(1, 0, 10, -0.15, 0.15);
             }
             public static class AngleMotor {
-                public static PIDValues values = new PIDValues(0.05, 0, 0.5);
-                static {
-                    values.lowerSpeedLimit = Optional.of(-0.2);
-                    values.upperSpeedLimit = Optional.of(0.2);
-                }
+                public static PIDValues values = new PIDValues(0.05, 0, 0.5, -0.2, 0.2);
             }
             public static class ShooterMotor {
                 public static PIDValues values = new PIDValues(0.0005, 0, 0, 0.0003);

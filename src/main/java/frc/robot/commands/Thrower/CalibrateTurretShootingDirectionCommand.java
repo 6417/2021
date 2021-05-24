@@ -43,7 +43,7 @@ public class CalibrateTurretShootingDirectionCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    throwerSubsystem.runShootingDirectionMotor(0.2);
+    throwerSubsystem.runShootingDirectionMotor(0.15);
   }
 
   // Called once the command ends or is interrupted.
