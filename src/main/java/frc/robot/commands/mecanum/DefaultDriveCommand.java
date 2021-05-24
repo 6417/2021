@@ -17,16 +17,16 @@ public class DefaultDriveCommand extends CommandBase {
     }
 
     private void mecanumDriveMode() {
-            MecanumDriveSubsystem.getInstance().drive(-Controller.getInstance().driveJoystick.getLeftStickX(),
+            MecanumDriveSubsystem.getInstance().drive(Controller.getInstance().driveJoystick.getLeftStickX(),
                     Controller.getInstance().driveJoystick.getLeftStickY(),
                     Controller.getInstance().driveJoystick.getRightStickX());
     }
 
     @Override
     public void execute() {
-        // if (!tankdriveModeActivated)
-        //     mecanumDriveMode();
-        // else
-        //     tankDriveMode();
+        if (!tankdriveModeActivated)
+            mecanumDriveMode();
+        else
+            tankDriveMode();
     }
 }

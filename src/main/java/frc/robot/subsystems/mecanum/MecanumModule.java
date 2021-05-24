@@ -32,7 +32,10 @@ public class MecanumModule implements SpeedController, Sendable {
                 copy.motorInitializer = null;
             copy.mountingPoint = mountingPoint;
             copy.maxSpeed = maxSpeed;
-            copy.pidValues = pidValues.clone();
+            if (pidValues != null)
+                copy.pidValues = pidValues.clone();
+            else
+                copy.pidValues = null;
             return copy;
         }
     }

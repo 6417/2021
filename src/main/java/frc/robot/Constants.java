@@ -192,7 +192,7 @@ public class Constants {
     }
 
     public static class BallPickUp {
-        public static boolean isEnabled = false;
+        public static boolean isEnabled = true;
 
         // MotorIDs
         public static final int pickUpMotor_ID = 12;
