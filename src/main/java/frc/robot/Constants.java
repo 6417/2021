@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.mecanum.MecanumModule;
 import frc.robot.subsystems.swerve.SwerveModule;
+import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.PIDValues;
 import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
@@ -221,6 +222,9 @@ public class Constants {
         public static final double releaseSpeed = 1; // TODO optimal speed
 
         public static final boolean isLightBarrierInverted = true;
+        
+        public static final GroveColorSensor.Color yellowBallColor = new GroveColorSensor.Color(119, 85, 51);
+        public static final GroveColorSensor.Color blueBallColor = new GroveColorSensor.Color(78, 98, 78);
     }
 
     public static class Drive {

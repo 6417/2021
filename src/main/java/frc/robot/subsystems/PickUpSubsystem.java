@@ -1,12 +1,15 @@
 package frc.robot.subsystems;
 
+import java.text.DecimalFormat;
 import java.util.Optional;
 import edu.wpi.first.hal.util.UncleanStatusException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 import frc.robot.commands.ballPickUp.PickUpDefaultCommand;
 import frc.robot.subsystems.base.PickUpBase;
@@ -38,6 +41,10 @@ public class PickUpSubsystem extends PickUpBase {
 
     private Optional<LightBarrier> lightBarrier;
 
+    private final Vector3d blueBallColorVector;
+    private final Vector3d yellowBallColorVector;
+    private BallColor currentBallColor = BallColor.colorNotFound;
+
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
         tunnelMotor = Constants.BallPickUp.tunnelMotor.get();
@@ -58,14 +65,18 @@ public class PickUpSubsystem extends PickUpBase {
         CommandScheduler.getInstance().schedule(new PickUpDefaultCommand());
 
         lightBarrier.filter((lightBarrier) -> lightBarrier.isActiv())
-            .ifPresent((lightBarrier) -> DriverStation.getInstance().reportError("Lightbarrier might not be properly connected, expected false and accutaly was true (if lightbarrier was activate on purpose ignore this massage)", false));
+                .ifPresent((lightBarrier) -> DriverStation.getInstance().reportError(
+                        "Lightbarrier might not be properly connected, expected false and accutaly was true (if lightbarrier was activate on purpose ignore this massage)",
+                        false));
+
+        blueBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.blueBallColor);
+        yellowBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.yellowBallColor);
     }
 
     private void initializeLightBarrier() {
-        try{
+        try {
             lightBarrier = Optional.of(new LightBarrier(0));
-        }catch(UncleanStatusException e)
-        {
+        } catch (UncleanStatusException e) {
             lightBarrier = Optional.empty();
             DriverStation.getInstance().reportError("LightBarrier not connected", false);
         }
@@ -74,9 +85,10 @@ public class PickUpSubsystem extends PickUpBase {
     @Override
     public void periodic() {
         super.periodic();
-        if(lightBarrier.isEmpty()){
+        if (lightBarrier.isEmpty()) {
             initializeLightBarrier();
         }
+        getBallColor();
     }
 
     public static PickUpBase getInstance() {
@@ -137,13 +149,24 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public BallColor getBallColor() {
-        if(currentColor.red > Constants.BallPickUp.comparativeValueRedLow && currentColor.blue < 60){
-            return BallColor.yellow;
-        }
-        else if(currentColor.red < Constants.BallPickUp.comparativeValueBlueLow && currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh){
-            return BallColor.blue;
-        }
-        return BallColor.colorNotFound;
+        return currentBallColor;
+    }
+
+    @Override
+    public void makeNewColorMeasurement() {
+        Vector3d currentBallColorVector = new Vector3d(currentColor.red, currentColor.green, currentColor.blue);
+        double currentVectorBlueVectorProduct = currentBallColorVector.dot(blueBallColorVector) / (blueBallColorVector.magnitude() * currentBallColorVector.magnitude());
+        double currentVectorYellowVectorProduct = currentBallColorVector.dot(yellowBallColorVector) / (blueBallColorVector.magnitude() * currentBallColorVector.magnitude());
+
+        if (currentVectorBlueVectorProduct < currentVectorYellowVectorProduct)
+            currentBallColor = BallColor.yellow;
+        else
+            currentBallColor = BallColor.blue;
+    }
+
+    @Override
+    public void resetBallColor() {
+        currentBallColor = BallColor.colorNotFound;
     }
 
     @Override
@@ -153,8 +176,12 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        lightBarrier.ifPresent((lightBarrier) -> builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null));
-        builder.addStringProperty("BallColor", getBallColor()::toString, null);
-        builder.addBooleanProperty("BallInTunnel", () -> ballInTunnel, null);
+        lightBarrier
+                .ifPresent((lightBarrier) -> builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null));
+        builder.addStringProperty("BallColor", () -> getBallColor().toString(), null);
+        builder.addBooleanProperty("BallinTunnel", () -> ballInTunnel, null);
+
+        Shuffleboard.getTab("Ball pick up").add("reset ball color", new InstantCommand(this::resetBallColor));
+        Shuffleboard.getTab("Ball pick up").add("update ball color", new InstantCommand(this::makeNewColorMeasurement));
     }
 }
