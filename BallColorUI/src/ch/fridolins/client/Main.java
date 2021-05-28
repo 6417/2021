@@ -2,6 +2,8 @@ package ch.fridolins.client;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -36,7 +38,7 @@ public class Main {
 
     private static JFrame frame;
     private static int port = 8080;
-    private static String robotIP = "10.64.17.2";
+    private static String robotIP = "127.0.0.1";
     private static JLabel textLabel;
 
     private static void setFrameColor(Color color) {
@@ -52,43 +54,54 @@ public class Main {
         textLabel.setFont(new Font(textLabel.getFont().getName(), Font.BOLD, 48));
         textLabel.setForeground(Color.WHITE);
         textLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        frame.add(textLabel);
     }
 
     private static void putError(String message) {
-        frame.getContentPane().setBackground(Color.RED);
         putText(message);
+        frame.getContentPane().setBackground(Color.RED);
+        try {
+            Thread.sleep(3500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        frame.getContentPane().setBackground(Color.DARK_GRAY);
     }
 
     private static void putText(String message) {
-        frame.remove(textLabel);
-        frame.validate();
-        frame.repaint();
         textLabel.setText("<html><body><div>" + message + "</div></body></html>");
-        frame.add(textLabel);
+        textLabel.setVisible(true);
     }
+
+    private static boolean mainShouldQuit = false;
 
     public static void main(String[] args) {
         initializeJFrame();
         initializeErrorLabel();
+        Socket socket = null;
 
-        while (true) {
+        while (!mainShouldQuit) {
+            outerMainLoop:
             try {
                 putText("Connecting ...");
-                Socket socket = new Socket(robotIP, port);
+                socket = new Socket(robotIP, port);
                 InputStreamReader reader = new InputStreamReader(socket.getInputStream());
                 BallColor previousBallColor = BallColor.none;
-                while (true) {
-                    frame.remove(textLabel);
-                    frame.validate();
-                    frame.repaint();
+                while (!mainShouldQuit) {
+                    textLabel.setVisible(false);
                     BallColor ballColor = BallColor.none;
-                    while (socket.getInputStream().available() > 0) {
-                        System.out.println("receiving data");
+                    long waitingTimeStart = System.currentTimeMillis();
+                    while (socket.getInputStream().available() == 0) {
+                        if (System.currentTimeMillis() - waitingTimeStart > 1000) {
+                            closeConnection(socket);
+                            putError("Disconnected");
+                            break outerMainLoop;
+                        }
                     }
                     int receivedChar = reader.read();
-                    System.out.println("received: " + Integer.valueOf(Character.toString(receivedChar)));
-                    int byteRepresentation = Integer.parseInt(Character.toString(receivedChar));
-                    ballColor = BallColor.fromByteRepresentation(byteRepresentation);
+                    System.out.println("received: " + (int) receivedChar);
+                    if (receivedChar == 3) continue;
+                    ballColor = BallColor.fromByteRepresentation(receivedChar);
                     if (ballColor != previousBallColor)
                         frame.getContentPane().setBackground(ballColor.jFrameColor);
                     previousBallColor = ballColor;
@@ -101,6 +114,19 @@ public class Main {
                 putError("InvalidByteRepresentationException: " + e.getMessage());
             }
         }
+        if (socket != null) {
+            try {
+                System.out.println("shutting down ...");
+                closeConnection(socket);
+            } catch (IOException e) {
+                System.err.println("Error while shutting down: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void closeConnection(Socket socket) throws IOException {
+        socket.getOutputStream().write(new byte[]{(byte) 0xf});
+        socket.close();
     }
 
     private static void initializeJFrame() {
@@ -108,7 +134,13 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.getContentPane().setBackground(Color.BLACK);
+        frame.getContentPane().setBackground(Color.DARK_GRAY);
         frame.setVisible(true);
+        frame.addWindowListener(
+                new WindowAdapter() {
+                    public void windowClosing(WindowEvent evt) {
+                        mainShouldQuit = true;
+                    }
+                });
     }
 }

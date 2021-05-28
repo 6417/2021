@@ -2,21 +2,21 @@
 <project version="4">
   <component name="RemoteTargetsManager">
     <targets>
-      <target name="adoptopenjdk/openjdk11:latest" type="docker">
+      <target name="openjdk:112" type="docker">
         <config>
           <option name="targetPlatform">
             <TargetPlatform />
           </option>
-          <option name="buildNotPull" value="false" />
+          <option name="buildImageConfig">
+            <BuildImageConfig>
+              <option name="builtImageTag" value="openjdk:11" />
+              <option name="dockerFile" value="Dockerfile" />
+            </BuildImageConfig>
+          </option>
           <option name="containerConfig">
             <ContainerConfig>
-              <option name="runCliOptions" value="--rm -p 10.64.17.2:8080:8080" />
+              <option name="runCliOptions" value="--rm -p 127.0.0.1:8080:8080" />
             </ContainerConfig>
-          </option>
-          <option name="pullImageConfig">
-            <PullImageConfig>
-              <option name="tagToPull" value="adoptopenjdk/openjdk11:latest" />
-            </PullImageConfig>
           </option>
         </config>
         <ContributedStateBase type="JavaLanguageRuntime">
@@ -39,50 +39,8 @@
                 </option>
               </VolumeState>
             </option>
-            <option name="homePath" value="/opt/java/openjdk" />
+            <option name="homePath" value="/usr/local/openjdk-11" />
             <option name="javaVersionString" value="11.0.11" />
-          </config>
-        </ContributedStateBase>
-      </target>
-      <target name="openjdk:latest" type="docker">
-        <config>
-          <option name="targetPlatform">
-            <TargetPlatform />
-          </option>
-          <option name="buildNotPull" value="false" />
-          <option name="containerConfig">
-            <ContainerConfig>
-              <option name="runCliOptions" value="--rm -p 10.64.17.2:8080:8080 -d" />
-            </ContainerConfig>
-          </option>
-          <option name="pullImageConfig">
-            <PullImageConfig>
-              <option name="tagToPull" value="openjdk:11" />
-            </PullImageConfig>
-          </option>
-        </config>
-        <ContributedStateBase type="JavaLanguageRuntime">
-          <config>
-            <option name="agentFolder">
-              <VolumeState>
-                <option name="targetSpecificBits">
-                  <map>
-                    <entry key="mountAsVolume" value="false" />
-                  </map>
-                </option>
-              </VolumeState>
-            </option>
-            <option name="classpathFolder">
-              <VolumeState>
-                <option name="targetSpecificBits">
-                  <map>
-                    <entry key="mountAsVolume" value="false" />
-                  </map>
-                </option>
-              </VolumeState>
-            </option>
-            <option name="homePath" value="/usr/java/openjdk-11" />
-            <option name="javaVersionString" value="16.0.1" />
           </config>
         </ContributedStateBase>
       </target>
