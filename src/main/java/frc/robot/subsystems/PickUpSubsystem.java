@@ -17,10 +17,12 @@ import frc.robot.commands.ballPickUp.PickUpDefaultCommand;
 import frc.robot.subsystems.base.PickUpBase;
 import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.LightBarrier;
+import frc.robot.utilities.Vector3d;
 import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
+import ch.fridolins.server.Config;
 
 public class PickUpSubsystem extends PickUpBase {
 
@@ -49,8 +51,8 @@ public class PickUpSubsystem extends PickUpBase {
 
     private Optional<LightBarrier> lightBarrier;
 
-    private final Vector3d blueBallColorVector;
-    private final Vector3d yellowBallColorVector;
+    private final Vector3d blueBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.blueBallColor);
+    private final Vector3d yellowBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.yellowBallColor);
     private BallColor currentBallColor = BallColor.colorNotFound;
 
     public PickUpSubsystem() {

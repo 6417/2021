@@ -1,26 +1,21 @@
 package ch.fridolins.server;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Main {
-    public static enum BallColor {
-        blue((byte) 1), yellow((byte) 2), colorNotFound((byte) 0);
+public class SimRioServerDocker {
+    public enum BallColor {
+        blue(Config.BallColor.blue), yellow(Config.BallColor.yellow), colorNotFound(Config.BallColor.colorNotFound);
 
         public final byte byteRepresentation;
 
-        private BallColor(byte byteRepresentation) {
+        BallColor(byte byteRepresentation) {
             this.byteRepresentation = byteRepresentation;
         }
     }
-
 
     static class Ping implements Runnable {
         private Socket clientSocket;
@@ -38,9 +33,9 @@ public class Main {
             pingLoopRunning.set(true);
             while (pingLoopRunning.get()) {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(pingInterval);
                     synchronized (outputStreamMutex) {
-                        clientSocket.getOutputStream().write(new byte[]{pingChar});
+                        clientSocket.getOutputStream().write(new byte[]{Config.ping});
                     }
                 } catch (SocketException e) {
                     pingLoopRunning.set(false);
@@ -67,45 +62,61 @@ public class Main {
     }
 
     private static final Object outputStreamMutex = new Object();
-    private static final char pingChar = 3;
+    private static final long pingInterval = 500; //ms
 
     public static void main(String[] args) {
         try {
-            System.out.println("initializing ui server ...");
-            ServerSocket serverSocket = new ServerSocket(8080);
-            Ping ping;
+            System.out.println("initializing ui server");
+            ServerSocket serverSocket = new ServerSocket(Config.port);
             while (true) {
-                BallColor ballColor = BallColor.colorNotFound;
+                BallColor ballColor;
                 System.out.println("Waiting for client ...");
                 Socket clientSocket = serverSocket.accept();
-                ping = new Ping(clientSocket);
+                Ping ping = new Ping(clientSocket);
                 ping.start();
-                System.out.println("Client connected!!!");
-                BallColor previousBallColor = BallColor.colorNotFound;
+                System.out.println("Client connected");
+                BallColor previousBallColor = null;
                 while (true) {
-                    if ((System.currentTimeMillis() / 1000) % 3 == 0)
-                        ballColor = BallColor.blue;
-                    else if ((System.currentTimeMillis() / (int) 1000) % 2 == 0)
-                        ballColor = BallColor.yellow;
-                    else
-                        ballColor = BallColor.colorNotFound;
-                    if (ballColor != previousBallColor) {
-                        synchronized (outputStreamMutex) {
-                            try {
-                                clientSocket.getOutputStream().write(new byte[]{ballColor.byteRepresentation});
-                            } catch (SocketException e) {
-                                break;
-                            }
-                        }
-                    }
+                    ballColor = updateBallColor();
+                    if (!sendDataToClient(ballColor, clientSocket, previousBallColor)) break;
                     previousBallColor = ballColor;
                 }
                 System.out.println("Client disconnected");
-                ping.interrupt();
-                clientSocket.close();
+                disconnectToClient(clientSocket, ping);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static void disconnectToClient(Socket clientSocket, Ping ping) throws IOException {
+        ping.interrupt();
+        clientSocket.close();
+    }
+
+    private static BallColor updateBallColor() {
+        BallColor ballColor;
+        if ((System.currentTimeMillis() / 1000) % 3 == 0)
+            ballColor = BallColor.blue;
+        else if ((System.currentTimeMillis() / 1000) % 2 == 0)
+            ballColor = BallColor.yellow;
+        else
+            ballColor = BallColor.colorNotFound;
+        return ballColor;
+    }
+
+    /**
+     * @return False if the connection to the client was lost, true if connection is ok
+     */
+    private static boolean sendDataToClient(BallColor ballColor, Socket clientSocket, BallColor previousBallColor) throws IOException {
+        if (ballColor != previousBallColor)
+            synchronized (outputStreamMutex) {
+                try {
+                    clientSocket.getOutputStream().write(new byte[]{ballColor.byteRepresentation});
+                } catch (SocketException e) {
+                    return false;
+                }
+            }
+        return true;
     }
 }

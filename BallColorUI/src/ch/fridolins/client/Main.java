@@ -1,5 +1,7 @@
 package ch.fridolins.client;
 
+import ch.fridolins.server.Config;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -8,11 +10,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 public class Main {
+
+
+    public static final int errorDelayBeforeStartup = 1000;
+
     private static enum BallColor {
-        blue(1, Color.BLUE), yellow(2, Color.YELLOW), none(0, Color.BLACK);
+        blue(Config.BallColor.blue, Color.BLUE), yellow(Config.BallColor.yellow, Color.YELLOW), none(Config.BallColor.colorNotFound, Color.BLACK);
 
         public static class InvalidByteRepresentationException extends Exception {
             public InvalidByteRepresentationException(String message) {
@@ -20,10 +25,10 @@ public class Main {
             }
         }
 
-        public final int byteRepresentation;
+        public final byte byteRepresentation;
         public final Color jFrameColor;
 
-        private BallColor(int byteRepresentation, Color jFrameColor) {
+        private BallColor(byte byteRepresentation, Color jFrameColor) {
             this.byteRepresentation = byteRepresentation;
             this.jFrameColor = jFrameColor;
         }
@@ -40,16 +45,10 @@ public class Main {
     private static int port = 8080;
     private static String robotIP = "127.0.0.1";
     private static JLabel textLabel;
+    public static final int maxTimeAmountToWaitOnServer = 1000;
+    public static final int errorShowTime = 3000;
 
-    private static void setFrameColor(Color color) {
-        frame.getContentPane().setBackground(color);
-    }
-
-    private static boolean isComponentInFrame(Component component) {
-        return Arrays.stream(frame.getContentPane().getComponents()).anyMatch(c -> c.equals(component));
-    }
-
-    private static void initializeErrorLabel() {
+    private static void initializeTextLabel() {
         textLabel = new JLabel();
         textLabel.setFont(new Font(textLabel.getFont().getName(), Font.BOLD, 48));
         textLabel.setForeground(Color.WHITE);
@@ -57,15 +56,40 @@ public class Main {
         frame.add(textLabel);
     }
 
+    private static Thread removeErrorMessageThread = new Thread(() -> {
+        try {
+            Thread.sleep(errorShowTime);
+        } catch (InterruptedException e) {
+            return;
+        }
+        textLabel.setVisible(false);
+    });
+
     private static void putError(String message) {
         putText(message);
-        frame.getContentPane().setBackground(Color.RED);
+        setWindowColor(Color.RED);
+        restartRemoveErrorMessageThread();
+    }
+
+    private static void restartRemoveErrorMessageThread() {
         try {
-            Thread.sleep(3500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            removeErrorMessageThread.start();
+        } catch (IllegalThreadStateException e) {
+            killRemoveErrorMessageThread();
+            removeErrorMessageThread.start();
         }
-        frame.getContentPane().setBackground(Color.DARK_GRAY);
+    }
+
+    private static void killRemoveErrorMessageThread() {
+        removeErrorMessageThread.interrupt();
+        removeErrorMessageThread = new Thread(() -> {
+            try {
+                Thread.sleep(errorShowTime);
+            } catch (InterruptedException interrupt) {
+                return;
+            }
+            textLabel.setVisible(false);
+        });
     }
 
     private static void putText(String message) {
@@ -74,42 +98,44 @@ public class Main {
     }
 
     private static boolean mainShouldQuit = false;
+    private static Socket socket = null;
 
     public static void main(String[] args) {
         initializeJFrame();
-        initializeErrorLabel();
-        Socket socket = null;
+        initializeTextLabel();
+        putText("Connecting ...");
+        long startupTime = System.currentTimeMillis();
 
         while (!mainShouldQuit) {
-            outerMainLoop:
+            CONNECT_TO_SERVER:
             try {
-                putText("Connecting ...");
                 socket = new Socket(robotIP, port);
                 InputStreamReader reader = new InputStreamReader(socket.getInputStream());
                 BallColor previousBallColor = BallColor.none;
+                killRemoveErrorMessageThread();
+                textLabel.setVisible(false);
                 while (!mainShouldQuit) {
-                    textLabel.setVisible(false);
                     BallColor ballColor = BallColor.none;
                     long waitingTimeStart = System.currentTimeMillis();
                     while (socket.getInputStream().available() == 0) {
-                        if (System.currentTimeMillis() - waitingTimeStart > 1000) {
+                        if (System.currentTimeMillis() - waitingTimeStart > maxTimeAmountToWaitOnServer) {
                             closeConnection(socket);
                             putError("Disconnected");
-                            break outerMainLoop;
+                            break CONNECT_TO_SERVER;
                         }
                     }
                     int receivedChar = reader.read();
-                    System.out.println("received: " + (int) receivedChar);
-                    if (receivedChar == 3) continue;
+                    if (receivedChar == Config.ping) continue;
                     ballColor = BallColor.fromByteRepresentation(receivedChar);
                     if (ballColor != previousBallColor)
-                        frame.getContentPane().setBackground(ballColor.jFrameColor);
+                        setWindowColor(ballColor.jFrameColor);
                     previousBallColor = ballColor;
                 }
             } catch (UnknownHostException e) {
                 putError("UnknownHostException: " + e.getMessage());
             } catch (IOException e) {
-                putError("IOException: " + e.getMessage());
+                if (System.currentTimeMillis() - startupTime > errorDelayBeforeStartup)
+                    putError("<p>Connecting ... <br>Are you connected to the robot, and is it on?</p><p style=\"font-size:16\"><br><br>(IOException: " + e.getMessage() + ")</p>");
             } catch (BallColor.InvalidByteRepresentationException e) {
                 putError("InvalidByteRepresentationException: " + e.getMessage());
             }
@@ -134,7 +160,7 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.getContentPane().setBackground(Color.DARK_GRAY);
+        setWindowColor(Color.BLACK);
         frame.setVisible(true);
         frame.addWindowListener(
                 new WindowAdapter() {
@@ -142,5 +168,9 @@ public class Main {
                         mainShouldQuit = true;
                     }
                 });
+    }
+
+    private static void setWindowColor(Color color) {
+        frame.getContentPane().setBackground(color);
     }
 }
