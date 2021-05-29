@@ -15,7 +15,6 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import frc.robot.subsystems.mecanum.MecanumModule;
 import frc.robot.subsystems.swerve.SwerveModule;

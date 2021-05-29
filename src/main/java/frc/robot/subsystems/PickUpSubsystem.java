@@ -3,7 +3,11 @@ package frc.robot.subsystems;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.DecimalFormat;
 import java.util.Optional;
+
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.hal.util.UncleanStatusException;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C.Port;
@@ -23,6 +27,7 @@ import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import ch.fridolins.server.Config;
+import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 
 public class PickUpSubsystem extends PickUpBase {
 
@@ -51,13 +56,15 @@ public class PickUpSubsystem extends PickUpBase {
 
     private Optional<LightBarrier> lightBarrier;
 
-    private final Vector3d blueBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.blueBallColor);
-    private final Vector3d yellowBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.yellowBallColor);
+
+    private final Vector3d blueBallColorVector;
+    private final Vector3d yellowBallColorVector;
     private BallColor currentBallColor = BallColor.colorNotFound;
 
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
         tunnelMotor = Constants.BallPickUp.tunnelMotor.get();
+        pickUpMotor.setIdleMode(IdleModeType.kCoast);
         pickUpMotor.factoryDefault();
         tunnelMotor.factoryDefault();
 
@@ -75,7 +82,12 @@ public class PickUpSubsystem extends PickUpBase {
         CommandScheduler.getInstance().schedule(new PickUpDefaultCommand());
 
         lightBarrier.filter((lightBarrier) -> lightBarrier.isActiv())
-            .ifPresent((lightBarrier) -> DriverStation.getInstance().reportError("Lightbarrier might not be properly connected, expected false and accutaly was true (if lightbarrier was activate on purpose ignore this massage)", false));
+                .ifPresent((lightBarrier) -> DriverStation.getInstance().reportError(
+                        "Lightbarrier might not be properly connected, expected false and accutaly was true (if lightbarrier was activate on purpose ignore this massage)",
+                        false));
+
+        blueBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.blueBallColor);
+        yellowBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.yellowBallColor);
     }
 
     private void uiSocketServer() {
@@ -200,8 +212,12 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        lightBarrier.ifPresent((lightBarrier) -> builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null));
-        builder.addStringProperty("BallColor", getBallColor()::toString, null);
-        builder.addBooleanProperty("BallInTunnel", () -> ballInTunnel, null);
+        lightBarrier
+                .ifPresent((lightBarrier) -> builder.addBooleanProperty("LightBarrier", lightBarrier::isActiv, null));
+        builder.addStringProperty("BallColor", () -> getBallColor().toString(), null);
+        builder.addBooleanProperty("BallinTunnel", () -> ballInTunnel, null);
+
+        Shuffleboard.getTab("Ball pick up").add("reset ball color", new InstantCommand(this::resetBallColor));
+        Shuffleboard.getTab("Ball pick up").add("update ball color", new InstantCommand(this::makeNewColorMeasurement));
     }
 }
