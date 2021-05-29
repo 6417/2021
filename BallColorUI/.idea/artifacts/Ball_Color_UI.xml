@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Ball Color UI">
+    <output-path>$PROJECT_DIR$/out/artifacts/Ball_Color_UI</output-path>
+    <root id="archive" name="Ball Color UI.jar">
+      <element id="module-output" name="BallColorUI" />
+      <element id="file-copy" path="$PROJECT_DIR$/out/production/BallColorUI/ch/fridolins/server/Config.class" />
+      <element id="file-copy" path="$PROJECT_DIR$/out/production/BallColorUI/ch/fridolins/server/Config$BallColor.class" />
+    </root>
+  </artifact>
+</component>
