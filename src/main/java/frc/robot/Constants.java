@@ -22,19 +22,8 @@ import frc.robot.utilities.Vector2d;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
 import frc.robot.utilities.fridolinsMotor.FridoTalonSRX;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
-import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 import frc.robot.utilities.swerveLimiter.SwerveLimiter;
-
-import java.util.Optional;
-import java.util.function.Supplier;
-
-
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
-import frc.robot.utilities.PIDValues;
-import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
-import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -324,12 +313,17 @@ public final class Constants {
         public static final double TURRET_DIRECTION_ANGLE_TOLERATION = 1;
         public static final int ROBOT_START_OFFSET = 0;
 
+        public static final double DIRECTION_CALIBRATION_SPEED = 0.4;
+        public static final double ANGLE_CALIBRATION_SPEED = 0.2;
+
+        public static final double AIMING_ANGLE_INCREMENT = 5;
+
         public static class PIDControllers {
             public static class DirectionMotor {
-                public static PIDValues values = new PIDValues(1, 0, 10, -0.15, 0.15);
+                public static PIDValues values = new PIDValues(1, 0, 10, -0.5, 0.5);
             }
             public static class AngleMotor {
-                public static PIDValues values = new PIDValues(0.05, 0, 0.5, -0.2, 0.2);
+                public static PIDValues values = new PIDValues(0.05, 0, 0.5, -0.4, 0.4);
             }
             public static class ShooterMotor {
                 public static PIDValues values = new PIDValues(0.0005, 0, 0, 0.0003);

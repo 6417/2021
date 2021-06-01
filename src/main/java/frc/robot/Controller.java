@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.Thrower.AimTurretCommandGroup;
 import frc.robot.commands.Thrower.AimTurretWithVisionCommandGroup;
 import frc.robot.commands.Thrower.CalibrateThrowerCommandGroup;
+import frc.robot.commands.Thrower.FlowForwardCommandGroup;
 import frc.robot.commands.Thrower.SetTurretShootingDirectionwithNavxCommand;
 import frc.robot.commands.Thrower.ShootCommand;
 import frc.robot.commands.ballPickUp.BallPickUpCommand;
@@ -113,10 +114,10 @@ public class Controller {
             releaseButton.whenPressed(new ReleaseBallCommand());
             loadButton.whenPressed(new LoadBallCommand());
 
+            calibrateThrowerButton.whenPressed(() -> Robot.getNavx().reset());
             calibrateThrowerButton.whenPressed(new CalibrateThrowerCommandGroup());
-            //testPIDButton.whileHeld(new AimTurretWithVisionCommandGroup());
             testPIDButton.whenPressed(new AimTurretCommandGroup());
-            shootButton.whileHeld(new ShootCommand());
+            shootButton.whenPressed(new FlowForwardCommandGroup());
         }
     }
 }

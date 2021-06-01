@@ -47,9 +47,10 @@ public class SetTurretShootingDirectionCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-      System.out.println("calculated the following shooting angle: " + angle);
       if(values.targetInView){
-        throwerSubsystem.setTurretShootingDirection(angle);
+        if (Math.abs(angle) >= 45) {
+          throwerSubsystem.setTurretShootingDirection(angle);
+        }
       }
   }
 

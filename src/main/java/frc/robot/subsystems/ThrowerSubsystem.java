@@ -54,7 +54,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
     shootMotor.selectBuiltinFeedbackSensor();
     shootMotor.setPID(Constants.Thrower.PIDControllers.ShooterMotor.values);
-    shootMotor.enableVoltageCompensation(9);
+    shootMotor.enableVoltageCompensation(8);
 
     loaderMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
     loaderMotor.enableReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
@@ -71,7 +71,6 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
     turretDirectionMotor.setPID(Constants.Thrower.PIDControllers.DirectionMotor.values);
     turretDirectionMotor.setEncoderPosition(0);
-
   }
 
   private double convertTurretAngleToEncoderTicks(double angle) {
@@ -81,10 +80,6 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
   private double convertEncoderTicksToTurretAngle(double encoderTicks) {
     return 360 * ((encoderTicks % Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION) / Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION); 
-  }
-
-  private double convertShootingAngleToEncoderTicks(double angle) {
-    return 0;
   }
 
   @Override
@@ -133,11 +128,6 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   }
 
   @Override
-  public void calibrateShootingDirection() {
-    
-  }
-
-  @Override
   public void setTurretShootingDirection(double angle) {
     turretDirectionMotor.setPosition(convertTurretAngleToEncoderTicks(angle));
   }
@@ -168,7 +158,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
 
   @Override
   public double calculateTurretAngleTicks(Values values) {
-    return 0.954845 * values.stripeHeight - 225.326;
+    return 0.954845 * values.stripeHeight - 225.326 - 3;
     //return 0.000316 * Math.pow(values.stripeHeight, 3) - 0.088683 * Math.pow(values.stripeHeight, 2) + 9.09257 * values.stripeHeight - 496.119;
   }  
 
@@ -184,6 +174,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     builder.addDoubleProperty("ShootMotorSpeed", () -> shootMotor.getEncoderVelocity(), null);
     builder.addDoubleProperty("current Angle", () -> convertEncoderTicksToTurretAngle(turretDirectionMotor.getEncoderTicks()), null);
     builder.addDoubleProperty("calculated ThrowerAngle", () -> calculateTurretDirection(VisionService.getInstance().getValues()), null);
+    builder.addDoubleProperty("current encoder Position", () -> turretDirectionMotor.getEncoderTicks(), null);
     super.initSendable(builder);
   }
 }

@@ -1,7 +1,5 @@
 package frc.robot.subsystems.base;
 
-import java.util.Optional;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ThrowerSubsystemBase extends SubsystemBase{
@@ -15,7 +13,6 @@ public class ThrowerSubsystemBase extends SubsystemBase{
   public void runShootingDirectionMotor(double speed) {}
   public void runShootingAngleMotor(double speed) {}
   public void runShooter(double speed) {}
-  public void calibrateShootingDirection() {}
   public void setTurretShootingDirection(double angle) {}
   public void setTurretShootingAngle(double angle) {}
   public void setShooterSpeed(double speed) {}

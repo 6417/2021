@@ -8,15 +8,14 @@
 package frc.robot.commands.Thrower;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.ThrowerSubsystem;
 import frc.robot.subsystems.base.ThrowerSubsystemBase;
-import frc.robot.utilities.Timer;
 
 /**
  * An example command that uses an example subsystem.
  */
 public class CalibrateTurretShootingDirectionCommand extends CommandBase {
-  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final ThrowerSubsystemBase throwerSubsystem;
   private long stallStartTime;
   private long accelerationStart;
@@ -43,7 +42,8 @@ public class CalibrateTurretShootingDirectionCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    throwerSubsystem.runShootingDirectionMotor(0.15);
+    //throwerSubsystem.runShootingDirectionMotor(Constants.Thrower.DIRECTION_CALIBRATION_SPEED);
+    throwerSubsystem.setTurretShootingDirection(throwerSubsystem.getCurrentTurretShootingDirection() + Constants.Thrower.AIMING_ANGLE_INCREMENT);
   }
 
   // Called once the command ends or is interrupted.
