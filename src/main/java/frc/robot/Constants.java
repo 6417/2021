@@ -57,12 +57,12 @@ public class Constants {
 
     public static final int zeroNavxButtonID = Joystick.BACK_BUTTON_ID;
 
-    public static final class Vision {
-        public static final boolean IS_ENABLED = false;
-    }
+    public static final class SwerveDrive {
+        public static enum MountingLocations {
+            FrontRight, FrontLeft, BackRight, BackLeft
+        }
 
-    public static class SwerveDrive {
-        public static class ButtounIds extends DriveButtonIds {
+        public static final class ButtounIds {
             public static final int zeroEncoders = Joystick.START_BUTTON_ID;
             public static final int breakButton = Joystick.RT_BUTTON_ID;
             public static final int centircSwerveMode = Joystick.LT_BUTTON_ID;
@@ -314,4 +314,51 @@ public class Constants {
         public static final double wheelDiameter = 0.10;
         public static final double defaultSpeedFac1or = 1.0;
     }
+
+    public static class Vision {
+        public static final boolean IS_ENABLED = true;
+
+        public static final double CAMERA_OFFSET_DEGREE = -5.5;
+    }
+
+    public static class Thrower {
+        public static final boolean IS_ENABLED = true;
+        public static final double GEAR_RATIO_TURRET_DIRECTION = 7 * (150 / 22);
+        public static final int GEAR_RATIO_SHOOTING_ANGLE = 1;
+        public static final double TURRET_DIRECTION_ANGLE_TOLERATION = 1;
+        public static final int ROBOT_START_OFFSET = 0;
+
+        public static final double DIRECTION_CALIBRATION_SPEED = 0.4;
+        public static final double ANGLE_CALIBRATION_SPEED = 0.2;
+
+        public static final double AIMING_ANGLE_INCREMENT = 5;
+
+        public static class PIDControllers {
+            public static class DirectionMotor {
+                public static PIDValues values = new PIDValues(1, 0, 10, -0.5, 0.5);
+            }
+            public static class AngleMotor {
+                public static PIDValues values = new PIDValues(0.05, 0, 0.5, -0.4, 0.4);
+            }
+            public static class ShooterMotor {
+                public static PIDValues values = new PIDValues(0.0005, 0, 0, 0.0003);
+            }
+        }
+
+        public static class Motors {
+            public static final int LOADER_ID = 20;
+            public static final int SHOOT_DIRECTION_ID = 21;
+            public static final int SHOOT_ANGLE_ID = 23;
+            public static final int SHOOT_ID = 22;
+            public static final Supplier<FridolinsMotor> loaderMotor = () -> new FridoCANSparkMax(LOADER_ID,
+                    MotorType.kBrushless);
+            public static final Supplier<FridolinsMotor> directionMotor = () -> new FridoCANSparkMax(SHOOT_DIRECTION_ID,
+                    MotorType.kBrushless);
+            public static final Supplier<FridolinsMotor> angleMotor = () -> new FridoCANSparkMax(SHOOT_ANGLE_ID,
+                    MotorType.kBrushless);
+            public static final Supplier<FridolinsMotor> shootMotor = () -> new FridoCANSparkMax(SHOOT_ID,
+                    MotorType.kBrushless);
+        }
+    }
 }
+

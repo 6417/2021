@@ -4,13 +4,13 @@ import java.util.Optional;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.utilities.baseClasses.VisionServiceBase;
 
 public class VisionService extends VisionServiceBase {
     private NetworkTableInstance networkTableInstance;
     private NetworkTable smartDashboard;
+    private Values values;
     private static VisionServiceBase instance;
 
     private VisionService() {
@@ -33,38 +33,48 @@ public class VisionService extends VisionServiceBase {
     public static class Values {
         public double robotAngle = -1;
         public double distance = -1;
-        public boolean targetLockon = false;
+        public boolean targetInView = false;
         public double targetAngle = -1;
         public double viewingSide = 0;
+        public double stripeHeight = 0;
 
         public Values() {
 
         }
 
-        public Values(double robotAngle, double distance, boolean targetLockon, double targetAngle, double viewingSide) {
+        public Values(double robotAngle, double distance, boolean targetInView, double targetAngle, double viewingSide, double stripeHeight) {
             this.robotAngle = robotAngle;
             this.distance = distance;
-            this.targetLockon = targetLockon;
+            this.targetInView = targetInView;
             this.targetAngle = targetAngle;
             this.viewingSide = viewingSide;
+            this.stripeHeight = stripeHeight;
         }
     }
 
-    @Override
-    public Optional<Values> getValues() {
+    public Optional<Values> getValuesOptional() {
         if (smartDashboard.getEntry("currentValues").getBoolean(false)) {
             if (smartDashboard.getEntry("connected").getBoolean(false) == false)
             setConnectionStatus();
             double distance = smartDashboard.getEntry("distance").getDouble(0);
             double robotAngle = smartDashboard.getEntry("robotAngle").getDouble(0);
-            boolean targetLockon = smartDashboard.getEntry("targetInView").getBoolean(false);
+            boolean targetInView = smartDashboard.getEntry("targetInView").getBoolean(false);
             double targetAngle = smartDashboard.getEntry("targetAngle").getDouble(0);
             double viewingSide = smartDashboard.getEntry("viewingSide").getDouble(0);
+            double stripeHeight = smartDashboard.getEntry("stripeHeight").getDouble(0);
             smartDashboard.getEntry("currentValues").setBoolean(false);
-            return Optional.of(new Values(robotAngle, distance, targetLockon, targetAngle, viewingSide));
+            return Optional.of(new Values(robotAngle, distance, targetInView, targetAngle, viewingSide, stripeHeight));
         }
         return Optional.empty();
     }
+
+    @Override
+    public Values getValues() {
+        getValuesOptional().ifPresent((a) -> this.values = a);
+        return this.values;
+    }
+
+
 
     @Override
     public void setConnectionStatus() {
