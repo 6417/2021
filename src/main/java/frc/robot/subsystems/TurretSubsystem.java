@@ -9,7 +9,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import frc.robot.Constants;
-import frc.robot.subsystems.base.ThrowerSubsystemBase;
+import frc.robot.subsystems.base.TurretSubsystemBase;
 import frc.robot.utilities.VisionService;
 import frc.robot.utilities.VisionService.Values;
 import frc.robot.utilities.fridolinsMotor.FridoCANSparkMax;
@@ -17,29 +17,29 @@ import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.LimitSwitchPolarity;
 
-public class ThrowerSubsystem extends ThrowerSubsystemBase {
+public class TurretSubsystem extends TurretSubsystemBase {
 
-  private static ThrowerSubsystemBase instance;
+  private static TurretSubsystemBase instance;
   private FridolinsMotor loaderMotor;
   private FridoCANSparkMax turretDirectionMotor;
   private FridoCANSparkMax turretAngleMotor;
   private FridoCANSparkMax shootMotor;
   
-  public ThrowerSubsystem() {
-    loaderMotor = Constants.Thrower.Motors.loaderMotor.get();
-    turretDirectionMotor = (FridoCANSparkMax)Constants.Thrower.Motors.directionMotor.get();
-    turretAngleMotor = (FridoCANSparkMax)Constants.Thrower.Motors.angleMotor.get();
-    shootMotor = (FridoCANSparkMax)Constants.Thrower.Motors.shootMotor.get();
+  public TurretSubsystem() {
+    loaderMotor = Constants.Turret.Motors.loaderMotor.get();
+    turretDirectionMotor = (FridoCANSparkMax)Constants.Turret.Motors.directionMotor.get();
+    turretAngleMotor = (FridoCANSparkMax)Constants.Turret.Motors.angleMotor.get();
+    shootMotor = (FridoCANSparkMax)Constants.Turret.Motors.shootMotor.get();
 
     initMotors();
   }
 
-  public static ThrowerSubsystemBase getInstance() {
+  public static TurretSubsystemBase getInstance() {
     if (instance == null) {
-        if (Constants.Thrower.IS_ENABLED) 
-            instance = new ThrowerSubsystem();
+        if (Constants.Turret.IS_ENABLED) 
+            instance = new TurretSubsystem();
         else {
-          instance = new ThrowerSubsystemBase();
+          instance = new TurretSubsystemBase();
         }
     }
     return instance;
@@ -53,7 +53,7 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     shootMotor.factoryDefault();
 
     shootMotor.selectBuiltinFeedbackSensor();
-    shootMotor.setPID(Constants.Thrower.PIDControllers.ShooterMotor.values);
+    shootMotor.setPID(Constants.Turret.PIDControllers.ShooterMotor.values);
     shootMotor.enableVoltageCompensation(8);
 
     loaderMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, false);
@@ -67,19 +67,19 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
     turretAngleMotor.setInverted(false);
     turretAngleMotor.setEncoderPosition(0);
     turretAngleMotor.enableForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed, true);
-    turretAngleMotor.setPID(Constants.Thrower.PIDControllers.AngleMotor.values);
+    turretAngleMotor.setPID(Constants.Turret.PIDControllers.AngleMotor.values);
 
-    turretDirectionMotor.setPID(Constants.Thrower.PIDControllers.DirectionMotor.values);
+    turretDirectionMotor.setPID(Constants.Turret.PIDControllers.DirectionMotor.values);
     turretDirectionMotor.setEncoderPosition(0);
   }
 
   private double convertTurretAngleToEncoderTicks(double angle) {
-    angle = (angle / 360) * Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION;
+    angle = (angle / 360) * Constants.Turret.GEAR_RATIO_TURRET_DIRECTION;
     return angle;
   }
 
   private double convertEncoderTicksToTurretAngle(double encoderTicks) {
-    return 360 * ((encoderTicks % Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION) / Constants.Thrower.GEAR_RATIO_TURRET_DIRECTION); 
+    return 360 * ((encoderTicks % Constants.Turret.GEAR_RATIO_TURRET_DIRECTION) / Constants.Turret.GEAR_RATIO_TURRET_DIRECTION); 
   }
 
   @Override
@@ -159,7 +159,6 @@ public class ThrowerSubsystem extends ThrowerSubsystemBase {
   @Override
   public double calculateTurretAngleTicks(Values values) {
     return 0.954845 * values.stripeHeight - 225.326 - 3;
-    //return 0.000316 * Math.pow(values.stripeHeight, 3) - 0.088683 * Math.pow(values.stripeHeight, 2) + 9.09257 * values.stripeHeight - 496.119;
   }  
 
   @Override

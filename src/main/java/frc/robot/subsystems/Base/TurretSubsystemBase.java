@@ -2,7 +2,7 @@ package frc.robot.subsystems.base;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ThrowerSubsystemBase extends SubsystemBase{
+public class TurretSubsystemBase extends SubsystemBase{
   public double getShootingDirectionMotorSpeed() {return 0;}
   public double getShootingDirectionMotorEncoderTicks() {return 0;}
   public double getShootingAngleMotorSpeed() {return 0;}

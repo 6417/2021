@@ -317,11 +317,10 @@ public class Constants {
 
     public static class Vision {
         public static final boolean IS_ENABLED = true;
-
         public static final double CAMERA_OFFSET_DEGREE = -5.5;
     }
 
-    public static class Thrower {
+    public static class Turret {
         public static final boolean IS_ENABLED = true;
         public static final double GEAR_RATIO_TURRET_DIRECTION = 7 * (150 / 22);
         public static final int GEAR_RATIO_SHOOTING_ANGLE = 1;

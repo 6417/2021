@@ -1,19 +1,19 @@
-package frc.robot.commands.Thrower;
+package frc.robot.commands.Turret;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ThrowerSubsystem;
-import frc.robot.subsystems.base.ThrowerSubsystemBase;
+import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.base.TurretSubsystemBase;
 import frc.robot.utilities.VisionService;
 import frc.robot.utilities.baseClasses.VisionServiceBase;
 
-public class SetTurretShootingAngleCommand extends CommandBase {
-    private final ThrowerSubsystemBase thrower;
+public class AimTurretAngle extends CommandBase {
+    private final TurretSubsystemBase thrower;
     private final VisionServiceBase vision;
     private VisionService.Values values;
     private double setPoint;
 
-    public SetTurretShootingAngleCommand() {
-        thrower = ThrowerSubsystem.getInstance();
+    public AimTurretAngle() {
+        thrower = TurretSubsystem.getInstance();
         vision = VisionService.getInstance();
     }
 
@@ -33,7 +33,7 @@ public class SetTurretShootingAngleCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return Math.abs(ThrowerSubsystem.getInstance().getShootingAngleMotorEncoderTicks() - setPoint) < 1;
+        return Math.abs(TurretSubsystem.getInstance().getShootingAngleMotorEncoderTicks() - setPoint) < 1;
     }
 
     @Override

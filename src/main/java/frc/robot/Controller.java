@@ -7,20 +7,20 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.Turret.AimTurret;
+import frc.robot.commands.Turret.CalibrateTurret;
+import frc.robot.commands.Turret.FindTarget;
+import frc.robot.commands.Turret.RunShooter;
+import frc.robot.commands.Turret.SearchTargetAndAimTurret;
+import frc.robot.commands.Turret.ShootAndLoad;
 import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
 import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
-import frc.robot.commands.Thrower.AimTurretCommandGroup;
-import frc.robot.commands.Thrower.AimTurretWithVisionCommandGroup;
-import frc.robot.commands.Thrower.CalibrateThrowerCommandGroup;
-import frc.robot.commands.Thrower.FlowForwardCommandGroup;
-import frc.robot.commands.Thrower.SetTurretShootingDirectionwithNavxCommand;
-import frc.robot.commands.Thrower.ShootCommand;
 import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
-import frc.robot.subsystems.ThrowerSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class Controller {
@@ -124,9 +124,9 @@ public class Controller {
             loadButton.whenPressed(new LoadBallCommand());
 
             calibrateThrowerButton.whenPressed(() -> Robot.getNavx().reset());
-            calibrateThrowerButton.whenPressed(new CalibrateThrowerCommandGroup());
-            testPIDButton.whenPressed(new AimTurretCommandGroup());
-            shootButton.whenPressed(new FlowForwardCommandGroup());
+            calibrateThrowerButton.whenPressed(new CalibrateTurret());
+            testPIDButton.whenPressed(new SearchTargetAndAimTurret());
+            shootButton.whenPressed(new ShootAndLoad());
         }
     }
 }

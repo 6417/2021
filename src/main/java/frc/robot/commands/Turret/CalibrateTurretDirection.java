@@ -5,18 +5,18 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.commands.Thrower;
+package frc.robot.commands.Turret;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.ThrowerSubsystem;
-import frc.robot.subsystems.base.ThrowerSubsystemBase;
+import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.base.TurretSubsystemBase;
 
 /**
  * An example command that uses an example subsystem.
  */
-public class CalibrateTurretShootingDirectionCommand extends CommandBase {
-  private final ThrowerSubsystemBase throwerSubsystem;
+public class CalibrateTurretDirection extends CommandBase {
+  private final TurretSubsystemBase throwerSubsystem;
   private long stallStartTime;
   private long accelerationStart;
 
@@ -26,8 +26,8 @@ public class CalibrateTurretShootingDirectionCommand extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public CalibrateTurretShootingDirectionCommand() {
-    throwerSubsystem = ThrowerSubsystem.getInstance();
+  public CalibrateTurretDirection() {
+    throwerSubsystem = TurretSubsystem.getInstance();
     stallStartTime = 0;
     accelerationStart = System.currentTimeMillis();
   }
@@ -43,7 +43,7 @@ public class CalibrateTurretShootingDirectionCommand extends CommandBase {
   @Override
   public void execute() {
     //throwerSubsystem.runShootingDirectionMotor(Constants.Thrower.DIRECTION_CALIBRATION_SPEED);
-    throwerSubsystem.setTurretShootingDirection(throwerSubsystem.getCurrentTurretShootingDirection() + Constants.Thrower.AIMING_ANGLE_INCREMENT);
+    throwerSubsystem.setTurretShootingDirection(throwerSubsystem.getCurrentTurretShootingDirection() + Constants.Turret.AIMING_ANGLE_INCREMENT);
   }
 
   // Called once the command ends or is interrupted.

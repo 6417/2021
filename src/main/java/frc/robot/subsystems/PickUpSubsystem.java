@@ -3,10 +3,7 @@ package frc.robot.subsystems;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.DecimalFormat;
 import java.util.Optional;
-
-import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.hal.util.UncleanStatusException;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,13 +17,12 @@ import frc.robot.Constants;
 import frc.robot.commands.ballPickUp.PickUpDefaultCommand;
 import frc.robot.subsystems.base.PickUpBase;
 import frc.robot.utilities.GroveColorSensor;
-import frc.robot.utilities.LightBarrier;
-import frc.robot.utilities.Vector3d;
 import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
+import frc.robot.utilities.LightBarrier;
+import frc.robot.utilities.Vector3d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
-import ch.fridolins.server.Config;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 
 public class PickUpSubsystem extends PickUpBase {

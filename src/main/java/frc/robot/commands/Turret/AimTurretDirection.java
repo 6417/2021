@@ -5,20 +5,20 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.commands.Thrower;
+package frc.robot.commands.Turret;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ThrowerSubsystem;
-import frc.robot.subsystems.base.ThrowerSubsystemBase;
+import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.base.TurretSubsystemBase;
 import frc.robot.utilities.VisionService;
 import frc.robot.utilities.baseClasses.VisionServiceBase;
 
 /**
  * An example command that uses an example subsystem.
  */
-public class SetTurretShootingDirectionCommand extends CommandBase {
+public class AimTurretDirection extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final ThrowerSubsystemBase throwerSubsystem;
+  private final TurretSubsystemBase throwerSubsystem;
   private final VisionServiceBase vision;
   private double angle;
   private VisionService.Values values;
@@ -31,8 +31,8 @@ public class SetTurretShootingDirectionCommand extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public SetTurretShootingDirectionCommand() {
-    this.throwerSubsystem = ThrowerSubsystem.getInstance();
+  public AimTurretDirection() {
+    this.throwerSubsystem = TurretSubsystem.getInstance();
     this.vision = VisionService.getInstance();
   }
 
