@@ -11,6 +11,16 @@ import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
 import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
+import frc.robot.commands.Thrower.AimTurretCommandGroup;
+import frc.robot.commands.Thrower.AimTurretWithVisionCommandGroup;
+import frc.robot.commands.Thrower.CalibrateThrowerCommandGroup;
+import frc.robot.commands.Thrower.FlowForwardCommandGroup;
+import frc.robot.commands.Thrower.SetTurretShootingDirectionwithNavxCommand;
+import frc.robot.commands.Thrower.ShootCommand;
+import frc.robot.commands.ballPickUp.BallPickUpCommand;
+import frc.robot.commands.ballPickUp.LoadBallCommand;
+import frc.robot.commands.ballPickUp.ReleaseBallCommand;
+import frc.robot.subsystems.ThrowerSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class Controller {
@@ -41,7 +51,7 @@ public class Controller {
     }
 
     // Class for basic Joystick functionality
-    public class SuperJoystick {
+    public static class SuperJoystick {
         Optional<Joystick> controller;
 
         public SuperJoystick(int joystickId) {
@@ -89,25 +99,22 @@ public class Controller {
         }
     }
 
-    public class ControlJoystick extends SuperJoystick {
-        // Define Buttons to make Bindings
-        JoystickButton pickUpButton; // RbButton
-        JoystickButton releaseButton; // LtButton
-        JoystickButton loadButton;
+    public static class ControlJoystick extends SuperJoystick {
 
         private ControlJoystick() {
             super(Constants.Joystick.CONTROL_ID);
-            controller.ifPresent((ignored) -> this.configureButtonBindings());
+            controller.ifPresent(ControlJoystick::configureButtonBindings);
         }
 
-        private void configureButtonBindings() {
+        private static void configureButtonBindings(Joystick controller) {
             // Initialize the buttons
-            pickUpButton = new JoystickButton(controller.get(), Constants.Joystick.RB_BUTTON_ID);
-            releaseButton = new JoystickButton(controller.get(), Constants.Joystick.LT_BUTTON_ID);
-            loadButton = new JoystickButton(controller.get(), Constants.Joystick.LB_BUTTON_ID);
-            loadButton = new JoystickButton(controller.get(), Constants.Joystick.LB_BUTTON_ID);
-            releaseButton = new JoystickButton(controller.get(), Constants.Joystick.LT_BUTTON_ID);
-            pickUpButton = new JoystickButton(controller.get(), Constants.Joystick.RB_BUTTON_ID);
+            JoystickButton pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
+            JoystickButton releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
+            JoystickButton loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
+
+            JoystickButton calibrateThrowerButton = new JoystickButton(controller, Constants.Joystick.B_BUTTON_ID);
+            JoystickButton testPIDButton = new JoystickButton(controller, Constants.Joystick.A_BUTTON_ID);
+            JoystickButton shootButton = new JoystickButton(controller, Constants.Joystick.X_BUTTON_ID);
 
             // Configure the bindings
             pickUpButton.whenPressed(runCommandAndCancelWhenPressedAgain(new BallPickUpCommand()));
@@ -115,6 +122,11 @@ public class Controller {
             pickUpButton.whenPressed(runCommandAndCancelWhenPressedAgain(new BallPickUpCommand()));
             releaseButton.whenPressed(new ReleaseBallCommand());
             loadButton.whenPressed(new LoadBallCommand());
+
+            calibrateThrowerButton.whenPressed(() -> Robot.getNavx().reset());
+            calibrateThrowerButton.whenPressed(new CalibrateThrowerCommandGroup());
+            testPIDButton.whenPressed(new AimTurretCommandGroup());
+            shootButton.whenPressed(new FlowForwardCommandGroup());
         }
     }
 }
