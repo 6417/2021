@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.PickUpSubsystem;
 import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.utilities.VisionService;
@@ -43,6 +44,7 @@ public class Robot extends TimedRobot {
         Controller.getInstance();
         SwerveDrive.getInstance();
         MecanumDriveSubsystem.getInstance();
+        PickUpSubsystem.getInstance();
         getNavx().calibrate();
         while(getNavx().isCalibrating());
         getNavx().reset();

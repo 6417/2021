@@ -1,15 +1,16 @@
 package frc.robot.utilities;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class LightBarrier {
 
-    private DigitalInput sensor;
+    private AnalogInput sensor;
 
     private boolean inverted;
 
     public LightBarrier(int DIOPort){
-        sensor = new DigitalInput(DIOPort);        
+        sensor = new AnalogInput(DIOPort);        
     }
 
     public void setInverted(boolean inverted){
@@ -17,7 +18,8 @@ public class LightBarrier {
     }
 
     public boolean isActiv(){
-        boolean output = sensor.get();
+        boolean output = sensor.getValue() > 1800;
+        System.out.println(sensor.getValue());
         if(inverted){
             return !output;
         } 

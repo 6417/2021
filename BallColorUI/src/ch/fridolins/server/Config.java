@@ -6,7 +6,7 @@ public class Config {
     public static class BallColor {
         public static final byte blue = 1;
         public static final byte yellow = 2;
-        public static final byte colorNotFound = 3;
+        public static final byte colorNotFound = 0;
     }
 
     public static final char ping = 3;

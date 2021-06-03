@@ -3,9 +3,8 @@ package frc.robot.subsystems.base;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.PickUpSubsystem.BallColor;
-import frc.robot.utilities.Vector3d;
 import frc.robot.utilities.GroveColorSensor.Color;
+import frc.robot.BallColorUIServer.BallColor;
 
 
 public class PickUpBase extends SubsystemBase{

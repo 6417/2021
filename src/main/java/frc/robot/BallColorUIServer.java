@@ -1,12 +1,15 @@
-package ch.fridolins.server;
+package frc.robot;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import ch.fridolins.server.Config;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.subsystems.PickUpSubsystem;
 
-public class SimRioServerDocker {
+public class BallColorUIServer implements Runnable {
     public enum BallColor {
         blue(Config.BallColor.blue), yellow(Config.BallColor.yellow), colorNotFound(Config.BallColor.colorNotFound);
 
@@ -35,7 +38,7 @@ public class SimRioServerDocker {
                 try {
                     Thread.sleep(pingInterval);
                     synchronized (outputStreamMutex) {
-                        clientSocket.getOutputStream().write(new byte[]{Config.ping});
+                        clientSocket.getOutputStream().write(new byte[] { Config.ping });
                     }
                 } catch (SocketException e) {
                     pingLoopRunning.set(false);
@@ -62,13 +65,14 @@ public class SimRioServerDocker {
     }
 
     private static final Object outputStreamMutex = new Object();
-    private static final long pingInterval = 500; //ms
+    private static final long pingInterval = 500; // ms
+    private ServerSocket serverSocket;
 
-    public static void main(String[] args) {
-        new Thread(() -> {
+    public void run() {
+        while (true) {
             try {
                 System.out.println("initializing ui server");
-                ServerSocket serverSocket = new ServerSocket(Config.port);
+                serverSocket = new ServerSocket(Config.port);
                 while (true) {
                     BallColor ballColor;
                     System.out.println("Waiting for client ...");
@@ -79,7 +83,8 @@ public class SimRioServerDocker {
                     BallColor previousBallColor = null;
                     while (true) {
                         ballColor = updateBallColor();
-                        if (!sendDataToClient(ballColor, clientSocket, previousBallColor)) break;
+                        if (!sendDataToClient(ballColor, clientSocket, previousBallColor)) 
+                            break;
                         previousBallColor = ballColor;
                     }
                     System.out.println("Client disconnected");
@@ -87,43 +92,36 @@ public class SimRioServerDocker {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }).start();
-
-        while (true) {
-            System.out.println(updateBallColor());
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                try {
+                    serverSocket.close();
+                } catch (IOException e1) {
+                }
             }
         }
     }
 
-    private static void disconnectToClient(Socket clientSocket, Ping ping) throws IOException {
+    private void disconnectToClient(Socket clientSocket, Ping ping) throws IOException {
         ping.interrupt();
         clientSocket.close();
     }
 
-    private static synchronized BallColor updateBallColor() {
-        BallColor ballColor;
-        if ((System.currentTimeMillis() / 1000) % 3 == 0)
-            ballColor = BallColor.blue;
-        else if ((System.currentTimeMillis() / 1000) % 2 == 0)
-            ballColor = BallColor.yellow;
-        else
-            ballColor = BallColor.colorNotFound;
-        return ballColor;
+    private BallColor updateBallColor() {
+        return PickUpSubsystem.getInstance().getBallColor();
     }
 
     /**
-     * @return False if the connection to the client was lost, true if connection is ok
+     * @return False if the connection to the client was lost, true if connection is
+     *         ok
      */
-    private static boolean sendDataToClient(BallColor ballColor, Socket clientSocket, BallColor previousBallColor) throws IOException {
+    private boolean sendDataToClient(BallColor ballColor, Socket clientSocket, BallColor previousBallColor)
+            throws IOException {
+        if (clientSocket.getInputStream().available() != 0)
+            if (clientSocket.getInputStream().read() == 0xf)
+                return false;
         if (ballColor != previousBallColor)
             synchronized (outputStreamMutex) {
                 try {
-                    clientSocket.getOutputStream().write(new byte[]{ballColor.byteRepresentation});
+                    clientSocket.getOutputStream().write(new byte[] { ballColor.byteRepresentation });
                 } catch (SocketException e) {
                     return false;
                 }

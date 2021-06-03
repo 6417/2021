@@ -1,12 +1,6 @@
 package frc.robot.subsystems;
 
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.text.DecimalFormat;
 import java.util.Optional;
-
-import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.hal.util.UncleanStatusException;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -16,8 +10,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.BallColorUIServer;
 import frc.robot.Constants;
-import frc.robot.commands.ballPickUp.PickUpDefaultCommand;
+import frc.robot.BallColorUIServer.BallColor;
 import frc.robot.subsystems.base.PickUpBase;
 import frc.robot.utilities.GroveColorSensor;
 import frc.robot.utilities.LightBarrier;
@@ -26,21 +21,9 @@ import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
-import ch.fridolins.server.Config;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 
 public class PickUpSubsystem extends PickUpBase {
-
-    public static enum BallColor {
-        blue((byte) 1), yellow((byte) 2), colorNotFound((byte) 0);
-
-        public final byte byteRepresentation;
-
-        private BallColor(byte byteRepresentation) {
-            this.byteRepresentation = byteRepresentation;
-        }
-    }
-
     private static PickUpBase instance;
 
     private GroveColorSensor.Color currentColor;
@@ -53,6 +36,7 @@ public class PickUpSubsystem extends PickUpBase {
     public static boolean ballInTunnel;
 
     private Thread updateBallColorThread; // we use this thread to update the ballcolor (there msut be a delay)
+    private Thread ballColorUIServerThread;
 
     private Optional<LightBarrier> lightBarrier;
 
@@ -61,6 +45,7 @@ public class PickUpSubsystem extends PickUpBase {
     private final Vector3d yellowBallColorVector;
     private BallColor currentBallColor = BallColor.colorNotFound;
 
+    @SuppressWarnings("static-access")
     public PickUpSubsystem() {
         pickUpMotor = Constants.BallPickUp.pickUpMotor.get();
         tunnelMotor = Constants.BallPickUp.tunnelMotor.get();
@@ -75,12 +60,13 @@ public class PickUpSubsystem extends PickUpBase {
         // color sensor and colorthread to updatje Ballcolor
         colorSensor = new GroveColorSensor(Port.kMXP, IntegrationTime._50MS, Gain.X1);
 
+        ballColorUIServerThread = new Thread(new BallColorUIServer());
+        ballColorUIServerThread.start();
+
         updateBallColorThread = new Thread(this::updateBallColorLoop);
         updateBallColorThread.start();
 
         // defaultcommand
-        CommandScheduler.getInstance().schedule(new PickUpDefaultCommand());
-
         lightBarrier.filter((lightBarrier) -> lightBarrier.isActiv())
                 .ifPresent((lightBarrier) -> DriverStation.getInstance().reportError(
                         "Lightbarrier might not be properly connected, expected false and accutaly was true (if lightbarrier was activate on purpose ignore this massage)",
@@ -90,19 +76,7 @@ public class PickUpSubsystem extends PickUpBase {
         yellowBallColorVector = Vector3d.fromBallColorToVector(Constants.BallPickUp.yellowBallColor);
     }
 
-    private void uiSocketServer() {
-        try {
-            ServerSocket serverSocket = new ServerSocket(8080);
-            Socket clientSocket = serverSocket.accept();
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            while (true) {
-                
-            }
-        } catch (Exception e) {
-            DriverStation.reportError("Error in ui server: " + e.getMessage(), false);
-        }
-    }
-
+    @SuppressWarnings("static-access")
     private void initializeLightBarrier() {
         try {
             lightBarrier = Optional.of(new LightBarrier(0));
@@ -179,17 +153,12 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public BallColor getBallColor() {
-        if(currentColor.red > Constants.BallPickUp.comparativeValueRedLow && currentColor.blue < 60){
-            return BallColor.yellow;
-        }
-        else if(currentColor.red < Constants.BallPickUp.comparativeValueBlueLow && currentColor.blue > Constants.BallPickUp.comparativeValueBlueHigh){
-            return BallColor.blue;
-        }
-        return BallColor.colorNotFound;
+        return currentBallColor;
     }
 
     @Override
     public void makeNewColorMeasurement() {
+        System.out.println("ball color measured");
         Vector3d currentBallColorVector = new Vector3d(currentColor.red, currentColor.green, currentColor.blue);
         double currentVectorBlueVectorProduct = currentBallColorVector.dot(blueBallColorVector) / (blueBallColorVector.magnitude() * currentBallColorVector.magnitude());
         double currentVectorYellowVectorProduct = currentBallColorVector.dot(yellowBallColorVector) / (blueBallColorVector.magnitude() * currentBallColorVector.magnitude());

@@ -115,6 +115,7 @@ public class SwerveDrive extends SwerveDriveBase {
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(Math.abs(currentChassisSpeeds.omegaRadiansPerSecond) > 0.01);
 
+        System.out.println(speedFactor);
         forEachModule((module) -> module.drive(speedFactor));
     }
 
@@ -230,9 +231,10 @@ public class SwerveDrive extends SwerveDriveBase {
         throwerOrientedButton.whenPressed(new ThrowerOriented());
         pickupOrientedButton.whenPressed(new PickupOriented());
         slowSpeedFactorButton.whenPressed(Controller
-                .runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
+                .runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.slowSpeedFactor)));
         breakButton.whileHeld(new BreakCommand());
         fullSpeedButton.whenPressed(Controller
-                .runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor)));
+                .runCommandAndCancelWhenPressedAgain(new SetSpeedFactor(Constants.SwerveDrive.fullSpeedFactor)));
+        zeroNavxButton.whenPressed(() -> Robot.getNavx().reset());
     }
 }

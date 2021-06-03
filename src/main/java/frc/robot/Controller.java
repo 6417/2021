@@ -105,15 +105,10 @@ public class Controller {
             pickUpButton = new JoystickButton(controller.get(), Constants.Joystick.RB_BUTTON_ID);
             releaseButton = new JoystickButton(controller.get(), Constants.Joystick.LT_BUTTON_ID);
             loadButton = new JoystickButton(controller.get(), Constants.Joystick.LB_BUTTON_ID);
-            loadButton = new JoystickButton(controller.get(), Constants.Joystick.LB_BUTTON_ID);
-            releaseButton = new JoystickButton(controller.get(), Constants.Joystick.LT_BUTTON_ID);
-            pickUpButton = new JoystickButton(controller.get(), Constants.Joystick.RB_BUTTON_ID);
 
             // Configure the bindings
             pickUpButton.whenPressed(runCommandAndCancelWhenPressedAgain(new BallPickUpCommand()));
             releaseButton.whenPressed(runCommandAndCancelWhenPressedAgain(new ReleaseBallCommand()));
-            pickUpButton.whenPressed(runCommandAndCancelWhenPressedAgain(new BallPickUpCommand()));
-            releaseButton.whenPressed(new ReleaseBallCommand());
             loadButton.whenPressed(new LoadBallCommand());
         }
     }

@@ -2,6 +2,7 @@ package frc.robot.commands.swerve;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class SetSpeedFactor extends CommandBase {
@@ -14,11 +15,17 @@ public class SetSpeedFactor extends CommandBase {
 
     @Override
     public void initialize() {
+        System.out.println("speed factor set");
         SwerveDrive.getInstance().setSpeedFactor(speedFactor);
     }
 
     @Override
+    public void end(boolean interrupted) {
+        SwerveDrive.getInstance().setSpeedFactor(Constants.SwerveDrive.defaultSpeedFactor);
+    }
+
+    @Override
     public boolean isFinished() {
-        return true;
+        return false;
     }
 }

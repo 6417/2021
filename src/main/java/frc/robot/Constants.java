@@ -84,7 +84,7 @@ public class Constants {
         }
 
         @SuppressWarnings("all")
-        public static final boolean enabled = false && Drive.enabled;
+        public static final boolean enabled = true && Drive.enabled;
         public static final boolean rotateAllModulesInSameDirection = false;
         public static final boolean joystickYinverted = true;
         public static final boolean joystickXinverted = true;
@@ -108,6 +108,7 @@ public class Constants {
         public static SwerveModule.Config commonConfigurations = new SwerveModule.Config();
         public static double defaultSpeedFactor = 0.75;
         public static double slowSpeedFactor = 0.35;
+        public static double fullSpeedFactor = 1.0;
 
         static {
             setSwerveDriveConstants();
@@ -249,7 +250,7 @@ public class Constants {
         public static final double slowModeSpeedFactor = 0.4;
 
         @SuppressWarnings("all")
-        public static final boolean IS_ENABLED = true && Drive.enabled;
+        public static final boolean IS_ENABLED = false && Drive.enabled;
         public static final double SECONDS_TO_ACCELERATE = 0.125;
 
         public static final Supplier<FridolinsMotor> frontRightMotorInitializer = () -> new FridoCANSparkMax(31,

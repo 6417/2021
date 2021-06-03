@@ -12,8 +12,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Main {
-
-
     public static final int errorDelayBeforeStartup = 1000;
 
     private static enum BallColor {
@@ -42,10 +40,9 @@ public class Main {
     }
 
     private static JFrame frame;
-    private static int port = 8080;
-    private static String robotIP = "127.0.0.1";
+    private static String robotIP = "10.64.17.2";
     private static JLabel textLabel;
-    public static final int maxTimeAmountToWaitOnServer = 1000;
+    public static final int maxTimeAmountToWaitOnServer = 5000;
     public static final int errorShowTime = 3000;
 
     private static void initializeTextLabel() {
@@ -67,6 +64,7 @@ public class Main {
 
     private static void putError(String message) {
         putText(message);
+        System.err.println("Error: " + message);
         setWindowColor(Color.RED);
         restartRemoveErrorMessageThread();
     }
@@ -109,11 +107,12 @@ public class Main {
         while (!mainShouldQuit) {
             CONNECT_TO_SERVER:
             try {
-                socket = new Socket(robotIP, port);
+                socket = new Socket(robotIP, Config.port);
                 InputStreamReader reader = new InputStreamReader(socket.getInputStream());
                 BallColor previousBallColor = BallColor.none;
                 killRemoveErrorMessageThread();
                 textLabel.setVisible(false);
+                setWindowColor(BallColor.none.jFrameColor);
                 while (!mainShouldQuit) {
                     BallColor ballColor = BallColor.none;
                     long waitingTimeStart = System.currentTimeMillis();
@@ -125,6 +124,7 @@ public class Main {
                         }
                     }
                     int receivedChar = reader.read();
+                    System.out.println("Received: " + receivedChar + ", ballColor char: " + previousBallColor.byteRepresentation);
                     if (receivedChar == Config.ping) continue;
                     ballColor = BallColor.fromByteRepresentation(receivedChar);
                     if (ballColor != previousBallColor)
@@ -172,5 +172,6 @@ public class Main {
 
     private static void setWindowColor(Color color) {
         frame.getContentPane().setBackground(color);
+        System.out.println("color set to: " + color.toString());
     }
 }
