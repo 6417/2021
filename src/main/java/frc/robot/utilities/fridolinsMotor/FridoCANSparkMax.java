@@ -11,6 +11,7 @@ import com.revrobotics.EncoderType;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utilities.CSVLogger;
+import frc.robot.Constants;
 import frc.robot.utilities.PIDValues;
 
 public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
@@ -75,8 +76,7 @@ public class FridoCANSparkMax extends CANSparkMax implements FridolinsMotor {
         this.velocity = velocity;
     }
 
-    private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(
-            FridolinsMotor.LimitSwitchPolarity polarity) {
+    private CANDigitalInput.LimitSwitchPolarity convertFromFridoLimitSwitchPolarity(FridolinsMotor.LimitSwitchPolarity polarity) {
         switch (polarity) {
             case kNormallyOpen:
                 return CANDigitalInput.LimitSwitchPolarity.kNormallyOpen;

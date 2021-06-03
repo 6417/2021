@@ -15,11 +15,11 @@ import frc.robot.Constants;
 import frc.robot.BallColorUIServer.BallColor;
 import frc.robot.subsystems.base.PickUpBase;
 import frc.robot.utilities.GroveColorSensor;
-import frc.robot.utilities.LightBarrier;
-import frc.robot.utilities.Vector3d;
 import frc.robot.utilities.GroveColorSensor.Color;
 import frc.robot.utilities.GroveColorSensorI2C.Gain;
 import frc.robot.utilities.GroveColorSensorI2C.IntegrationTime;
+import frc.robot.utilities.LightBarrier;
+import frc.robot.utilities.Vector3d;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor;
 import frc.robot.utilities.fridolinsMotor.FridolinsMotor.IdleModeType;
 
