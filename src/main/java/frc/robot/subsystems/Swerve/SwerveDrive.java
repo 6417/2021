@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants;
 import frc.robot.Constants.Drive.MountingLocations;
 import frc.robot.Controller;
+import frc.robot.Robot;
 import frc.robot.commands.swerve.BreakCommand;
 import frc.robot.commands.swerve.DefaultDriveCommand;
 import frc.robot.commands.swerve.FieldOriented;
@@ -114,7 +115,6 @@ public class SwerveDrive extends SwerveDriveBase {
         if (Constants.SwerveDrive.rotateAllModulesInSameDirection)
             correctRotationDirections(Math.abs(currentChassisSpeeds.omegaRadiansPerSecond) > 0.01);
 
-        System.out.println(speedFactor);
         forEachModule((module) -> module.drive(speedFactor));
     }
 

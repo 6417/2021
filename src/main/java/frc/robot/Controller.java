@@ -7,10 +7,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.Turret.AimTurret;
 import frc.robot.commands.Turret.CalibrateTurret;
-import frc.robot.commands.Turret.FindTarget;
-import frc.robot.commands.Turret.RunShooter;
 import frc.robot.commands.Turret.SearchTargetAndAimTurret;
 import frc.robot.commands.Turret.ShootAndLoad;
 import frc.robot.commands.ballPickUp.BallPickUpCommand;
@@ -20,7 +17,6 @@ import frc.robot.subsystems.mecanum.MecanumDriveSubsystem;
 import frc.robot.commands.ballPickUp.BallPickUpCommand;
 import frc.robot.commands.ballPickUp.LoadBallCommand;
 import frc.robot.commands.ballPickUp.ReleaseBallCommand;
-import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class Controller {
@@ -108,9 +104,9 @@ public class Controller {
 
         private static void configureButtonBindings(Joystick controller) {
             // Initialize the buttons
-            pickUpButton = new JoystickButton(controller.get(), Constants.Joystick.RB_BUTTON_ID);
-            releaseButton = new JoystickButton(controller.get(), Constants.Joystick.LT_BUTTON_ID);
-            loadButton = new JoystickButton(controller.get(), Constants.Joystick.LB_BUTTON_ID);
+            JoystickButton pickUpButton = new JoystickButton(controller, Constants.Joystick.RB_BUTTON_ID);
+            JoystickButton releaseButton = new JoystickButton(controller, Constants.Joystick.LT_BUTTON_ID);
+            JoystickButton loadButton = new JoystickButton(controller, Constants.Joystick.LB_BUTTON_ID);
 
             JoystickButton calibrateThrowerButton = new JoystickButton(controller, Constants.Joystick.B_BUTTON_ID);
             JoystickButton testPIDButton = new JoystickButton(controller, Constants.Joystick.A_BUTTON_ID);

@@ -42,8 +42,8 @@ public class Main {
     private static JFrame frame;
     private static String robotIP = "10.64.17.2";
     private static JLabel textLabel;
-    public static final int maxTimeAmountToWaitOnServer = 5000;
-    public static final int errorShowTime = 3000;
+    public static final int maxTimeAmountToWaitOnServer = 3000;
+    public static final int errorShowTime = 25000;
 
     private static void initializeTextLabel() {
         textLabel = new JLabel();

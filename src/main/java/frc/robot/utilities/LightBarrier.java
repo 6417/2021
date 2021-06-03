@@ -19,7 +19,6 @@ public class LightBarrier {
 
     public boolean isActiv(){
         boolean output = sensor.getValue() > 1800;
-        System.out.println(sensor.getValue());
         if(inverted){
             return !output;
         } 
