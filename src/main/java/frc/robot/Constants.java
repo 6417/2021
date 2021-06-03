@@ -221,7 +221,7 @@ public class Constants {
         public static final double loadSpeed = 1; // TODO optimal speed
         public static final double releaseSpeed = 1; // TODO optimal speed
 
-        public static final boolean isLightBarrierInverted = true;
+        public static final boolean isLightBarrierInverted = false;
         
         public static final GroveColorSensor.Color yellowBallColor = new GroveColorSensor.Color(119, 85, 51);
         public static final GroveColorSensor.Color blueBallColor = new GroveColorSensor.Color(78, 98, 78);

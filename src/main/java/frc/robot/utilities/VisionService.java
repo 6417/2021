@@ -78,7 +78,6 @@ public class VisionService extends VisionServiceBase {
 
     @Override
     public void setConnectionStatus() {
-        System.out.println("Connected to the pi");
         smartDashboard.getEntry("connected").setBoolean(true);
     }
 }

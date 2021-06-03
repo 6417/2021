@@ -15,7 +15,6 @@ public class SetSpeedFactor extends CommandBase {
 
     @Override
     public void initialize() {
-        System.out.println("speed factor set");
         SwerveDrive.getInstance().setSpeedFactor(speedFactor);
     }
 

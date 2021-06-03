@@ -158,7 +158,6 @@ public class PickUpSubsystem extends PickUpBase {
 
     @Override
     public void makeNewColorMeasurement() {
-        System.out.println("ball color measured");
         Vector3d currentBallColorVector = new Vector3d(currentColor.red, currentColor.green, currentColor.blue);
         double currentVectorBlueVectorProduct = currentBallColorVector.dot(blueBallColorVector) / (blueBallColorVector.magnitude() * currentBallColorVector.magnitude());
         double currentVectorYellowVectorProduct = currentBallColorVector.dot(yellowBallColorVector) / (blueBallColorVector.magnitude() * currentBallColorVector.magnitude());

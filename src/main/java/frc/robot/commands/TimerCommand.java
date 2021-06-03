@@ -17,7 +17,6 @@ public class TimerCommand extends CommandBase{
 
     @Override
     public boolean isFinished() {
-        System.out.println("TIMER" + (System.currentTimeMillis() - startTime) / 1000.0);
         return (System.currentTimeMillis() - startTime) / 1000.0 >= duration;
     }
     
